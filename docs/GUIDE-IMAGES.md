@@ -196,6 +196,44 @@ or develop the RAW in darktable or RawTherapee where you can pick a style.
 
 ---
 
+## Contact sheets
+
+A shoot is sixty photographs that all look the same in a file listing. A contact
+sheet is one picture showing small versions of all of them with the file names
+underneath, which is still the quickest way to work out which ones are worth
+keeping.
+
+Add your photographs as usual, then press **Make a contact sheet**, under the
+Squeeze button. It only appears when what you have added includes pictures, and it
+says how many it will use.
+
+Sixty camera RAW files means sixty developments, so it takes a couple of minutes
+and counts its way through. You can stop it part way. When it finishes it shows
+you the sheet, and offers to open it.
+
+**How many across** and **how big** are under Advanced image settings.
+
+From a terminal:
+
+```
+vidsqueeze --contact-sheet ~/Photos                        name it after the folder
+vidsqueeze --contact-sheet --sheet-out ~/shoot.png *.CR2   choose the name
+```
+
+Options: `--sheet-columns` for how many across, `--sheet-size` for how big each
+one is, and `--no-sheet-labels` to leave the names off. The destination has its own
+flag rather than following `--contact-sheet` directly, so that
+`--contact-sheet *.CR2` cannot mistake your first photograph for the file to write.
+
+Camera RAW works without anything extra, developed the same way it is anywhere
+else. Anything that cannot be read is left off the sheet and named, so you are
+never left wondering whether a picture was skipped or simply missed.
+
+The names are drawn using a font from your computer. If none can be found the
+sheet is still made, without names, and it tells you.
+
+---
+
 ## iPhone photos (HEIC)
 
 iPhones save photographs as HEIC. Reading it needs a recent ffmpeg. If yours is

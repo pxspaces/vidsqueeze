@@ -7,6 +7,55 @@ Dates are the day the change was made.
 
 ---
 
+## 1.9.0 - 2026-08-17
+
+### Added
+
+- **Contact sheets.** One image showing small versions of every photograph in a
+  folder, with the file names under them. A shoot is sixty pictures that all look
+  identical in a file listing, and a sheet is still the fastest way to pick the
+  four worth keeping.
+
+  **Make a contact sheet** appears under the buttons whenever the files you have
+  added include pictures, with the number it will use. It reports progress while
+  it works, because sixty camera RAW files means sixty developments and takes a
+  couple of minutes, can be stopped part way, and shows the finished sheet in the
+  window when it is done. How many across and how big are under Advanced image
+  settings.
+
+  From a terminal:
+
+  ```
+  vidsqueeze --contact-sheet ~/Photos
+  vidsqueeze --contact-sheet --sheet-out ~/shoot.png --sheet-columns 6 *.CR2
+  ```
+
+  Camera RAW works exactly as it does elsewhere, developed with the same look, so
+  a sheet of RAW files needs nothing extra. Anything that cannot be read is left
+  off and named, rather than quietly shrinking the sheet.
+
+### Notes
+
+- HEIC cannot be written. It was on the list, and ffmpeg has no HEIF muxer at all,
+  so there is nothing to build on. HEIC is still read.
+
+---
+
+## 1.8.0 - 2026-08-17
+
+### Added
+
+- **It now says beforehand when a file will come out bigger.** Converting a
+  photograph to PNG or TIFF almost always makes it larger, because those formats
+  throw nothing away. VidSqueeze used to mention this afterwards, as "the result
+  is not smaller", which is true, unavoidable, and reads like a fault rather than
+  a property of the format you picked. The warning now appears in the settings as
+  soon as you choose such a format, while you can still choose another, and it
+  names a smaller one to use instead. It stays quiet where the file will shrink,
+  because a warning on every conversion is a warning nobody reads.
+
+---
+
 ## 1.7.0 - 2026-08-17
 
 ### Fixed

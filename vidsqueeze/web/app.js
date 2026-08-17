@@ -299,7 +299,9 @@ function buildImageForm() {
   $('imageQuality').addEventListener('input', () => {
     setText($('imageQualityValue'), $('imageQuality').value);
   });
-  $('imageLossless').addEventListener('change', syncImageForm);
+  // Quality decides colour depth for the lossless formats, so it changes the
+  // answer to "will this be bigger". Only on release, not on every drag.
+  $('imageQuality').addEventListener('change', refreshSizeExpectation);
   syncImageForm();
 }
 
@@ -329,6 +331,33 @@ function syncImageForm() {
   if (wantsFidelity && !state.sizeTouched) $('imageMaxDimension').value = '';
 
   show('imageBackgroundField', !spec.alpha);
+  refreshSizeExpectation();
+}
+
+/* Ask the server whether these settings will make the files bigger. Asked there
+   rather than worked out here, so the window and the command line cannot end up
+   telling the user different things. */
+let expectationPending = null;
+
+async function refreshSizeExpectation() {
+  const note = $('sizeExpectation');
+  if (!note) return;
+  if (!state.paths.length) {
+    show('sizeExpectation', false);
+    return;
+  }
+  const ticket = {};
+  expectationPending = ticket;
+  try {
+    const reply = await post('/api/expectation', {
+      paths: state.paths, spec: readSpec(),
+    });
+    if (expectationPending !== ticket) return;   // a newer answer is on its way
+    setText(note, reply.note || '');
+    show('sizeExpectation', !!reply.note);
+  } catch (err) {
+    show('sizeExpectation', false);
+  }
 }
 
 function syncQualityMode() {
@@ -621,6 +650,15 @@ function renderSources() {
   $('startBtn').disabled = !ready;
   $('sampleBtn').disabled = !ready;
   $('bakeoffBtn').disabled = !ready;
+
+  // A contact sheet is only meaningful for pictures, so the button only appears
+  // when there are some. Offering it for a folder of video would be a puzzle.
+  const pictures = state.files.filter((f) => f.kind === 'image').length;
+  show('sheetRow', pictures > 0);
+  $('sheetBtn').disabled = !ready || pictures === 0;
+  $('sheetBtn').textContent = pictures > 1
+    ? `Make a contact sheet of ${pictures}`
+    : 'Make a contact sheet';
 }
 
 const isRunning = () => Object.values(state.results).some((r) => r.status === 'running' || r.status === 'queued');
@@ -1095,6 +1133,90 @@ $('bakeoffBtn').addEventListener('click', () => {
   runSample(candidates, 'Try several settings',
     'Converting a short stretch of {name} at each setting, so you can pick before committing to the whole file.');
 });
+
+/* ---------- contact sheet ---------- */
+
+let sheetTimer = null;
+
+$('sheetBtn').addEventListener('click', async () => {
+  const status = $('sheetStatus');
+  $('sheetBtn').disabled = true;
+  show('sheetStatus', true);
+  setText(status, 'Starting.');
+  try {
+    const reply = await post('/api/sheet/start', {
+      paths: state.paths,
+      spec: readSpec(),
+      output_dir: state.settings.output_dir || undefined,
+      columns: Number($('sheetColumns').value),
+      thumbnail: Number($('sheetThumbnail').value),
+      labels: true,
+    });
+    setText(status, `Working through ${reply.count} picture${reply.count === 1 ? '' : 's'}.`);
+    show('sheetCancelBtn', true);
+    watchSheet();
+  } catch (err) {
+    setText(status, err.message);
+    $('sheetBtn').disabled = false;
+  }
+});
+
+$('sheetCancelBtn').addEventListener('click', async () => {
+  try { await post('/api/sheet/cancel', {}); } catch (err) { /* it is stopping anyway */ }
+});
+
+function watchSheet() {
+  clearInterval(sheetTimer);
+  sheetTimer = setInterval(async () => {
+    let state_;
+    try {
+      state_ = await api('/api/sheet');
+    } catch (err) {
+      return;
+    }
+    const status = $('sheetStatus');
+    if (state_.running) {
+      const { done_count: done, total } = state_;
+      setText(status, total
+        ? `Developing and laying out: ${done} of ${total}.`
+        : 'Working.');
+      return;
+    }
+
+    clearInterval(sheetTimer);
+    sheetTimer = null;
+    show('sheetCancelBtn', false);
+    $('sheetBtn').disabled = false;
+
+    if (state_.error) {
+      setText(status, state_.error);
+      return;
+    }
+    if (state_.done && state_.output) {
+      // The notes carry the count and the grid, plus anything skipped.
+      setText(status, (state_.notes || []).join(' '));
+      showSheetResult(state_.output);
+    }
+  }, 700);
+}
+
+function showSheetResult(path) {
+  const host = $('sheetStatus');
+  const link = document.createElement('button');
+  link.type = 'button';
+  link.className = 'btn secondary';
+  link.style.marginTop = '8px';
+  link.textContent = 'Open the sheet';
+  link.addEventListener('click', () => post('/api/reveal', { path }).catch(() => {}));
+  host.appendChild(document.createElement('br'));
+  host.appendChild(link);
+
+  const preview = document.createElement('img');
+  preview.src = `/api/media?path=${encodeURIComponent(path)}&token=${TOKEN}`;
+  preview.alt = 'The contact sheet';
+  preview.style.cssText = 'display:block;margin-top:10px;max-width:100%;border-radius:6px;border:1px solid var(--line)';
+  host.appendChild(preview);
+}
 
 function renderSamples(status) {
   const host = $('sampleResults');

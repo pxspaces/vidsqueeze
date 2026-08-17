@@ -297,7 +297,9 @@ for themselves, so if you are on 1.5.0 or earlier and the button will not offer
 anything, update by pulling with git, or download the newest copy from the
 project page.
 
-**The PNG came out bigger than the original.** PNG never throws anything away,
+**The PNG came out bigger than the original.** From 1.8.0 VidSqueeze warns about
+this in the settings before you start, rather than mentioning it afterwards.
+PNG never throws anything away,
 so it is often larger than a camera file, which does. If you want a smaller
 file, choose WebP or AVIF. If you want PNG but not an enormous one, keep the
 quality below 90: above that VidSqueeze keeps 16 bits of colour per channel,

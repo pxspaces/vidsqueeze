@@ -100,6 +100,22 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Shrink so the longest side is at most this many pixels.")
     stills.add_argument("--background", metavar="COLOUR",
                         help="Background colour when flattening transparency.")
+    # Deliberately not taking an optional value. Written as "--contact-sheet
+    # [FILE]" it swallowed the next argument, so `--contact-sheet *.CR2` treated
+    # the first photograph as the file to write, and a PNG landed on top of
+    # somebody's RAW. The destination has its own flag.
+    stills.add_argument("--contact-sheet", action="store_true",
+                        help="Make one sheet of small versions of the pictures, with "
+                             "their names, instead of converting them.")
+    stills.add_argument("--sheet-out", metavar="FILE",
+                        help="Where to write the contact sheet. Defaults to a name "
+                             "based on the folder, in the output folder.")
+    stills.add_argument("--sheet-columns", type=int, default=4, metavar="N",
+                        help="Thumbnails across the contact sheet. Default 4.")
+    stills.add_argument("--sheet-size", type=int, default=320, metavar="PIXELS",
+                        help="Longest side of each thumbnail. Default 320.")
+    stills.add_argument("--no-sheet-labels", action="store_true",
+                        help="Leave the file names off the contact sheet.")
     stills.add_argument("--raw-look", choices=["natural", "neutral"],
                         help="How a camera RAW should look: natural, like the "
                              "photograph, or neutral and flat for editing.")
@@ -109,6 +125,67 @@ def build_parser() -> argparse.ArgumentParser:
     extras.add_argument("--no-metadata", action="store_true", help="Strip dates and camera information.")
 
     return parser
+
+
+def _make_contact_sheet(tools, files: list[Path], args, spec: JobSpec,
+                        output_dir: Path) -> int:
+    """One sheet of small versions, instead of converting anything."""
+    from . import sheet
+
+    if not files:
+        print("Nothing to put on a sheet.")
+        return 1
+
+    destination = Path(args.sheet_out).expanduser() if args.sheet_out else (
+        output_dir / f"{files[0].parent.name or 'contact'}-sheet.png"
+    )
+    # Refuse to write over one of the pictures being read. A sheet named after a
+    # source would destroy it, and the source list is exactly what a shell glob
+    # would have expanded into.
+    if destination.resolve() in {p.resolve() for p in files}:
+        print(f"  {destination.name} is one of the pictures being read. "
+              f"Choose another name with --sheet-out.")
+        return 1
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    print(f"\nBuilding a contact sheet from {len(files)} file"
+          f"{'s' if len(files) != 1 else ''}\n")
+    try:
+        result, notes = sheet.build(
+            tools, files, destination,
+            sheet.SheetSpec(columns=args.sheet_columns, thumbnail=args.sheet_size,
+                            background=spec.image_background,
+                            labels=not args.no_sheet_labels,
+                            raw_look=spec.raw_look),
+        )
+    except sheet.SheetError as exc:
+        print(f"  {exc}")
+        return 1
+
+    for note in notes:
+        print(f"  {note}")
+    print(f"\n{result}  ({human_size(result.stat().st_size)})\n")
+    return 0
+
+
+def _size_warning(files: list[Path], spec: JobSpec) -> str:
+    """One warning for the batch, from the first picture that would grow."""
+    from . import raw
+    from .encode import image_spec_of
+    from .images import format_of, size_expectation
+
+    image = image_spec_of(spec)
+    for path in files[:200]:
+        if raw.is_raw(path):
+            note = size_expectation(image, "", is_raw=True)
+        elif path.suffix.lower().lstrip(".") in ("jpg", "jpeg", "jpe", "heic", "heif",
+                                                 "webp", "avif", "jxl", "png", "tiff", "tif"):
+            note = size_expectation(image, format_of(path))
+        else:
+            continue
+        if note:
+            return note
+    return ""
 
 
 def _looks_like_still(tools, path: Path) -> bool:
@@ -255,6 +332,13 @@ def run_batch(tools: deps.Tools, files: list[Path], spec: JobSpec, output_dir: P
 
     print(f"\nCompressing {len(files)} file{'s' if len(files) != 1 else ''} into {output_dir}\n")
 
+    # Said before the work starts, while there is still a choice to make. The
+    # same fact reported afterwards reads like a fault rather than a property of
+    # the format that was asked for.
+    warning = _size_warning(files, spec)
+    if warning:
+        print(f"  Note: {warning}\n")
+
     for index, path in enumerate(files, start=1):
         bar = LineProgress(path.name, index, len(files))
         notes: list[str] = []
@@ -395,6 +479,9 @@ def main(argv: list[str] | None = None) -> int:
 
     spec = spec_from_args(args)
     output_dir = Path(args.output).expanduser() if args.output else OUTPUT_DIR
+
+    if args.contact_sheet:
+        return _make_contact_sheet(tools, files, args, spec, output_dir)
 
     if args.dry_run:
         from . import raw

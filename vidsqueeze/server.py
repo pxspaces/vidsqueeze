@@ -27,7 +27,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from . import deps, history, hwaccel, images, media, presets, raw, selfupdate, updates, watch
+from . import (deps, history, hwaccel, images, media, presets, raw, selfupdate, sheet,
+               updates, watch)
 from .encode import (
     CODEC_LABELS,
     CONTAINER_RULES,
@@ -36,6 +37,7 @@ from .encode import (
     SPEEDS,
     JobSpec,
     free_space,
+    image_spec_of,
 )
 from .jobs import Queue, sensible_concurrency
 from .paths import (
@@ -79,6 +81,8 @@ class Session:
         self.queue: Queue | None = None
         self.setup_state = {"running": False, "message": "", "fraction": -1.0, "error": "", "done": False}
         self.sample_state: dict = {"running": False, "source": "", "results": [], "error": "", "done": False}
+        self.sheet_state: dict = {"running": False, "done": False, "error": "",
+                                  "output": "", "notes": [], "done_count": 0, "total": 0}
         self.watcher: watch.Watcher | None = None
         self.update_state = {"running": False, "message": "", "fraction": -1.0,
                              "error": "", "done": False, "result": ""}
@@ -382,6 +386,8 @@ class Handler(BaseHTTPRequestHandler):
             self._serve_media((query.get("path") or [""])[0])
         elif route == "/api/sample":
             self._json(SESSION.sample_state)
+        elif route == "/api/sheet":
+            self._json(SESSION.sheet_state)
         elif route == "/api/watch":
             self._json(self._watch_state())
         elif route == "/api/updates":
@@ -415,6 +421,8 @@ class Handler(BaseHTTPRequestHandler):
             self._inspect(body)
         elif route == "/api/describe":
             self._describe(body)
+        elif route == "/api/expectation":
+            self._expectation(body)
         elif route == "/api/queue/start":
             self._start_queue(body)
         elif route == "/api/queue/cancel":
@@ -433,6 +441,11 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"stopped": stopped})
         elif route == "/api/sample/start":
             self._start_sample(body)
+        elif route == "/api/sheet/start":
+            self._start_sheet(body)
+        elif route == "/api/sheet/cancel":
+            SESSION.sheet_state["running"] = False
+            self._json({"cancelled": True})
         elif route == "/api/settings":
             save_settings(**{k: v for k, v in (body or {}).items() if k in ALLOWED_SETTINGS})
             self._json({"saved": True, "settings": load_settings()})
@@ -621,6 +634,77 @@ class Handler(BaseHTTPRequestHandler):
 
         threading.Thread(target=work, daemon=True).start()
         self._json({"started": True})
+
+    def _start_sheet(self, body: dict) -> None:
+        """Tile the chosen pictures into one sheet, in the background.
+
+        A sheet of sixty camera RAW files means sixty develops and takes a couple
+        of minutes, so this reports progress rather than holding the request open.
+        """
+        if SESSION.tools is None:
+            self._error("ffmpeg is not set up yet.")
+            return
+        if SESSION.sheet_state.get("running"):
+            self._error("A contact sheet is already being made.")
+            return
+
+        chosen, problems = expand_selection(
+            body.get("paths") or [], bool(body.get("recursive", True)), kinds=["image"],
+        )
+        if not chosen:
+            self._error("None of those files is a picture." +
+                        (" " + " ".join(problems) if problems else ""))
+            return
+
+        try:
+            spec = _spec_from_request(body.get("spec") or {})
+        except (TypeError, ValueError) as exc:
+            self._error(f"Those settings are not valid: {exc}")
+            return
+
+        destination = Path(body.get("output_dir") or OUTPUT_DIR).expanduser()
+        try:
+            destination.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            self._error(f"That folder cannot be used: {exc}")
+            return
+
+        stem = Path(chosen[0]).parent.name or "contact"
+        output = destination / f"{stem}-sheet.png"
+        sheet_spec = sheet.SheetSpec(
+            columns=int(body.get("columns") or 4),
+            thumbnail=int(body.get("thumbnail") or 320),
+            background=spec.image_background,
+            labels=bool(body.get("labels", True)),
+            raw_look=spec.raw_look,
+        )
+
+        SESSION.sheet_state = {
+            "running": True, "done": False, "error": "", "output": "",
+            "notes": [], "done_count": 0, "total": len(chosen),
+        }
+
+        def work() -> None:
+            try:
+                result, notes = sheet.build(
+                    SESSION.tools, chosen, output, sheet_spec,
+                    on_progress=lambda done, total: SESSION.sheet_state.update(
+                        {"done_count": done, "total": total}
+                    ),
+                    keep_going=lambda: bool(SESSION.sheet_state.get("running")),
+                )
+                SESSION.sheet_state["output"] = str(result)
+                SESSION.sheet_state["notes"] = notes
+                SESSION.sheet_state["done"] = True
+            except sheet.SheetError as exc:
+                SESSION.sheet_state["error"] = str(exc)
+            except Exception as exc:  # noqa: BLE001 - surfaced in the interface
+                SESSION.sheet_state["error"] = f"The sheet failed: {exc}"
+            finally:
+                SESSION.sheet_state["running"] = False
+
+        threading.Thread(target=work, daemon=True).start()
+        self._json({"started": True, "count": len(chosen)})
 
     def _state(self) -> dict:
         preset_list, warnings = presets.all_presets()
@@ -887,6 +971,30 @@ class Handler(BaseHTTPRequestHandler):
 
         threading.Thread(target=work, daemon=True).start()
         self._json({"started": True})
+
+    def _expectation(self, body: dict) -> None:
+        """Whether the chosen settings will make these files bigger.
+
+        Answered here rather than worked out again in the page, so there is one
+        implementation of it and the command line and the window cannot disagree.
+        """
+        try:
+            spec = _spec_from_request(body.get("spec") or {})
+        except (TypeError, ValueError):
+            self._json({"note": ""})
+            return
+
+        image = image_spec_of(spec)
+        for entry in (body.get("paths") or [])[:200]:
+            path = Path(entry)
+            if raw.is_raw(path):
+                note = images.size_expectation(image, "", is_raw=True)
+            else:
+                note = images.size_expectation(image, images.format_of(path))
+            if note:
+                self._json({"note": note})
+                return
+        self._json({"note": ""})
 
     def _describe(self, body: dict) -> None:
         """Describe exact files, including ones inside the output folder.

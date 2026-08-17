@@ -248,6 +248,51 @@ def build_command(
     return command, notes
 
 
+#: Sources that are already squeezed hard. Turning one of these into a lossless
+#: format makes it bigger, always, and there is nothing wrong with the program
+#: when it happens.
+ALREADY_COMPRESSED = {"jpeg", "jpg", "jpe", "heic", "heif", "webp", "avif", "jxl", "mp4"}
+
+
+def size_expectation(spec: ImageSpec, source_format: str, is_raw: bool = False) -> str:
+    """A plain warning that the result will be bigger, or "" when it will not.
+
+    Said before the job rather than after. VidSqueeze reported "the result is not
+    smaller" on every RAW to PNG conversion, which is true, unavoidable and reads
+    like a fault. Anybody choosing PNG deserves to know that beforehand, when they
+    can still choose something else.
+    """
+    fmt = spec.image_format
+    source = (source_format or "").lower().lstrip(".")
+
+    if fmt not in ALWAYS_LOSSLESS and not (spec.lossless and fmt in ("webp", "jxl")):
+        return ""
+
+    label = IMAGE_FORMATS.get(fmt, {}).get("label", fmt.upper())
+
+    if is_raw:
+        if fmt in ALWAYS_LOSSLESS and spec.quality >= FULL_CHROMA_FROM:
+            return (
+                f"{label} at this quality keeps every colour value from the camera, "
+                f"so expect a file several times the size of the original. "
+                f"Choose JPEG or WebP for something smaller, or a quality below "
+                f"{FULL_CHROMA_FROM} for half the depth."
+            )
+        return (
+            f"{label} throws nothing away, so a photograph converted to it is "
+            f"normally larger than the camera file, not smaller. Choose JPEG, "
+            f"WebP or AVIF if a smaller file is the point."
+        )
+
+    if source in ALREADY_COMPRESSED:
+        return (
+            f"This file is already compressed, and {label} throws nothing away, "
+            f"so the result will almost certainly be larger. That is worth doing "
+            f"to stop further quality loss, and not worth doing to save space."
+        )
+    return ""
+
+
 def output_name(source: Path, spec: ImageSpec) -> str:
     """The file name a converted image should get."""
     extension = IMAGE_FORMATS[spec.image_format]["ext"]

@@ -142,6 +142,19 @@ converted photograph was stamped with the day it was converted.
 **Strip dates and camera information** removes all of it, for photographs you
 intend to share.
 
+### It says when a file will get bigger
+
+Some conversions cannot make a file smaller. A photograph turned into PNG or TIFF
+is normally larger than the camera file, because those formats throw nothing away,
+and a JPEG turned into any lossless format is larger for the same reason.
+
+VidSqueeze says so in the settings as soon as you choose such a format, before the
+work starts, and names a smaller format to use instead. It stays quiet when the
+file will shrink: a warning that appears every time is a warning nobody reads.
+
+The same wording appears on the command line, before the batch begins, because it
+is worked out in one place rather than twice.
+
 ### What quality actually changes
 
 Quality is not only how hard the picture is squeezed. At **90 and above**,
@@ -405,6 +418,23 @@ vidsqueeze --info video.mp4         describe a file, change nothing
 vidsqueeze --dry-run video.mp4      show the command without running it
 vidsqueeze --setup                  download ffmpeg and exit
 ```
+
+Contact sheets, one image of everything in a folder with the names underneath.
+**Make a contact sheet** appears under the buttons whenever pictures have been
+added, counts its way through, can be stopped, and shows the result. From a
+terminal:
+
+```
+vidsqueeze --contact-sheet ~/Photos                        named after the folder
+vidsqueeze --contact-sheet --sheet-out ~/shoot.png *.CR2   choose the name
+vidsqueeze --contact-sheet --sheet-columns 6 *.CR2         six across
+vidsqueeze --contact-sheet --no-sheet-labels *.jpg         no names
+```
+
+Camera RAW is developed the same way it is everywhere else, so a sheet of RAW
+files needs nothing extra. Anything unreadable is left off and named rather than
+quietly shrinking the sheet. Names are drawn with whatever font the computer has;
+if there is none, the sheet is made without them and says so.
 
 Photographs and camera RAW, from a script as well as the interface:
 

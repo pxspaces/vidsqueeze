@@ -218,6 +218,25 @@
             </select>
             <small class="muted">Used only when the target format cannot store transparency.</small>
           </label>
+          <p id="sizeExpectation" class="muted tiny-text" hidden></p>
+          <label class="field"><span>Contact sheet, thumbnails across</span>
+            <select id="sheetColumns">
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="8">8</option>
+            </select>
+            <small class="muted">Used by Make a contact sheet, which lays every
+              picture out on one page with its name underneath.</small>
+          </label>
+          <label class="field"><span>Contact sheet, thumbnail size</span>
+            <select id="sheetThumbnail">
+              <option value="180">Small</option>
+              <option value="320" selected>Medium</option>
+              <option value="480">Large</option>
+            </select>
+          </label>
           <label class="field" id="rawLookField"><span>Camera RAW should look</span>
             <select id="rawLook">
               <option value="natural">Like the photograph</option>
@@ -266,6 +285,11 @@
           <button id="sampleBtn" class="btn secondary" type="button" disabled>Test a short sample</button>
           <button id="bakeoffBtn" class="btn secondary" type="button" disabled>Try several settings</button>
         </div>
+        <div id="sheetRow" class="row two-up" hidden>
+          <button id="sheetBtn" class="btn secondary" type="button" disabled>Make a contact sheet</button>
+          <button id="sheetCancelBtn" class="btn secondary" type="button" hidden>Stop the sheet</button>
+        </div>
+        <p id="sheetStatus" class="muted tiny-text" hidden></p>
         <p id="actionHint" class="muted tiny-text"></p>
       </div>
     </div>
