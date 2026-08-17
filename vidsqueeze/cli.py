@@ -19,7 +19,7 @@ from .paths import OUTPUT_DIR, ensure_dirs, human_duration, human_size
 from .probe import ProbeError, probe
 from .server import expand_selection
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 
 def build_parser() -> argparse.ArgumentParser:

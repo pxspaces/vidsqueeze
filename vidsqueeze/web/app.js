@@ -24,6 +24,7 @@ const state = {
   watchFolder: '',
   duration: 0,
   compareMode: 'frames',
+  lastChecked: -1,
   activePreset: '',
   mode: 'any',
   rawSupport: null,
@@ -178,6 +179,16 @@ function buildModeSelector() {
   }
 }
 
+/* The mode narrows what is listed and what a folder brings in. "Anything"
+   applies no filter at all. */
+function modeKinds() {
+  return state.mode === 'any' ? null : [state.mode];
+}
+function kindsParam() {
+  const kinds = modeKinds();
+  return kinds ? `&kinds=${encodeURIComponent(kinds.join(','))}` : '';
+}
+
 function setMode(value) {
   state.mode = value;
   for (const button of $('modeSelector').querySelectorAll('.seg')) {
@@ -186,6 +197,10 @@ function setMode(value) {
   post('/api/settings', { media_mode: value }).catch(() => {});
   state.settings.media_mode = value;
   renderPresets();
+  // A different mode means a different set of files is relevant, so anything
+  // already chosen is re-read through the new filter.
+  if (state.paths.length) refreshSelection();
+  if (!$('browser').hidden && state.browserPath) loadFolder(state.browserPath);
 }
 
 /* ---------- setup and upgrade ---------- */
@@ -595,15 +610,15 @@ async function refreshSelection() {
   setText($('actionHint'), 'Reading files...');
   let data;
   try {
-    data = await post('/api/inspect', { paths: state.paths, recursive: $('recursive').checked });
+    data = await post('/api/inspect', { paths: state.paths, recursive: $('recursive').checked, kinds: modeKinds() });
   } catch (error) {
     setText($('actionHint'), error.message);
     return;
   }
 
-  state.files = data.details.length
-    ? data.details
-    : data.paths.map((p) => ({ path: p, name: p.split(/[\\/]/).pop() }));
+  // Every chosen file comes back. Only the first batch has been opened and
+  // measured; the rest are listed from name and size, which is all this needs.
+  state.files = data.details;
   state.kinds = data.kinds || [];
 
   if (data.needs_raw_decoder) {
@@ -625,8 +640,9 @@ async function refreshSelection() {
     show('upgradeOffer', false);
   }
 
-  setText($('actionHint'), data.count > data.details.length
-    ? `${data.count} files selected. Showing details for the first ${data.details.length}.`
+  const unmeasured = data.count - (data.probed || 0);
+  setText($('actionHint'), unmeasured > 0
+    ? `${data.count} files ready. The first ${data.probed} have been measured; the rest are read as they are converted.`
     : (data.problems || []).join(' '));
 
   renderPresets();
@@ -711,7 +727,7 @@ async function openBrowser(mode) {
 }
 
 async function loadFolder(path) {
-  const data = await api(`/api/browse?path=${encodeURIComponent(path)}`);
+  const data = await api(`/api/browse?path=${encodeURIComponent(path)}${kindsParam()}`);
   if (data.error) { setText($('browserError'), data.error); show('browserError', true); return; }
   show('browserError', false);
   state.browserPath = data.path;
@@ -733,13 +749,19 @@ async function loadFolder(path) {
 
   const files = $('fileBrowseList');
   files.innerHTML = '';
+  state.lastChecked = -1;
+
   if (state.browserMode === 'files') {
-    for (const file of data.files) {
+    data.files.forEach((file, index) => {
       const item = document.createElement('li');
       const label = document.createElement('label');
       const box = document.createElement('input');
       box.type = 'checkbox';
       box.value = file.path;
+      box.dataset.index = String(index);
+      // The click carries the modifier keys; the change event does not, so the
+      // range has to be worked out here and the box left to toggle itself.
+      box.addEventListener('click', (event) => handleBoxClick(event, index));
       box.addEventListener('change', updateAddButton);
       const name = document.createElement('span');
       name.className = 'fname';
@@ -750,19 +772,61 @@ async function loadFolder(path) {
       label.append(box, name, size);
       item.append(label);
       files.append(item);
-    }
+    });
+
     if (!data.folders.length && !data.files.length) {
       const empty = document.createElement('li');
       empty.className = 'muted tiny-text';
-      empty.textContent = 'This folder has nothing VidSqueeze can open.';
+      empty.textContent = data.hidden
+        ? `This folder has ${data.hidden} file${data.hidden === 1 ? '' : 's'}, but none of the kind you are working with.`
+        : 'This folder has nothing VidSqueeze can open.';
       files.append(empty);
     }
   }
+
+  const count = data.files.length;
+  show('selectAllRow', state.browserMode === 'files' && count > 0);
+  $('selectAll').checked = false;
+  $('selectAll').indeterminate = false;
+  setText($('browseCount'), count
+    ? `${count} file${count === 1 ? '' : 's'}` + (data.hidden ? `, ${data.hidden} of other kinds hidden` : '')
+    : '');
+  updateAddButton();
+}
+
+/* Click, shift-click for a range, exactly as a file manager behaves. Uses only
+   the standard shiftKey flag, so it works the same on every platform. */
+function handleBoxClick(event, index) {
+  const boxes = [...document.querySelectorAll('#fileBrowseList input[type=checkbox]')];
+  if (event.shiftKey && state.lastChecked >= 0 && state.lastChecked !== index) {
+    const wanted = event.target.checked;
+    const [from, to] = [state.lastChecked, index].sort((a, b) => a - b);
+    for (let i = from; i <= to; i += 1) boxes[i].checked = wanted;
+  }
+  state.lastChecked = index;
   updateAddButton();
 }
 
 const checkedFiles = () => [...document.querySelectorAll('#fileBrowseList input:checked')].map((i) => i.value);
-function updateAddButton() { $('addSelectedBtn').disabled = checkedFiles().length === 0; }
+function updateAddButton() {
+  const boxes = [...document.querySelectorAll('#fileBrowseList input[type=checkbox]')];
+  const chosen = boxes.filter((b) => b.checked).length;
+  $('addSelectedBtn').disabled = chosen === 0;
+  setText($('addSelectedBtn'), chosen ? `Add ${chosen} selected` : 'Add selected');
+  const all = $('selectAll');
+  if (all) {
+    all.checked = chosen > 0 && chosen === boxes.length;
+    all.indeterminate = chosen > 0 && chosen < boxes.length;
+  }
+}
+
+$('selectAll').addEventListener('change', (event) => {
+  for (const box of document.querySelectorAll('#fileBrowseList input[type=checkbox]')) {
+    box.checked = event.target.checked;
+  }
+  state.lastChecked = -1;
+  updateAddButton();
+});
 
 $('addSelectedBtn').addEventListener('click', () => { addPaths(checkedFiles()); show('browser', false); });
 $('addFolderBtn').addEventListener('click', () => {
@@ -887,6 +951,7 @@ $('startBtn').addEventListener('click', async () => {
     await post('/api/queue/start', {
       paths: state.paths,
       recursive: $('recursive').checked,
+      kinds: modeKinds(),
       spec: readSpec(),
       replace_originals: replacing,
       concurrency: $('concurrency').checked ? 2 : 1,
@@ -1446,6 +1511,11 @@ function renderUpdates(report) {
   }));
 
   $('updateDot').hidden = !(app.update_available || ff.update_available);
+
+  const when = report.checked_at ? new Date(report.checked_at * 1000) : null;
+  setText($('updatesChecked'), when
+    ? `Last checked ${when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+    : '');
 }
 
 function updateRow({ title, detail, stale, action }) {

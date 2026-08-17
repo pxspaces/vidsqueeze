@@ -20,6 +20,7 @@ import string
 import subprocess
 import threading
 import webbrowser
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -47,7 +48,14 @@ from .paths import (
     save_settings,
     system_key,
 )
-from .probe import MEDIA_EXTENSIONS, ProbeError, probe, scan_folder
+from .probe import (
+    MEDIA_EXTENSIONS,
+    ProbeError,
+    kind_for_extension,
+    matches_kinds,
+    probe,
+    scan_folder,
+)
 
 from . import __version__ as VERSION
 
@@ -155,8 +163,13 @@ def places() -> list[dict]:
     return entries
 
 
-def browse(raw_path: str) -> dict:
-    """List the folders and media files inside a directory."""
+def browse(raw_path: str, kinds: set[str] | None = None) -> dict:
+    """List the folders and media files inside a directory.
+
+    When a kind filter is given, only files of those kinds are listed. Someone
+    who has said they are working with photographs should not have to pick their
+    way past a folder of video files.
+    """
     target = Path(raw_path).expanduser() if raw_path else Path.home()
     try:
         target = target.resolve()
@@ -168,6 +181,7 @@ def browse(raw_path: str) -> dict:
 
     folders: list[dict] = []
     files: list[dict] = []
+    hidden = 0          # files of other kinds, filtered out but worth mentioning
     try:
         for child in sorted(target.iterdir(), key=lambda p: p.name.lower()):
             if child.name.startswith("."):
@@ -176,6 +190,9 @@ def browse(raw_path: str) -> dict:
                 if child.is_dir():
                     folders.append({"name": child.name, "path": str(child)})
                 elif child.suffix.lower() in MEDIA_EXTENSIONS:
+                    if not matches_kinds(child, kinds):
+                        hidden += 1
+                        continue
                     size = child.stat().st_size
                     files.append(
                         {
@@ -183,6 +200,7 @@ def browse(raw_path: str) -> dict:
                             "path": str(child),
                             "bytes": size,
                             "size": human_size(size),
+                            "kind": kind_for_extension(child),
                         }
                     )
             except OSError:
@@ -193,21 +211,37 @@ def browse(raw_path: str) -> dict:
         return {"error": f"That folder could not be read: {exc}", "path": str(target)}
 
     parent = str(target.parent) if target.parent != target else ""
-    return {"path": str(target), "parent": parent, "folders": folders, "files": files}
+    return {
+        "path": str(target), "parent": parent,
+        "folders": folders, "files": files, "hidden": hidden,
+    }
 
 
-def expand_selection(raw_paths: list[str], recursive: bool = True) -> tuple[list[Path], list[str]]:
-    """Turn a mixed selection of files and folders into a flat list of files."""
+def expand_selection(
+    raw_paths: list[str],
+    recursive: bool = True,
+    kinds: list[str] | set[str] | None = None,
+) -> tuple[list[Path], list[str]]:
+    """Turn a mixed selection of files and folders into a flat list of files.
+
+    A kind filter applies to folders and to individually chosen files alike, so
+    that choosing a whole folder in photograph mode brings in the photographs
+    and leaves the videos where they are.
+    """
+    wanted = set(kinds) if kinds else None
     collected: list[Path] = []
     problems: list[str] = []
     for raw in raw_paths:
         path = Path(raw).expanduser()
         if path.is_dir():
-            found = scan_folder(path, recursive=recursive)
+            found = scan_folder(path, recursive=recursive, kinds=wanted)
             if not found:
-                problems.append(f"No video or audio files found in {path.name}.")
+                what = " or ".join(sorted(wanted)) if wanted else "video or audio"
+                problems.append(f"No {what} files found in {path.name}.")
             collected += found
         elif path.is_file():
+            if not matches_kinds(path, wanted):
+                continue
             collected.append(path)
         else:
             problems.append(f"Not found: {raw}")
@@ -329,7 +363,9 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/state":
             self._json(self._state())
         elif route == "/api/browse":
-            self._json(browse((query.get("path") or [""])[0]))
+            raw_kinds = (query.get("kinds") or [""])[0]
+            wanted = {k for k in raw_kinds.split(",") if k} or None
+            self._json(browse((query.get("path") or [""])[0], wanted))
         elif route == "/api/places":
             self._json({"places": places()})
         elif route == "/api/queue":
@@ -621,78 +657,145 @@ class Handler(BaseHTTPRequestHandler):
             "defaults": asdict(JobSpec()),
         }
 
+    #: How many files get a full inspection. Reading a file's dimensions and
+    #: length means running ffprobe on it, which is far too slow to do to a
+    #: folder of five hundred photographs before showing anything. Beyond this
+    #: point files are still listed, from their name and size alone.
+    PROBE_LIMIT = 60
+
+    def _basic_entry(self, path: Path) -> dict:
+        """Describe a file without opening it. Cheap enough to do to thousands."""
+        try:
+            size = path.stat().st_size
+        except OSError:
+            size = 0
+        kind = kind_for_extension(path) or "video"
+        return {
+            "path": str(path), "name": path.name,
+            "summary": f"{path.suffix.lstrip('.').upper()}, {human_size(size)}",
+            "bytes": size, "size": human_size(size), "duration": 0,
+            "is_hdr": False, "has_video": kind != "audio", "width": 0, "height": 0,
+            "resolution": "", "fps": 0, "codec": path.suffix.lstrip(".").lower(),
+            "playable": False, "kind": kind, "has_alpha": False,
+            "is_raw": False, "raw_ready": True, "probed": False,
+        }
+
+    def _raw_entry(self, path: Path) -> dict:
+        """A camera RAW file, described without opening it."""
+        entry = self._basic_entry(path)
+        support = raw.describe_support()
+        entry.update({
+            "summary": f"{raw.camera_of(path)} RAW, {entry['size']}"
+                       + (f", will use {support['decoder']}" if support["available"]
+                          else ", no RAW decoder installed"),
+            "resolution": "RAW", "codec": "raw", "kind": "image",
+            "is_raw": True, "raw_ready": support["available"],
+        })
+        return entry
+
     def _inspect(self, body: dict) -> None:
-        """Report what is in a selection, so the interface can preview it."""
+        """Report what is in a selection, so the interface can preview it.
+
+        Every file chosen is returned. Only the first batch is opened and
+        measured; the rest are listed from their name and size, which is all the
+        file list actually needs to show them.
+        """
         if SESSION.tools is None:
             self._error("ffmpeg is not set up yet.")
             return
 
-        paths, problems = expand_selection(body.get("paths") or [], bool(body.get("recursive", True)))
-        details = []
+        paths, problems = expand_selection(
+            body.get("paths") or [],
+            bool(body.get("recursive", True)),
+            kinds=body.get("kinds") or None,
+        )
+
         unreadable: list[str] = []
-        total_bytes = 0
-        # Probing is not free, so only the first few files are described in full.
-        for path in paths[:25]:
-            if raw.is_raw(path):
-                # ffmpeg cannot open these at all; they are developed first.
-                try:
-                    size = path.stat().st_size
-                except OSError:
-                    size = 0
-                support = raw.describe_support()
-                details.append({
-                    "path": str(path), "name": path.name,
-                    "summary": f"{raw.camera_of(path)} RAW, {human_size(size)}"
-                               + (f", will use {support['decoder']}" if support["available"]
-                                  else ", no RAW decoder installed"),
-                    "bytes": size, "size": human_size(size), "duration": 0,
-                    "is_hdr": False, "has_video": True, "width": 0, "height": 0,
-                    "resolution": "RAW", "fps": 0, "codec": "raw",
-                    "playable": False, "kind": "image", "has_alpha": False,
-                    "is_raw": True, "raw_ready": support["available"],
-                })
-                total_bytes += size
-                continue
+
+        # Decide up front which files get opened. Everything else is listed from
+        # its name, so the count is always the real one.
+        to_probe = [p for p in paths if not raw.is_raw(p)][: self.PROBE_LIMIT]
+        probe_set = {str(p) for p in to_probe}
+
+        def measure(path: Path) -> tuple[str, dict | None, str]:
             try:
                 info = probe(SESSION.tools, path)
-                details.append(
-                    {
-                        "path": str(path),
-                        "name": path.name,
-                        "summary": info.summary(),
-                        "bytes": info.size_bytes,
-                        "size": human_size(info.size_bytes),
-                        "duration": info.duration,
-                        "is_hdr": info.is_hdr,
-                        "has_video": info.has_video,
-                        "width": info.display_width,
-                        "height": info.display_height,
-                        "resolution": info.resolution_label,
-                        "fps": round(info.fps, 3),
-                        "codec": info.video_codec or info.audio_codec,
-                        "playable": media.can_browser_play(info),
-                        "kind": info.kind,
-                        "has_alpha": info.has_alpha,
-                    }
-                )
             except ProbeError as exc:
-                problems.append(str(exc))
-                if deps.upgrade_would_help(path, SESSION.tools):
-                    unreadable.append(str(path))
+                return str(path), None, str(exc)
+            return str(path), {
+                "path": str(path),
+                "name": path.name,
+                "summary": info.summary(),
+                "bytes": info.size_bytes,
+                "size": human_size(info.size_bytes),
+                "duration": info.duration,
+                "is_hdr": info.is_hdr,
+                "has_video": info.has_video,
+                "width": info.display_width,
+                "height": info.display_height,
+                "resolution": info.resolution_label,
+                "fps": round(info.fps, 3),
+                "codec": info.video_codec or info.audio_codec,
+                "playable": media.can_browser_play(info),
+                "kind": info.kind,
+                "has_alpha": info.has_alpha,
+                "is_raw": False,
+                "raw_ready": True,
+                "probed": True,
+            }, ""
+
+        # Each measurement is a separate short-lived process, so they overlap
+        # happily. Done one at a time, sixty files took over five seconds before
+        # the list appeared.
+        measured: dict[str, dict] = {}
+        if to_probe:
+            workers = max(4, min(12, (os.cpu_count() or 4) * 2))
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                for key, entry, failure in pool.map(measure, to_probe):
+                    if entry is not None:
+                        measured[key] = entry
+                    else:
+                        problems.append(failure)
+                        if deps.upgrade_would_help(key, SESSION.tools):
+                            unreadable.append(key)
+
+        details: list[dict] = []
+        total_bytes = 0
         for path in paths:
-            try:
-                total_bytes += path.stat().st_size
-            except OSError:
-                pass
+            key = str(path)
+            if raw.is_raw(path):
+                entry = self._raw_entry(path)
+            elif key in measured:
+                entry = measured[key]
+                # ffprobe will happily accept rubbish carrying a picture
+                # extension and report it as an image with no dimensions. That
+                # only fails later, during conversion, so it is called out now.
+                if entry["kind"] == "image" and not entry["width"]:
+                    entry = dict(entry, unreadable=True,
+                                 summary=f"Not a readable image, {entry['size']}")
+            elif key in probe_set:
+                # It was opened and refused to be read. It still belongs in the
+                # list, marked, rather than vanishing from the count.
+                entry = self._basic_entry(path)
+                entry["summary"] = f"Could not be read, {entry['size']}"
+                entry["unreadable"] = True
+            else:
+                entry = self._basic_entry(path)
+
+            details.append(entry)
+            total_bytes += entry["bytes"]
+
+        probed = len(measured)
 
         self._json(
             {
                 "count": len(paths),
                 "paths": [str(p) for p in paths],
                 "details": details,
+                "probed": probed,
                 "total_bytes": total_bytes,
                 "total_size": human_size(total_bytes),
-                "problems": problems,
+                "problems": problems[:12],
                 "kinds": sorted({d["kind"] for d in details}),
                 "needs_raw_decoder": any(d.get("is_raw") and not d.get("raw_ready") for d in details),
                 "raw_install_hint": raw.install_hint(),
@@ -801,7 +904,11 @@ class Handler(BaseHTTPRequestHandler):
             self._error("A batch is already running.")
             return
 
-        paths, problems = expand_selection(body.get("paths") or [], bool(body.get("recursive", True)))
+        paths, problems = expand_selection(
+            body.get("paths") or [],
+            bool(body.get("recursive", True)),
+            kinds=body.get("kinds") or None,
+        )
         if not paths:
             self._error("No video or audio files were selected." + (" " + " ".join(problems) if problems else ""))
             return

@@ -447,8 +447,9 @@
         <p id="updateMessage" class="muted tiny-text"></p>
       </div>
       <p id="updatesError" class="notice bad" hidden></p>
-      <div class="row">
+      <div class="row update-actions">
         <button id="updatesRecheck" class="btn secondary tiny" type="button">Check again</button>
+        <span id="updatesChecked" class="muted tiny-text"></span>
       </div>
     </div>
   </div>
@@ -469,6 +470,12 @@
           <code id="currentPath" class="path"></code>
         </div>
         <div id="browserError" class="notice bad" hidden></div>
+        <div id="selectAllRow" class="select-all" hidden>
+          <label class="inline"><input id="selectAll" type="checkbox"> Select all</label>
+          <span id="browseCount" class="muted tiny-text"></span>
+          <span class="grow"></span>
+          <span class="muted tiny-text">Tip: click one, then shift-click another to take everything between</span>
+        </div>
         <div class="lists">
           <ul id="folderList" class="folders"></ul>
           <ul id="fileBrowseList" class="browse-files"></ul>

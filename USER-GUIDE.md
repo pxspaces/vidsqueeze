@@ -3,7 +3,7 @@
 Step by step, for people who have never touched a video setting. If you can
 double-click a file, you can use this.
 
-Living document, last updated for version 1.2.0.
+Living document, last updated for version 1.3.0.
 
 **Jump to:** [Windows](#getting-started-on-windows) &middot;
 [macOS](#getting-started-on-macos) &middot; [Linux](#getting-started-on-linux) &middot;
@@ -168,9 +168,17 @@ the picture settings appear regardless.
 ## Your first conversion
 
 1. **Add something.** Press **Choose files or a folder** in the Sources pane.
-   Navigate to your videos or photos, tick the ones you want, press **Add
-   selected**. To do a whole folder at once, open it and press **Use this
-   folder**.
+   Navigate to your videos or photos and choose them:
+
+   - tick them one at a time, or
+   - click one, then **shift-click** another to take everything between the two,
+     which works in either direction, or
+   - tick **Select all**, or
+   - press **Use this folder** to take the whole folder.
+
+   If you set your media type to Photos, only pictures are listed, so you are
+   not picking your way past videos. The same goes for Video and Audio. Choose
+   **Anything** in the header to see everything.
 
 2. **Pick what you want.** In the middle, under Settings, choose a preset. If
    you are unsure, **Balanced** for video and **Photo for the web** for

@@ -7,7 +7,48 @@ Dates are the day the change was made.
 
 ---
 
+## 1.3.0 - 2026-08-17
+
+### Fixed
+
+- **The Check again button in Updates sat flush against the last entry.** It now
+  has space and a dividing line above it, and says when the last check was made.
+
+- **Only the first 25 files of a selection were listed.** Choosing a folder of
+  two hundred photographs showed twenty-five, and the count and total size were
+  wrong with them. Every file chosen is now listed. Opening each one to measure
+  it is what was slow, so the first sixty are measured in full and the rest are
+  listed from their name and size, which is all the list needs. The conversion
+  itself always used the whole selection; it was the display that was short.
+- **Measuring files was done one at a time.** Sixty files took over five
+  seconds before anything appeared. They are now measured together, which brings
+  the same folder down to under two.
+- **Rubbish with a picture extension was listed as a real image** of no
+  dimensions, and only failed later during conversion. It is now marked as
+  unreadable in the list.
+- Files that cannot be read no longer vanish from the list and the count. They
+  are shown, marked.
+
+### Added
+
+- **The media type you chose now filters what you see.** In Photos, the file
+  browser lists only pictures and camera RAW, and choosing a whole folder brings
+  in only those. Video and Audio behave the same way. Anything applies no filter.
+  The browser says how many files of other kinds it is hiding.
+- **Shift-click to select a range.** Click one file, then shift-click another,
+  and everything between them is taken, in either direction. There is also a
+  Select all box, and the add button says how many are chosen.
+
+---
+
 ## 1.2.0 - 2026-08-17
+
+### Fixed
+
+- The ignore file named development-only paths that do not exist in a published
+  copy. The publishing script now writes a clean one rather than editing the
+  development version, and its checks scan every file instead of a list of
+  extensions, which is how a dotfile slipped past them.
 
 ### Added
 

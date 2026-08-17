@@ -3,7 +3,7 @@
 A complete inventory. This is a living document: anything added to the program
 is added here in the same change.
 
-Last updated for version 1.2.0.
+Last updated for version 1.3.0.
 
 ---
 
@@ -162,8 +162,14 @@ anything. This only decides which settings you are shown: nothing is locked
 away. The answer is remembered, and the selector stays in the header so you can
 change it whenever you like.
 
-Selecting files always wins over the setting. Add a photograph while in Video
-mode and the picture settings appear anyway.
+It also filters what you are shown. In Photos, the file browser lists only
+pictures and camera RAW, and choosing a whole folder brings in only those. The
+browser tells you how many files of other kinds it has hidden. Anything applies
+no filter at all.
+
+Selecting files always wins over the setting for the purposes of which settings
+appear: add a photograph while in Video mode and the picture settings show up
+anyway.
 
 ---
 
@@ -235,6 +241,20 @@ Select a finished file in Results.
   format, audio, bitrate, length and transparency.
 - **Open original** and **Open result** always open the real files in whatever
   program your computer normally uses.
+
+---
+
+## Choosing files
+
+The file browser lists everything of the kind you are working with, however many
+that is. Select them individually, use **Select all**, or click one file and
+**shift-click** another to take everything in between, in either direction, the
+way a file manager behaves. **Use this folder** takes the whole folder.
+
+Large selections are listed in full. The first sixty files are opened and
+measured for resolution and length; the rest are listed from their name and
+size, so a folder of hundreds appears in a second or two rather than making you
+wait. Every file in the selection is converted regardless.
 
 ---
 

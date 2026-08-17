@@ -321,7 +321,32 @@ def looks_like_media(path: Path) -> bool:
     return path.suffix.lower() in MEDIA_EXTENSIONS
 
 
-def scan_folder(folder: Path, recursive: bool = True) -> list[Path]:
+def kind_for_extension(path: Path | str) -> str | None:
+    """Guess what a file is from its name alone, without opening it.
+
+    This is deliberately cheap, so it can be used to filter a folder of
+    thousands. It can be wrong in one direction: an animated GIF is called an
+    image here and turns out to be a video once opened. Nothing depends on that
+    distinction at the point this is used.
+    """
+    suffix = Path(path).suffix.lower()
+    if suffix in VIDEO_EXTENSIONS:
+        return KIND_VIDEO
+    if suffix in AUDIO_EXTENSIONS:
+        return KIND_AUDIO
+    if suffix in IMAGE_EXTENSIONS:
+        return KIND_IMAGE
+    return None
+
+
+def matches_kinds(path: Path | str, kinds: set[str] | None) -> bool:
+    """Whether a file is one of the kinds asked for. No filter means everything."""
+    if not kinds:
+        return True
+    return kind_for_extension(path) in kinds
+
+
+def scan_folder(folder: Path, recursive: bool = True, kinds: set[str] | None = None) -> list[Path]:
     """Find media files in a folder, skipping our own output and hidden files."""
     folder = Path(folder)
     if not folder.is_dir():
@@ -332,6 +357,8 @@ def scan_folder(folder: Path, recursive: bool = True) -> list[Path]:
         if not candidate.is_file() or candidate.name.startswith("."):
             continue
         if not looks_like_media(candidate):
+            continue
+        if not matches_kinds(candidate, kinds):
             continue
         results.append(candidate)
     return sorted(results)
