@@ -627,6 +627,29 @@ select, input[type="number"], input[type="text"] {
 
 .update-dot { background: var(--accent-soft); color: var(--accent); }
 .update-list { display: grid; gap: 10px; }
+
+/* What is new in the version being offered. Scrolls rather than growing, so a
+   long list of changes cannot push the buttons off the bottom of the window. */
+.update-list details {
+  border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px;
+  background: var(--surface);
+  /* A grid item defaults to min-width:auto, which lets a long line inside a
+     fenced block force the whole window wider and push the text off the right
+     edge. Both of these are needed to keep the overflow where it belongs. */
+  min-width: 0;
+}
+.update-list summary { cursor: pointer; font-weight: 600; font-size: .92rem; }
+.release-notes { margin-top: 8px; max-height: 15rem; overflow-y: auto; font-size: .88rem;
+  min-width: 0; overflow-wrap: break-word; }
+.release-notes h4 { margin: .9rem 0 .35rem; font-size: .85rem; text-transform: uppercase;
+  letter-spacing: .04em; color: var(--ink-soft); }
+.release-notes h4:first-child { margin-top: 0; }
+.release-notes ul { margin: 0 0 .6rem; padding-left: 1.1rem; }
+.release-notes li { margin-bottom: .45rem; }
+.release-notes p { margin: 0 0 .6rem; }
+.release-notes pre { background: rgba(127,127,127,.14); padding: .55rem .7rem;
+  border-radius: 4px; overflow-x: auto; font-size: .82rem; margin: 0 0 .6rem; }
+.release-notes code { background: rgba(127,127,127,.16); padding: .05rem .3rem; border-radius: 3px; }
 .update-row {
   display: flex; align-items: center; gap: 13px;
   padding: 13px 15px; border: 1px solid var(--line); border-radius: var(--r);

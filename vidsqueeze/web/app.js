@@ -1646,6 +1646,126 @@ async function openUpdates(force) {
   renderUpdates(report);
 }
 
+/* Turn a release description into DOM nodes.
+
+   Everything here is built with createElement and textContent, never by
+   assigning HTML. The text comes from a GitHub release, which is to say from
+   the internet, and this page carries the key that lets it convert and delete
+   the user's files. Handing remote text to innerHTML would mean a release
+   description could run whatever it liked in here, so it is never given the
+   chance. Only a small, well understood part of Markdown is understood, and
+   anything else simply shows as itself. */
+const SAFE_LINK = /^https?:\/\//i;
+
+function inlineMarkdown(text, into) {
+  // Bold, code spans and links. The pattern is deliberately one alternation, so
+  // the text is walked once and anything unmatched lands as plain text.
+  const pattern = /(\*\*([^*]+)\*\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)\s]+)\))/g;
+  let at = 0;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > at) into.append(text.slice(at, match.index));
+    if (match[1]) {
+      const strong = document.createElement('strong');
+      strong.textContent = match[2];
+      into.append(strong);
+    } else if (match[3]) {
+      const code = document.createElement('code');
+      code.textContent = match[4];
+      into.append(code);
+    } else {
+      // A link only if the target is plainly http or https. Anything else,
+      // javascript: most of all, is shown as text rather than made clickable.
+      if (SAFE_LINK.test(match[7])) {
+        const link = document.createElement('a');
+        link.href = match[7];
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = match[6];
+        into.append(link);
+      } else {
+        into.append(match[6]);
+      }
+    }
+    at = pattern.lastIndex;
+  }
+  if (at < text.length) into.append(text.slice(at));
+}
+
+function renderReleaseNotes(markdown) {
+  const box = document.createElement('div');
+  box.className = 'release-notes';
+  let list = null;
+  let para = null;
+  let pre = null;
+
+  for (const raw of String(markdown).split('\n')) {
+    const line = raw.trim();
+
+    // Fenced blocks. These notes use them to show what the program prints, and
+    // without this the fence markers appeared as stray backticks and the block
+    // collapsed into a paragraph.
+    if (line.startsWith('```')) {
+      if (pre) {
+        pre = null;
+      } else {
+        list = null;
+        para = null;
+        pre = document.createElement('pre');
+        box.append(pre);
+      }
+      continue;
+    }
+    if (pre) {
+      // Verbatim, and as text, so whatever is inside stays inside.
+      pre.append((pre.textContent ? '\n' : '') + raw);
+      continue;
+    }
+    // Only a blank line ends a paragraph or a list. These notes are written with
+    // hard wrapped lines, so treating every newline as a break split sentences
+    // down the middle and read like a ransom note.
+    if (!line) { list = null; para = null; continue; }
+
+    const heading = line.match(/^#{1,6}\s+(.*)$/);
+    if (heading) {
+      list = null;
+      para = null;
+      const h = document.createElement('h4');
+      inlineMarkdown(heading[1], h);
+      box.append(h);
+      continue;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.*)$/);
+    if (bullet) {
+      para = null;
+      if (!list) { list = document.createElement('ul'); box.append(list); }
+      const li = document.createElement('li');
+      inlineMarkdown(bullet[1], li);
+      list.append(li);
+      continue;
+    }
+
+    if (list) {
+      // A wrapped continuation of the bullet above, so it belongs to that
+      // bullet rather than starting something of its own.
+      list.lastChild.append(' ');
+      inlineMarkdown(line, list.lastChild);
+      continue;
+    }
+
+    if (para) {
+      para.append(' ');
+      inlineMarkdown(line, para);
+      continue;
+    }
+    para = document.createElement('p');
+    inlineMarkdown(line, para);
+    box.append(para);
+  }
+  return box;
+}
+
 function renderUpdates(report) {
   const host = $('updatesBody');
   host.innerHTML = '';
@@ -1668,6 +1788,17 @@ function renderUpdates(report) {
         : { label: 'How to update', href: app.url })
       : null,
   }));
+
+  // What the new version actually changes. Shown only when there is something to
+  // take, because a list of what you already have is not news.
+  if (app.update_available && app.notes) {
+    const details = document.createElement('details');
+    details.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = `What is new in ${app.latest}`;
+    details.append(summary, renderReleaseNotes(app.notes));
+    host.append(details);
+  }
 
   host.append(updateRow({
     title: 'ffmpeg',

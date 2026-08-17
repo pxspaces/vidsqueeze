@@ -51,31 +51,40 @@ def _newer(latest: str, current: str) -> bool:
 # --------------------------------------------------------------------------
 
 
-def latest_app_version() -> tuple[str, str]:
-    """The newest published version, and where to get it.
+#: How much of a release description to keep. Enough for a real list of changes,
+#: short of letting a very long one push the window off the screen.
+NOTES_LIMIT = 6000
+
+
+def latest_app_version() -> tuple[str, str, str]:
+    """The newest published version, where to get it, and what changed.
 
     Returns empty strings when there is nothing to report, which includes the
-    perfectly normal case of the project not publishing releases yet.
+    perfectly normal case of the project not publishing releases yet. The notes
+    are whatever the release description says, in Markdown, and may be empty even
+    when there is a release: somebody has to have written them.
     """
     try:
         release = _fetch_json(RELEASES_API)
         tag = str(release.get("tag_name") or "").lstrip("v")
         if tag:
-            return tag, str(release.get("html_url") or PROJECT_URL)
+            notes = str(release.get("body") or "").strip()[:NOTES_LIMIT]
+            return tag, str(release.get("html_url") or PROJECT_URL), notes
     except (urllib.error.HTTPError, urllib.error.URLError, ssl.SSLError, OSError, ValueError):
         pass
 
-    # No releases, or no repository yet. Tags are the next best thing.
+    # No releases, or no repository yet. Tags are the next best thing, though a
+    # tag carries no description, so there is nothing to show but the number.
     try:
         tags = _fetch_json(TAGS_API)
         if isinstance(tags, list) and tags:
             newest = max((str(t.get("name") or "").lstrip("v") for t in tags), key=_version_tuple)
             if newest:
-                return newest, PROJECT_URL
+                return newest, PROJECT_URL, ""
     except (urllib.error.HTTPError, urllib.error.URLError, ssl.SSLError, OSError, ValueError):
         pass
 
-    return "", ""
+    return "", "", ""
 
 
 # --------------------------------------------------------------------------
@@ -146,7 +155,7 @@ def check(app_version: str, tools: deps.Tools | None, force: bool = False) -> di
         if cached is not None:
             return cached
 
-    latest_app, app_url = latest_app_version()
+    latest_app, app_url, notes = latest_app_version()
     latest_ffmpeg = latest_ffmpeg_version()
     current_ffmpeg = tools.version if tools else ""
 
@@ -156,6 +165,9 @@ def check(app_version: str, tools: deps.Tools | None, force: bool = False) -> di
         "url": app_url or PROJECT_URL,
         "update_available": bool(latest_app) and _newer(latest_app, app_version),
         "checked": bool(latest_app),
+        # What changed, as written in the release. Carried through so somebody can
+        # see what they are being offered before they take it.
+        "notes": notes,
     }
 
     ffmpeg = {

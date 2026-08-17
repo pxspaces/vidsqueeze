@@ -7,6 +7,24 @@ Dates are the day the change was made.
 
 ---
 
+## 1.11.0 - 2026-08-17
+
+### Added
+
+- **The Updates window now shows what is new.** It used to offer a version number
+  and nothing else, so the only way to find out what you were about to install was
+  to go and read the project page. What changed, what was fixed and what was added
+  now appear in the window, under the version being offered, taken from the release
+  itself. It is shown only when there is an update to take, because a list of what
+  you already have is not news.
+
+  The notes are text from the internet, and the window that displays them can
+  convert and delete your files, so they are never treated as anything but text.
+  Only headings, lists, bold, code and ordinary links are understood, links only
+  when they point at a real web address, and everything else appears as itself.
+
+---
+
 ## 1.10.0 - 2026-08-17
 
 ### Added

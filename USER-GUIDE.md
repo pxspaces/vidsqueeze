@@ -314,6 +314,10 @@ file, choose WebP or AVIF. If you want PNG but not an enormous one, keep the
 quality below 90: above that VidSqueeze keeps 16 bits of colour per channel,
 which roughly triples the size.
 
+**What is in the new version?** Press **Updates** in the header. When there is one
+to take, the window lists what was fixed and what was added, so you can decide
+before installing rather than afterwards.
+
 **How do I update?** Press **Updates** in the header, then **Update now**. That
 is all: no terminal, no git, no downloading a ZIP again. Your converted files,
 settings and history are left alone, and the previous version is kept in case

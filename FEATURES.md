@@ -262,6 +262,17 @@ anyway.
 The **Updates** button reports two separate things: whether a newer VidSqueeze
 exists, and whether a newer ffmpeg exists. Both can be updated from there.
 
+**When there is a new version, it shows you what is in it.** What was fixed and
+what was added appear in the window, under the version being offered, so you can
+decide before installing rather than afterwards. It stays quiet when you are
+already current, because a list of what you already have is not news.
+
+Those notes arrive from the internet, and the window showing them is the same one
+that can convert and delete your files, so they are never treated as anything but
+text. Headings, lists, bold, code and ordinary links are understood; links only
+when they point at a real web address. Anything else is displayed as itself rather
+than acted on.
+
 **Updating VidSqueeze** needs no terminal and no git knowledge. Press **Update
 now**. A folder cloned with git is updated with git, because that is what
 someone who cloned it will expect; anything else has the newest release
