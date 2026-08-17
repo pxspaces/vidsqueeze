@@ -280,6 +280,15 @@ fault in versions before 1.5.0, where photographs were developed with the wrong
 tone curve and came out darker than they should have been. Update, and convert
 again.
 
+**I need my computer back part way through a big batch.** Press **Pause**, next to
+Stop. The file being worked on finishes, then it waits. Press **Carry on** when you
+are ready. Nothing is lost and the time estimate does not punish you for the break.
+
+**It says some files came out larger.** That is the honest report rather than a
+fault. It happens when the output format does not compress, which usually means
+PNG or TIFF was chosen for photographs. Convert those to JPEG, WebP or AVIF
+instead. From 1.8.0 VidSqueeze warns about this before the batch starts.
+
 **My portrait photographs came out the wrong size, or bigger.** Fixed in 1.6.0.
 Phones and cameras store a portrait photograph as a landscape picture plus a note
 saying which way up it goes, and VidSqueeze was reading the shape and not the

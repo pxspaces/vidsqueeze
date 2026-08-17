@@ -396,6 +396,30 @@ If any check fails the original is kept and the reason is shown.
 
 ---
 
+## Long batches
+
+Sixty files is twenty minutes of the machine being busy, so a batch can be put
+down and picked up again.
+
+**Pause** sits next to Stop while a batch runs, and becomes **Carry on**. The file
+already being worked on finishes rather than being cut off, which would leave a
+half written file behind, so pausing takes effect from the next one. The estimate
+of time remaining does not count the pause against you.
+
+The summary at the end separates the two kinds of success:
+
+```
+Finished. 41 came out smaller, 2.3 GB saved.
+23 came out larger, and would have been better left alone or sent to a format
+that squeezes.
+```
+
+Both numbers matter. A run where most files grew usually means the wrong output
+format was chosen, and one count of "done" hides that completely. The command line
+prints the same breakdown.
+
+---
+
 ## History
 
 What has been converted and how much space has been reclaimed, from the terminal

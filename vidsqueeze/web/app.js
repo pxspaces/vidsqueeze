@@ -1026,6 +1026,7 @@ $('startBtn').addEventListener('click', async () => {
     recursive: $('recursive').checked,
   }).catch(() => {});
   show('cancelBtn', true);
+  show('pauseBtn', true);
   show('resultsFoot', true);
   startPolling();
 });
@@ -1033,6 +1034,15 @@ $('startBtn').addEventListener('click', async () => {
 $('cancelBtn').addEventListener('click', async () => {
   $('cancelBtn').disabled = true;
   await post('/api/queue/cancel').catch(() => {});
+});
+
+$('pauseBtn').addEventListener('click', async () => {
+  // The label reflects what pressing it will do, so read the current state from
+  // the queue rather than from the button.
+  const paused = state.lastTotals && state.lastTotals.paused;
+  $('pauseBtn').disabled = true;
+  await post(paused ? '/api/queue/resume' : '/api/queue/pause').catch(() => {});
+  $('pauseBtn').disabled = false;
 });
 
 function startPolling() {
@@ -1055,13 +1065,16 @@ async function pollQueue() {
   }
 
   const totals = snapshot.totals || {};
+  state.lastTotals = totals;
   const bar = $('overallBar');
   if (bar) bar.style.width = `${(totals.overall_fraction || 0) * 100}%`;
   setText($('resultsTotal'), totals.total
     ? `${totals.completed || 0} of ${totals.total} done` +
-      (totals.running && totals.eta > 0 ? `, about ${formatTime(totals.eta)} left` : '') +
+      (totals.paused ? ', paused' : '') +
+      (totals.running && !totals.paused && totals.eta > 0 ? `, about ${formatTime(totals.eta)} left` : '') +
       (totals.saved_bytes > 0 ? `  ·  ${totals.saved_size} saved` : '')
     : '');
+  $('pauseBtn').textContent = totals.paused ? 'Carry on' : 'Pause';
   show('resultsFoot', !!totals.total);
 
   renderSources();
@@ -1071,8 +1084,15 @@ async function pollQueue() {
   if (finished) {
     clearInterval(state.polling);
     show('cancelBtn', false);
+    show('pauseBtn', false);
     $('cancelBtn').disabled = false;
-    setText($('actionHint'), `Finished. ${totals.saved_size} saved.`);
+    // Two kinds of success. One number hides which one happened.
+    const grew = totals.grew || 0;
+    setText($('actionHint'), grew
+      ? `Finished. ${totals.smaller || 0} came out smaller, ${totals.saved_size} saved. `
+        + `${grew} came out larger, and would have been better left alone or sent to a `
+        + `format that squeezes.`
+      : `Finished. ${totals.saved_size} saved.`);
     api('/api/history').then(renderHistory).catch(() => {});
     if (!state.selectedResult) {
       const first = (snapshot.items || []).find((i) => i.status === 'done');

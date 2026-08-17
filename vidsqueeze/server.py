@@ -425,6 +425,14 @@ class Handler(BaseHTTPRequestHandler):
             self._expectation(body)
         elif route == "/api/queue/start":
             self._start_queue(body)
+        elif route == "/api/queue/pause":
+            if SESSION.queue:
+                SESSION.queue.pause()
+            self._json({"paused": bool(SESSION.queue and SESSION.queue.paused)})
+        elif route == "/api/queue/resume":
+            if SESSION.queue:
+                SESSION.queue.resume()
+            self._json({"paused": bool(SESSION.queue and SESSION.queue.paused)})
         elif route == "/api/queue/cancel":
             if SESSION.queue:
                 SESSION.queue.cancel()

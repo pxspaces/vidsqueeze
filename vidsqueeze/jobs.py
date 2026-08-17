@@ -59,6 +59,11 @@ class QueueItem:
     notes: list[str] = field(default_factory=list)
     result: JobResult | None = None
     source_bytes: int = 0
+    #: Finished, but the new file was no smaller. Worth separating from a real
+    #: saving in the summary: sixty files of which forty grew is a different
+    #: outcome from sixty that all shrank, and reporting them together as
+    #: "succeeded" hides that.
+    grew: bool = False
 
     def to_dict(self) -> dict:
         data = {
@@ -75,6 +80,7 @@ class QueueItem:
             "notes": self.notes,
             "source_bytes": self.source_bytes,
             "source_size": human_size(self.source_bytes) if self.source_bytes else "",
+            "grew": self.grew,
         }
         if self.result is not None:
             data.update(
@@ -122,6 +128,12 @@ class Queue:
 
         self._lock = threading.Lock()
         self._cancel = threading.Event()
+        # Set means "carry on". Pausing waits between files rather than
+        # suspending an encoder part way, which would leave a half written file
+        # and an ffmpeg process in a state nobody wants to reason about.
+        self._carry_on = threading.Event()
+        self._carry_on.set()
+        self._paused_at: float | None = None
         self._workers: list[threading.Thread] = []
         self._file_cancels: dict[int, threading.Event] = {}
         self._next_id = 1
@@ -191,9 +203,35 @@ class Queue:
             worker.start()
         threading.Thread(target=self._await_finish, daemon=True).start()
 
+    @property
+    def paused(self) -> bool:
+        return not self._carry_on.is_set()
+
+    def pause(self) -> None:
+        """Stop taking new files. Whatever is already running finishes.
+
+        Sixty files is twenty minutes of the machine being busy, and sometimes
+        that has to wait. Suspending a running encoder instead would leave a part
+        written file behind, so the current one is allowed to finish.
+        """
+        if not self.paused:
+            self._paused_at = time.time()
+        self._carry_on.clear()
+        self._notify()
+
+    def resume(self) -> None:
+        if self.paused and self._paused_at is not None and self.started_at is not None:
+            # Do not count the pause against the batch, or the estimate of time
+            # remaining is nonsense for the rest of the run.
+            self.started_at += time.time() - self._paused_at
+        self._paused_at = None
+        self._carry_on.set()
+        self._notify()
+
     def cancel(self) -> None:
         """Stop everything, abandoning whatever is part-way through."""
         self._cancel.set()
+        self._carry_on.set()          # so a paused worker wakes up and exits
         with self._lock:
             events = list(self._file_cancels.values())
         for event in events:
@@ -218,6 +256,11 @@ class Queue:
 
     def _work(self) -> None:
         while not self._cancel.is_set():
+            # Wait here rather than while holding a file, so a pause never
+            # interrupts an encoder that is part way through writing.
+            self._carry_on.wait()
+            if self._cancel.is_set():
+                break
             item = self._claim()
             if item is None:
                 break
@@ -257,6 +300,11 @@ class Queue:
             if result.ok:
                 item.status = STATUS_DONE
                 item.fraction = 1.0
+                item.grew = (
+                    result.output_bytes > 0
+                    and result.source_bytes > 0
+                    and result.output_bytes >= result.source_bytes
+                )
                 history.record(
                     source=item.source,
                     output=result.output,
@@ -314,14 +362,19 @@ class Queue:
             elapsed = time.time() - self.started_at
             eta = elapsed / overall - elapsed
 
+        # Two kinds of success, and lumping them together hides the useful one.
+        grew = [i for i in done if i.grew]
         return {
             "total": len(self.items),
             "completed": completed,
             "succeeded": len(done),
+            "smaller": len(done) - len(grew),
+            "grew": len(grew),
             "failed": len([i for i in self.items if i.status == STATUS_FAILED]),
             "cancelled": len([i for i in self.items if i.status == STATUS_CANCELLED]),
             "replaced": len([i for i in done if i.result and i.result.replaced]),
             "running": self.running,
+            "paused": self.paused,
             "concurrency": self.concurrency,
             "overall_fraction": round(overall, 4),
             "eta": round(eta, 1),

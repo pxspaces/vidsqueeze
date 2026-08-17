@@ -329,6 +329,7 @@ def run_batch(tools: deps.Tools, files: list[Path], spec: JobSpec, output_dir: P
     output_dir.mkdir(parents=True, exist_ok=True)
     total_source = total_output = 0
     failures = 0
+    grew = 0
 
     print(f"\nCompressing {len(files)} file{'s' if len(files) != 1 else ''} into {output_dir}\n")
 
@@ -363,6 +364,8 @@ def run_batch(tools: deps.Tools, files: list[Path], spec: JobSpec, output_dir: P
                 elapsed=result.elapsed,
                 replaced=result.replaced,
             )
+            if result.output_bytes >= result.source_bytes > 0:
+                grew += 1
             saved = f"{result.percent_saved:.0f}% smaller" if result.percent_saved > 0 else "no saving"
             replaced = "  original deleted" if result.replaced else ""
             print(f"{prefix}{path.name}")
@@ -384,6 +387,13 @@ def run_batch(tools: deps.Tools, files: list[Path], spec: JobSpec, output_dir: P
             f"{human_size(max(0, saved))} saved"
             f" ({100 * saved / total_source:.0f}%)."
         )
+    # Two kinds of success. Sixty files of which forty grew is a different
+    # outcome from sixty that all shrank, and one number hides which happened.
+    converted = len(files) - failures - grew
+    if grew:
+        print(f"{converted} file{'s' if converted != 1 else ''} came out smaller. "
+              f"{grew} came out larger and would have been better left alone, "
+              f"or converted to a format that squeezes.")
     if failures:
         print(f"{failures} file{'s' if failures != 1 else ''} failed.")
     print(f"Results are in {output_dir}\n")

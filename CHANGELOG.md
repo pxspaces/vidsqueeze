@@ -7,6 +7,24 @@ Dates are the day the change was made.
 
 ---
 
+## 1.10.0 - 2026-08-17
+
+### Added
+
+- **Pause a batch.** Sixty files is twenty minutes of your computer being busy,
+  and sometimes that has to wait. **Pause** appears next to Stop while a batch is
+  running, and **Carry on** starts it again. The file already being worked on is
+  allowed to finish rather than being cut off, which would leave a half written
+  file behind, so pausing takes effect from the next one. The estimate of time
+  remaining does not count the pause against you.
+- **The summary now separates the two kinds of success.** Sixty files of which
+  forty came out larger is a very different outcome from sixty that all shrank,
+  and reporting both as "done" hid which had happened. It now says how many came
+  out smaller and how many came out larger, and suggests what to do about the
+  latter. On the command line too.
+
+---
+
 ## 1.9.0 - 2026-08-17
 
 ### Added
