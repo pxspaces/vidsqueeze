@@ -7,6 +7,45 @@ Dates are the day the change was made.
 
 ---
 
+## 1.5.0 - 2026-08-17
+
+### Fixed
+
+- **Photographs from a camera came out dark and muddy.** Converting a RAW file
+  produced something noticeably flatter and greyer than the same shot rendered
+  by the camera. The decoder was being left on its default tone curve, which is
+  not the one every viewer assumes, so every shadow was rendered darker than it
+  should have been. It is now told explicitly which curve to use, and the
+  difference is plain when the two are put side by side.
+- **RAW files were developed at 8 bits per channel**, throwing away most of what
+  the camera recorded before anything else happened. They are now developed at
+  16, and at a quality setting of 90 or more the extra depth is kept all the way
+  into the finished file.
+- **Lossless was not lossless.** Asking for a lossless WebP produced a file that
+  was neither: colour was thrown away before the encoder ever saw the image, and
+  because that damage does not compress, the result was also about twice the
+  size it should have been. Lossless now reproduces the original exactly.
+- **Colour detail was reduced even at the highest quality.** At a quality of 90
+  or more, JPEG now keeps full colour resolution instead of quartering it.
+- **Converting a RAW file wrote a large temporary file into the folder holding
+  your photographs**, and failed outright if that folder was read only, such as
+  a memory card. Everything temporary is now kept out of the way and cleaned up.
+- **A custom preset giving an exact size in odd numbers** produced an empty file
+  for AV1 and AVIF, with no error. Sizes are now always brought to even numbers.
+
+### Added
+
+- **Image settings on the command line.** `--image-format`, `--image-quality`,
+  `--lossless`, `--max-dimension` and `--background` were previously only
+  reachable in the browser interface, which meant photographs and camera RAW
+  could not be converted from a script. Wrong values are refused with a sentence
+  rather than a stack trace.
+- **A test suite**, in `tests/`. It uses nothing beyond what Python already
+  includes. `python3 -m tests` runs it, and `python3 -m tests --fast` runs the
+  half that needs no ffmpeg.
+
+---
+
 ## 1.4.0 - 2026-08-17
 
 ### Fixed

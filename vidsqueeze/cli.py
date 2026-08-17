@@ -12,14 +12,14 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import deps, history, hwaccel, presets
+from . import deps, history, hwaccel, images, presets
 from .encode import CODEC_LABELS, QUALITY_LABELS, SPEEDS, JobSpec, encode_one
 from .jobs import Queue
 from .paths import OUTPUT_DIR, ensure_dirs, human_duration, human_size
 from .probe import ProbeError, probe
 from .server import expand_selection
 
-VERSION = "1.4.0"
+VERSION = "1.5.0"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -85,6 +85,18 @@ def build_parser() -> argparse.ArgumentParser:
     audio.add_argument("--audio", choices=["opus", "aac", "mp3", "flac", "copy", "none"], help="Audio codec.")
     audio.add_argument("--audio-bitrate", type=int, metavar="KBPS", help="Audio bitrate.")
 
+    stills = parser.add_argument_group("images")
+    stills.add_argument("--image-format", choices=sorted(images.IMAGE_FORMATS),
+                        help="Output format for stills and camera RAW.")
+    stills.add_argument("--image-quality", type=int, metavar="1-100",
+                        help="Still image quality. 90 and above keeps full colour detail.")
+    stills.add_argument("--lossless", action="store_true",
+                        help="Lossless stills. WebP and JPEG XL only.")
+    stills.add_argument("--max-dimension", type=int, metavar="PIXELS",
+                        help="Shrink so the longest side is at most this many pixels.")
+    stills.add_argument("--background", metavar="COLOUR",
+                        help="Background colour when flattening transparency.")
+
     extras = parser.add_argument_group("extras")
     extras.add_argument("--keep-subtitles", action="store_true", help="Carry subtitles across.")
     extras.add_argument("--no-metadata", action="store_true", help="Strip dates and camera information.")
@@ -143,6 +155,26 @@ def spec_from_args(args: argparse.Namespace) -> JobSpec:
         spec.keep_subtitles = True
     if args.no_metadata:
         spec.keep_metadata = False
+
+    if args.image_format:
+        spec.image_format = args.image_format
+    if args.image_quality is not None:
+        if not 1 <= args.image_quality <= 100:
+            raise SystemExit("--image-quality takes a number from 1 to 100.")
+        spec.image_quality = args.image_quality
+    if args.lossless:
+        if args.image_format and args.image_format not in ("webp", "jxl"):
+            raise SystemExit(
+                f"--lossless does not apply to {args.image_format}. "
+                "It is for WebP and JPEG XL. PNG, TIFF and BMP are always lossless."
+            )
+        spec.image_lossless = True
+    if args.max_dimension is not None:
+        if args.max_dimension < 1:
+            raise SystemExit("--max-dimension takes a positive number of pixels.")
+        spec.image_max_dimension = args.max_dimension
+    if args.background:
+        spec.image_background = args.background
 
     return spec
 

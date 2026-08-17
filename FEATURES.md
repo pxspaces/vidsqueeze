@@ -121,6 +121,27 @@ than turning transparent areas black, and VidSqueeze tells you it did so.
 
 Images are never enlarged.
 
+### What quality actually changes
+
+Quality is not only how hard the picture is squeezed. At **90 and above**,
+VidSqueeze stops economising on colour:
+
+| Quality  | Colour detail                  | Photographs from a camera |
+| -------- | ------------------------------ | ------------------------- |
+| below 90 | colour stored at half width    | 8 bits per colour         |
+| 90 or up | colour stored in full          | 16 bits per colour        |
+
+Below 90 the saving is large and the difference is hard to see. At 90 and above
+nothing is economised, which matters for photographs you intend to edit later,
+and makes the files considerably bigger. A 26 megapixel photograph saved as PNG
+is about 36 MB below 90, and about 120 MB above it.
+
+PNG, TIFF and BMP are lossless whatever quality you choose. The setting only
+decides how much colour depth is carried into them.
+
+**Lossless WebP and lossless JPEG XL reproduce the original exactly**, pixel for
+pixel. If you compare the two files with a measuring tool, they are identical.
+
 ---
 
 ## Camera RAW
@@ -139,6 +160,18 @@ therefore looks for a proper decoder and uses the best one installed:
 
 Once developed, the image goes through the ordinary picture pipeline, so every
 setting works exactly as it does for a JPEG.
+
+Whichever decoder is used, VidSqueeze asks it for the camera's own white
+balance, for 16 bits of colour per channel, and for the standard tone curve that
+every image viewer expects. Left to their own defaults these tools use a
+different curve, which nothing records in the file, so every viewer reads the
+result as too dark. That is why a converted photograph used to look flatter and
+greyer than the same shot straight out of the camera.
+
+A neutral development is not the same as the camera's own picture style. Cameras
+apply their own contrast and colour to the JPEGs they produce. VidSqueeze does
+not try to imitate that, because it would be guessing, and because a neutral
+starting point is what you want if you intend to edit the photograph.
 
 **If none of them is installed**, VidSqueeze uses the preview image the camera
 stored inside the RAW file. That needs nothing installed and always produces
@@ -335,9 +368,19 @@ vidsqueeze --dry-run video.mp4      show the command without running it
 vidsqueeze --setup                  download ffmpeg and exit
 ```
 
+Photographs and camera RAW, from a script as well as the interface:
+
+```
+vidsqueeze --image-format png photo.cr2           develop a RAW to PNG
+vidsqueeze --image-format webp --lossless *.png   lossless WebP, exact copies
+vidsqueeze --image-format jpeg --image-quality 95 *.tif
+vidsqueeze --image-format avif --max-dimension 2048 ~/Pictures
+```
+
 Flags: `--codec --container --quality --crf --size --bitrate --speed --scale
 --fps --trim-start --trim-end --audio --audio-bitrate --hardware --replace
 --10bit --denoise --deinterlace --no-tonemap --keep-subtitles --no-metadata
+--image-format --image-quality --lossless --max-dimension --background
 --browser --port --no-browser --no-download -o -p`
 
 ---

@@ -259,6 +259,25 @@ installed, so VidSqueeze used the preview picture your camera stored inside the
 file. It tells you when this happens, and names the command to fix it. Install
 that and convert again for full quality.
 
+**My photographs look flatter than the camera's own JPEG.** They should look
+correct, but they will not be identical. Your camera adds its own contrast and
+colour to the JPEGs it makes. A RAW file is what the sensor recorded, and
+VidSqueeze develops it plainly rather than imitating a look. The result holds
+more detail in the brightest and darkest parts, which is what you want if you
+are going to edit it. There is more on this in
+[Working with photos and images](docs/GUIDE-IMAGES.md).
+
+**My converted picture looks dark or muddy.** It should not. This was a genuine
+fault in versions before 1.5.0, where photographs were developed with the wrong
+tone curve and came out darker than they should have been. Update, and convert
+again.
+
+**The PNG came out bigger than the original.** PNG never throws anything away,
+so it is often larger than a camera file, which does. If you want a smaller
+file, choose WebP or AVIF. If you want PNG but not an enormous one, keep the
+quality below 90: above that VidSqueeze keeps 16 bits of colour per channel,
+which roughly triples the size.
+
 **How do I update?** Press **Updates** in the header, then **Update now**. That
 is all: no terminal, no git, no downloading a ZIP again. Your converted files,
 settings and history are left alone, and the previous version is kept in case

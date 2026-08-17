@@ -38,13 +38,27 @@ if you are unsure.
 The quality slider runs 1 to 100 and is translated onto whatever scale the
 chosen format actually uses, so 80 means roughly the same thing everywhere.
 
-- **90 and above**: no visible difference, larger files
+- **90 and above**: no visible difference, larger files, and full colour
 - **75 to 85**: the sensible range for photographs, and the default
 - **60 to 75**: acceptable for previews and thumbnails
 - **below 60**: visible blotches, especially in skies and skin
 
-PNG, TIFF and BMP have no quality dial: they are lossless, so the slider
-disappears.
+**90 is a real threshold, not just a number.** Below it, VidSqueeze stores
+colour at half width, which is what almost every photograph on the internet
+does and is very hard to see. At 90 and above it stops doing that and keeps
+colour in full. If you are going to edit the picture afterwards, or it has fine
+coloured detail such as text or a logo on a strong background, use 90 or more.
+
+For photographs from a camera, 90 and above also keeps 16 bits of colour per
+channel instead of 8. That is a large difference in file size and no difference
+at all to the naked eye, but it is what lets you lift shadows later without the
+sky turning into bands.
+
+PNG, TIFF and BMP are always lossless, so there is nothing to lose by squeezing
+them. For those the quality setting only decides how much colour depth is kept:
+below 90 they are written at 8 bits per channel, which is what screens show and
+what every program reads. This is why a photograph converted to PNG is around
+36 MB at the default and around 120 MB at 95.
 
 ---
 
@@ -107,6 +121,23 @@ A note on expectations: this is a conversion, not a RAW editor. VidSqueeze
 develops the file with sensible defaults. Recovering blown highlights or
 changing white balance needs a proper RAW editor such as darktable or
 RawTherapee, both of which are free.
+
+### Why it does not look identical to the camera's own JPEG
+
+It should look correct, and it should not look dark or muddy. If it does, that
+is a fault worth reporting. But it will not be pixel for pixel the same as the
+JPEG your camera produces, and that is deliberate.
+
+Your camera applies its own look to the JPEGs it makes: extra contrast, a little
+more colour, and its manufacturer's idea of how skin should appear. That look is
+a choice, not the photograph. A RAW file is what the sensor actually recorded,
+and VidSqueeze develops it plainly, without adding a look of its own.
+
+The practical difference is that a VidSqueeze conversion usually appears very
+slightly flatter than the camera's JPEG, and holds more detail in the brightest
+and darkest parts. That is the better starting point if you plan to edit it. If
+you would rather have the camera's look, use the JPEG your camera already made,
+or develop the RAW in darktable or RawTherapee where you can pick a style.
 
 ---
 

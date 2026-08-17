@@ -139,6 +139,10 @@ vidsqueeze --terminal               step-by-step questions instead of flags
 vidsqueeze --list-presets           show every preset
 vidsqueeze --info video.mp4         describe a file without changing it
 vidsqueeze --dry-run video.mp4      show the command without running it
+
+vidsqueeze --image-format png photo.cr2               develop a camera RAW
+vidsqueeze --image-format webp --lossless picture.png an exact, smaller copy
+vidsqueeze --image-format jpeg --image-quality 95 *.tif
 ```
 
 Run it as `python3 -m vidsqueeze` from inside the folder, or use the launcher.
@@ -173,6 +177,17 @@ ffmpeg does the encoding. VidSqueeze builds the command, runs it, reads its
 progress, and checks the result.
 
 Nothing is uploaded anywhere. The only network access is downloading ffmpeg.
+
+There is a test suite, which also needs nothing installed:
+
+```
+python3 -m tests            everything
+python3 -m tests --fast     the half that does not need ffmpeg
+```
+
+Some of it builds ffmpeg commands and checks them. The rest converts a generated
+test picture and measures the result, because a setting that looks right in a
+command can still ruin the image, and only measuring catches that.
 
 ---
 

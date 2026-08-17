@@ -332,10 +332,22 @@ def output_duration(spec: JobSpec, info: MediaInfo) -> float:
 # --------------------------------------------------------------------------
 
 
+def _even(value: int) -> int:
+    """Round down to an even number, never below 2.
+
+    Subsampled formats refuse odd dimensions. AVIF and AV1 do not refuse them
+    loudly: they write a file of zero length and report success.
+    """
+    return max(2, int(value) - (int(value) % 2))
+
+
 def _scaled_dimensions(spec: JobSpec, info: MediaInfo) -> tuple[int, int] | None:
     """Work out the exact output size, keeping the aspect ratio and even numbers."""
     if spec.scale_exact:
-        return spec.scale_exact
+        # Even here, where the size was asked for explicitly. A custom preset
+        # may name an odd number, and AV1 and AVIF answer an odd dimension by
+        # writing an empty file and reporting success.
+        return _even(spec.scale_exact[0]), _even(spec.scale_exact[1])
     if not spec.scale or not info.display_width or not info.display_height:
         return None
 

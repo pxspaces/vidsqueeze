@@ -17,6 +17,7 @@ reported as such rather than passed off as a real conversion.
 
 from __future__ import annotations
 
+import shutil
 import struct
 import subprocess
 from dataclasses import dataclass
@@ -24,6 +25,22 @@ from pathlib import Path
 
 from .deps import _no_window
 from .paths import system_key
+
+#: Flags for dcraw and for LibRaw's dcraw_emu, which takes the same ones.
+#:
+#:   -w            the camera's own white balance, rather than one guessed from
+#:                 the image. Without it, colour is wrong from the first step.
+#:   -6            16 bit output. The default is 8, which throws away most of
+#:                 what a 14 bit sensor recorded before anything else happens.
+#:   -q 3          the best demosaic these tools offer.
+#:   -o 1          sRGB output primaries.
+#:   -g 2.4 12.92  a real sRGB transfer curve. The default is BT.709, 2.222 4.5.
+#:                 Nothing tags the result, so every viewer reads it as sRGB and
+#:                 renders the shadows too dark. This one flag is the difference
+#:                 between a flat, muddy conversion and one that looks like the
+#:                 photograph the camera took.
+#:   -T            write TIFF rather than PPM.
+DEVELOP_FLAGS = ["-w", "-6", "-q", "3", "-o", "1", "-g", "2.4", "12.92", "-T"]
 
 #: Formats produced by digital cameras. Not every decoder reads every one, but
 #: LibRaw and ImageMagick between them cover all of these.
@@ -83,9 +100,26 @@ def camera_of(path: Path | str) -> str:
 
 
 def _which(name: str) -> str | None:
-    import shutil
-
     return shutil.which(name)
+
+
+def _stage(source: Path, workdir: Path) -> Path:
+    """Put the RAW somewhere the decoder may safely write beside it.
+
+    dcraw and LibRaw write their result next to their input, under the input
+    name with a suffix added. Run them on the user's own file and they drop a
+    large TIFF into the user's photo folder, and fail outright if that folder is
+    read only or on a card that has been unmounted. A link inside the working
+    directory costs nothing and keeps everything we produce in one place.
+    """
+    staged = workdir / f"staged{source.suffix}"
+    staged.unlink(missing_ok=True)
+    try:
+        staged.symlink_to(source.resolve())
+    except (OSError, NotImplementedError, AttributeError):
+        # Windows without developer mode, or a filesystem with no links.
+        shutil.copy2(source, staged)
+    return staged
 
 
 def find_decoder() -> Decoder | None:
@@ -196,11 +230,14 @@ def _develop_with(decoder: Decoder, source: Path, target: Path) -> tuple[bool, s
         return ok, problem
 
     if name == "dcraw_emu":
-        # LibRaw's tool appends its own suffix to the input name.
-        ok, problem = _run([name, "-T", "-w", str(source)])
+        # LibRaw's tool writes beside its input, so give it a staged copy and
+        # let it litter the working directory instead of the user's folder.
+        staged = _stage(source, target.parent)
+        ok, problem = _run([name, *DEVELOP_FLAGS, str(staged)])
         if ok:
-            for candidate in (source.with_suffix(source.suffix + ".tiff"),
-                              source.with_suffix(".tiff")):
+            # It appends its own suffix to the name it was given.
+            for candidate in (staged.with_suffix(staged.suffix + ".tiff"),
+                              staged.with_suffix(".tiff")):
                 if candidate.exists():
                     candidate.replace(target)
                     return True, ""
@@ -208,10 +245,11 @@ def _develop_with(decoder: Decoder, source: Path, target: Path) -> tuple[bool, s
         return ok, problem
 
     if name == "dcraw":
+        # dcraw can write to stdout, so it needs no staging.
         try:
             with open(target, "wb") as handle:
                 result = subprocess.run(
-                    [name, "-T", "-w", "-c", str(source)],
+                    [name, *DEVELOP_FLAGS, "-c", str(source)],
                     stdout=handle, stderr=subprocess.PIPE, timeout=300, **_no_window(),
                 )
         except (OSError, subprocess.SubprocessError) as exc:
@@ -221,8 +259,9 @@ def _develop_with(decoder: Decoder, source: Path, target: Path) -> tuple[bool, s
         return True, ""
 
     if name in ("magick", "convert"):
-        command = [name, str(source), str(target)] if name == "convert" else [name, str(source), str(target)]
-        return _run(command)
+        # Both take the same arguments here. Ask for the depth and the colour
+        # space explicitly, because the defaults vary between builds.
+        return _run([name, str(source), "-depth", "16", "-colorspace", "sRGB", str(target)])
 
     return False, "unknown decoder"
 
