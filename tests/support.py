@@ -90,6 +90,53 @@ def make_test_image(target: Path, size="640x480") -> Path:
     return target
 
 
+#: A minimal EXIF block carrying nothing but an orientation, ready to be spliced
+#: in after a JPEG's start marker. Little endian TIFF, one IFD entry, tag 0x0112.
+def exif_orientation_block(orientation: int) -> bytes:
+    tiff = (b"II\x2a\x00\x08\x00\x00\x00"          # header, IFD0 at offset 8
+            b"\x01\x00"                            # one entry
+            b"\x12\x01" b"\x03\x00" b"\x01\x00\x00\x00"   # tag, SHORT, count 1
+            + orientation.to_bytes(2, "little") + b"\x00\x00"
+            + b"\x00\x00\x00\x00")                 # no next IFD
+    payload = b"Exif\x00\x00" + tiff
+    return b"\xff\xe1" + (len(payload) + 2).to_bytes(2, "big") + payload
+
+
+def make_oriented_jpeg(target: Path, orientation: int, size="800x400") -> Path:
+    """A JPEG whose EXIF says it should be displayed rotated.
+
+    ffmpeg's decoder honours this and hands back a rotated frame, while ffprobe
+    reports the dimensions as stored. Anything reasoning about the shape of an
+    image has to agree with the decoder, not with the container.
+    """
+    kit = tools()
+    plain = target.with_name(target.stem + "-plain.jpg")
+    subprocess.run(
+        [str(kit.ffmpeg), "-hide_banner", "-loglevel", "error", "-y",
+         "-f", "lavfi", "-i", f"testsrc2=size={size}:duration=1:rate=1",
+         "-frames:v", "1", "-update", "1", str(plain)],
+        check=True,
+    )
+    data = plain.read_bytes()
+    target.write_bytes(data[:2] + exif_orientation_block(orientation) + data[2:])
+    plain.unlink(missing_ok=True)
+    return target
+
+
+def decoded_size(path: Path) -> tuple:
+    """The size ffmpeg actually decodes to, which is the size that matters."""
+    kit = tools()
+    result = subprocess.run(
+        [str(kit.ffmpeg), "-hide_banner", "-i", str(path), "-f", "null", "-"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, errors="replace",
+    )
+    import re
+    matches = re.findall(r"wrapped_avframe.*?(\d+)x(\d+)", result.stderr or "")
+    if not matches:
+        raise AssertionError(f"could not read a decoded size:\n{result.stderr}")
+    return int(matches[-1][0]), int(matches[-1][1])
+
+
 def psnr(reference: Path, candidate: Path) -> float:
     """Average PSNR of candidate against reference, in dB.
 

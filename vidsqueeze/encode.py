@@ -12,7 +12,7 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Callable, Iterator
 
-from . import hwaccel, images, raw
+from . import hwaccel, images, metadata, raw
 from .deps import Tools, _no_window
 from .images import ImageError, ImageSpec
 from .probe import MediaInfo, ProbeError, probe
@@ -865,6 +865,15 @@ def encode_image(
         return JobResult(source=info.path, output=None, ok=False,
                          message=_friendly_error(result.stderr or ""),
                          source_bytes=info.size_bytes, command=command)
+
+    # ffmpeg writes pixels and nothing else for stills, so the camera, the lens
+    # and the date the photograph was taken have to be carried over separately.
+    # `named_after` rather than `info.path`: for a RAW the details live in the
+    # file the user chose, not in the temporary image developed from it.
+    if spec.keep_metadata:
+        note = metadata.carry(named_after, output)
+        if note and on_note:
+            on_note(note)
 
     output_bytes = output.stat().st_size
     try:

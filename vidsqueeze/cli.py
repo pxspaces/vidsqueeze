@@ -12,14 +12,17 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import deps, history, hwaccel, images, presets
+from . import __version__, deps, history, hwaccel, images, presets
 from .encode import CODEC_LABELS, QUALITY_LABELS, SPEEDS, JobSpec, encode_one
 from .jobs import Queue
 from .paths import OUTPUT_DIR, ensure_dirs, human_duration, human_size
 from .probe import ProbeError, probe
 from .server import expand_selection
 
-VERSION = "1.5.0"
+#: The version lives in __init__.py and nowhere else. It was once written here
+#: as well, and the two drifted apart, so the command line announced a new
+#: version while the interface and the update check still reported the old one.
+VERSION = __version__
 
 
 def build_parser() -> argparse.ArgumentParser:

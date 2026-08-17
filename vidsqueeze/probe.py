@@ -72,6 +72,7 @@ class MediaInfo:
     pix_fmt: str = ""
     bit_depth: int = 8
     rotation: int = 0
+    exif_orientation: int = 0          # 1 to 8 for stills, 0 when absent
     color_transfer: str = ""
     color_primaries: str = ""
     video_bitrate: int = 0
@@ -294,7 +295,102 @@ def probe(tools: Tools, path: Path | str) -> MediaInfo:
     if not info.has_video and not info.has_audio:
         raise ProbeError(f"{path.name} contains no video or audio")
 
+    # Stills carry their rotation in EXIF, which ffprobe reports nowhere: no
+    # tag, no side data, and the dimensions given as stored. The decoder rotates
+    # anyway, so without this the rest of the program disagrees with ffmpeg
+    # about which side of a sideways photograph is the long one.
+    if info.is_image and not info.rotation:
+        info.exif_orientation = _exif_orientation(path)
+        if info.exif_orientation in SWAPPING_ORIENTATIONS:
+            info.rotation = 90
+
     return info
+
+
+#: EXIF orientations that put the long side the other way round. The mirrored
+#: ones matter here too: 5 and 7 are a flip *and* a quarter turn.
+SWAPPING_ORIENTATIONS = frozenset({5, 6, 7, 8})
+
+#: The EXIF tag holding the orientation.
+_ORIENTATION_TAG = 0x0112
+
+
+def _exif_orientation(path: Path) -> int:
+    """The EXIF orientation of a still, 1 to 8, or 0 when there is none.
+
+    Written out by hand rather than pulled from a library, because the program
+    has no third-party dependencies and this is a few dozen lines. It reads by
+    seeking rather than loading the file, so it costs nothing on a 30 MB RAW.
+    """
+    try:
+        with open(path, "rb") as handle:
+            start = handle.read(2)
+            if start == b"\xff\xd8":                    # JPEG
+                base = _jpeg_exif_offset(handle)
+                return _tiff_orientation(handle, base) if base is not None else 0
+            if start in (b"II", b"MM"):                 # TIFF, and most RAW
+                return _tiff_orientation(handle, 0)
+    except OSError:
+        return 0
+    return 0
+
+
+def _jpeg_exif_offset(handle) -> int | None:
+    """Walk a JPEG's markers to the start of its EXIF block."""
+    handle.seek(2)
+    while True:
+        marker = handle.read(2)
+        if len(marker) < 2 or marker[0] != 0xFF:
+            return None
+        kind = marker[1]
+        if kind in (0xD8, 0x01) or 0xD0 <= kind <= 0xD7:
+            continue                                    # no payload
+        if kind in (0xDA, 0xD9):
+            return None                                 # image data, too late
+        size = handle.read(2)
+        if len(size) < 2:
+            return None
+        length = int.from_bytes(size, "big")
+        if kind == 0xE1:
+            if handle.read(6) == b"Exif\x00\x00":
+                return handle.tell()
+            handle.seek(length - 8, 1)
+        else:
+            handle.seek(length - 2, 1)
+
+
+def _tiff_orientation(handle, base: int) -> int:
+    """Read the orientation out of a TIFF header and its first directory."""
+    handle.seek(base)
+    header = handle.read(8)
+    if len(header) < 8:
+        return 0
+    if header[:2] == b"II":
+        order = "little"
+    elif header[:2] == b"MM":
+        order = "big"
+    else:
+        return 0
+    if int.from_bytes(header[2:4], order) != 42:
+        return 0
+
+    first = int.from_bytes(header[4:8], order)
+    if first < 8:
+        return 0
+    handle.seek(base + first)
+    entries = handle.read(2)
+    if len(entries) < 2:
+        return 0
+
+    # A bound on the loop: a corrupt count should not send us reading forever.
+    for _ in range(min(int.from_bytes(entries, order), 512)):
+        entry = handle.read(12)
+        if len(entry) < 12:
+            return 0
+        if int.from_bytes(entry[0:2], order) == _ORIENTATION_TAG:
+            value = int.from_bytes(entry[8:10], order)
+            return value if 1 <= value <= 8 else 0
+    return 0
 
 
 #: Pixel formats that carry transparency. Flattening onto a background is only

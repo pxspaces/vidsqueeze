@@ -70,6 +70,28 @@ side to 2560 typically removes most of the file size without any visible loss.
 
 Images are **never enlarged**, so setting 2560 on a small image leaves it alone.
 
+This works properly for portrait photographs too. A phone or camera almost always
+stores a portrait shot as a landscape picture with a note attached saying to turn
+it, and a program that reads the shape without reading the note will shrink the
+wrong side. VidSqueeze reads the note, so "longest side" means the side you
+actually see.
+
+---
+
+## What is kept with the photograph
+
+Converting keeps the details your camera recorded: the camera and lens, the
+exposure, the aperture, the ISO, and when the photograph was taken. The date taken
+also becomes the date on the file, so a shoot stays in order in any folder sorted
+by time. That last part matters more than it sounds: without it, converting a
+whole shoot leaves every picture stamped with the same day, and the order they
+were taken in is gone.
+
+JPEG keeps all of it. PNG, WebP, AVIF, TIFF and BMP keep the date.
+
+If you are sharing photographs and would rather not include any of this, tick
+**Strip dates and camera information**, which removes the lot.
+
 ---
 
 ## Transparency

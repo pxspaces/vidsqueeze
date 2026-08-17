@@ -119,7 +119,28 @@ Transparency is preserved wherever the target format supports it. Where it does
 not, such as JPEG, the image is composited onto your chosen background rather
 than turning transparent areas black, and VidSqueeze tells you it did so.
 
-Images are never enlarged.
+Images are never enlarged. This includes photographs taken with the camera
+turned sideways, which are stored as a landscape picture plus a note saying
+which way up they go. VidSqueeze reads the note, so a portrait photograph is
+measured on the side you actually see.
+
+### The camera, the lens and the date are kept
+
+Converting a photograph keeps the details recorded with it: the camera and lens,
+the exposure, the aperture, the ISO, and the date and time it was taken. The date
+taken also becomes the date on the file, so a shoot stays in the right order in
+any folder sorted by time.
+
+| Target                         | What is kept                        |
+| ------------------------------ | ----------------------------------- |
+| JPEG                           | Everything above                    |
+| PNG, WebP, AVIF, TIFF, BMP     | The date it was taken               |
+
+This matters most for camera RAW, where previously none of it survived and every
+converted photograph was stamped with the day it was converted.
+
+**Strip dates and camera information** removes all of it, for photographs you
+intend to share.
 
 ### What quality actually changes
 

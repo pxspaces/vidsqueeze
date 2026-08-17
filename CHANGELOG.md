@@ -7,6 +7,32 @@ Dates are the day the change was made.
 
 ---
 
+## 1.6.0 - 2026-08-17
+
+### Fixed
+
+- **Update checking reported the wrong version, and said you were up to date
+  when you were not.** The version number was written down in two places, and
+  they drifted apart: the command line announced the new version while the
+  window and the update check still reported the old one. There is now one
+  place it is written, and the program refuses to build if a second appears.
+- **Photographs taken with the camera turned sideways were made bigger, not
+  smaller.** Almost every phone and camera stores a portrait photograph as a
+  landscape picture plus a note saying which way up it goes. VidSqueeze was
+  reading the stored shape and not the note, so it shrank the wrong side.
+  Asking for a longest side of 500 pixels gave back a picture 1000 pixels tall,
+  four times the size of the original, and broke the promise that images are
+  never enlarged. It now reads the note.
+- **Converting a photograph threw away the camera, the lens, the exposure and
+  the date it was taken.** The converted file was stamped with the day it was
+  converted, so a folder of holiday pictures lost the order it was taken in.
+  This was worst for camera RAW, where none of it survived at all. The details
+  are now carried across, and the date the photograph was taken becomes the
+  date on the file, so a shoot stays in order in any folder sorted by time.
+  JPEG keeps the full set of details. Other formats keep the date.
+
+---
+
 ## 1.5.0 - 2026-08-17
 
 ### Fixed

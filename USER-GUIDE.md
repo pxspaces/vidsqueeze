@@ -272,6 +272,23 @@ fault in versions before 1.5.0, where photographs were developed with the wrong
 tone curve and came out darker than they should have been. Update, and convert
 again.
 
+**My portrait photographs came out the wrong size, or bigger.** Fixed in 1.6.0.
+Phones and cameras store a portrait photograph as a landscape picture plus a note
+saying which way up it goes, and VidSqueeze was reading the shape and not the
+note, so it shrank the wrong side. Update and convert again.
+
+**The date on my converted photographs is today, not when I took them.** Fixed in
+1.6.0. The date the photograph was taken is now kept, and becomes the date on the
+file, so a shoot stays in order. Camera and lens details are kept too, in JPEG.
+If you would rather they were not, tick **Strip dates and camera information**.
+
+**Updates says I am up to date but I know there is a newer version.** Press
+**Check again** in the Updates window, which ignores the saved answer from the
+last few hours. Versions before 1.6.0 could also report the wrong version number
+for themselves, so if you are on 1.5.0 or earlier and the button will not offer
+anything, update by pulling with git, or download the newest copy from the
+project page.
+
 **The PNG came out bigger than the original.** PNG never throws anything away,
 so it is often larger than a camera file, which does. If you want a smaller
 file, choose WebP or AVIF. If you want PNG but not an enormous one, keep the
