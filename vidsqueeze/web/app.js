@@ -293,6 +293,9 @@ function buildImageForm() {
     .map(([key, spec]) => [key, spec.label]);
   fillSelect($('imageFormat'), entries, 'jpeg');
   $('imageFormat').addEventListener('change', syncImageForm);
+  $('imageLossless').addEventListener('change', syncImageForm);
+  // Once the size has been set deliberately, stop rearranging it underneath.
+  $('imageMaxDimension').addEventListener('change', () => { state.sizeTouched = true; });
   $('imageQuality').addEventListener('input', () => {
     setText($('imageQualityValue'), $('imageQuality').value);
   });
@@ -307,9 +310,24 @@ function syncImageForm() {
   const losslessCapable = key === 'webp' || key === 'jxl';
   show('imageLosslessRow', losslessCapable);
   if (!losslessCapable) $('imageLossless').checked = false;
-  // Formats with no quality dial at all.
-  const hasQuality = !['png', 'tiff', 'bmp'].includes(key) && !$('imageLossless').checked;
+
+  // PNG and TIFF are always lossless, so quality is not about how hard they are
+  // squeezed. It decides how much colour depth is carried in: 90 and above keeps
+  // all 16 bits of a developed RAW, below it keeps 8. Hiding the dial for these
+  // meant the interface could never ask for a full depth PNG at all.
+  const depthOnly = key === 'png' || key === 'tiff';
+  const hasQuality = key !== 'bmp' && !$('imageLossless').checked;
   show('imageQualityField', hasQuality);
+  setText($('imageQualityHint'), depthOnly
+    ? 'Lossless either way. 90 and above keeps full colour depth, which is much larger.'
+    : '');
+
+  // Choosing a lossless format is a request for fidelity, so stop quietly
+  // halving the resolution. Shown as a change to the control rather than done
+  // behind the user's back, so it can be set back.
+  const wantsFidelity = depthOnly || $('imageLossless').checked;
+  if (wantsFidelity && !state.sizeTouched) $('imageMaxDimension').value = '';
+
   show('imageBackgroundField', !spec.alpha);
 }
 
@@ -387,6 +405,7 @@ function applySpec(spec) {
   $('imageLossless').checked = !!spec.image_lossless;
   $('imageMaxDimension').value = spec.image_max_dimension ? String(spec.image_max_dimension) : '';
   $('imageBackground').value = spec.image_background || 'white';
+  $('rawLook').value = spec.raw_look || 'natural';
 
   syncQualityMode();
   syncImageForm();
@@ -421,6 +440,7 @@ function readSpec() {
     image_lossless: $('imageLossless').checked,
     image_max_dimension: num('imageMaxDimension'),
     image_background: $('imageBackground').value,
+    raw_look: $('rawLook').value,
   };
 }
 

@@ -42,6 +42,40 @@ from .paths import system_key
 #:   -T            write TIFF rather than PPM.
 DEVELOP_FLAGS = ["-w", "-6", "-q", "3", "-o", "1", "-g", "2.4", "12.92", "-T"]
 
+#: How a developed RAW should look.
+#:
+#: A RAW file is what the sensor recorded, not a photograph. Something has to
+#: decide how bright it is and how strong its colour is, and a decoder left to
+#: itself decides "not very", because it is being faithful to the sensor rather
+#: than to the scene. The result is correct and looks flat and grey next to the
+#: same shot rendered by the camera, which is not what somebody converting a
+#: holiday photograph wants.
+NATURAL = "natural"     # looks like the photograph. The default.
+NEUTRAL = "neutral"     # flat and faithful, for editing afterwards
+LOOKS = (NATURAL, NEUTRAL)
+
+#: The natural look, arrived at by measuring rather than by taste.
+#:
+#: Two photographs in very different light were rendered by the operating
+#: system's own RAW pipeline, and these are the values that bring a plain
+#: develop closest to it without clipping any highlight. Brightness lands within
+#: 8 per cent on both, and colour within 8 per cent on one and 3 on the other.
+#: Values that matched one photograph exactly overshot the other by 15 per cent,
+#: which is what tuning against a single image buys you.
+NATURAL_BRIGHTNESS = "1.4"      # given to the decoder, before the tone curve
+NATURAL_SATURATION = 1.30       # applied afterwards; no decoder here can do it
+
+
+def saturation_for(look: str) -> float:
+    """How much colour to add after developing, 1.0 meaning none."""
+    return NATURAL_SATURATION if look == NATURAL else 1.0
+
+
+def _flags_for(look: str) -> list[str]:
+    if look == NATURAL:
+        return DEVELOP_FLAGS + ["-b", NATURAL_BRIGHTNESS]
+    return DEVELOP_FLAGS
+
 #: Formats produced by digital cameras. Not every decoder reads every one, but
 #: LibRaw and ImageMagick between them cover all of these.
 RAW_EXTENSIONS = {
@@ -174,7 +208,8 @@ def _run(command: list[str], timeout: int = 300) -> tuple[bool, str]:
     return True, ""
 
 
-def develop(source: Path, workdir: Path, decoder: Decoder | None = None) -> tuple[Path, str]:
+def develop(source: Path, workdir: Path, decoder: Decoder | None = None,
+            look: str = NATURAL) -> tuple[Path, str]:
     """Turn a RAW file into an ordinary image.
 
     Returns the developed file and a note describing how it was produced. Falls
@@ -187,7 +222,7 @@ def develop(source: Path, workdir: Path, decoder: Decoder | None = None) -> tupl
     decoder = decoder or find_decoder()
 
     if decoder is not None:
-        ok, problem = _develop_with(decoder, source, target)
+        ok, problem = _develop_with(decoder, source, target, look)
         if ok and target.exists() and target.stat().st_size > 1024:
             return target, f"Developed with {decoder.label}."
         # A decoder that is present but fails on this particular file should
@@ -211,9 +246,11 @@ def develop(source: Path, workdir: Path, decoder: Decoder | None = None) -> tupl
     )
 
 
-def _develop_with(decoder: Decoder, source: Path, target: Path) -> tuple[bool, str]:
+def _develop_with(decoder: Decoder, source: Path, target: Path,
+                  look: str = NATURAL) -> tuple[bool, str]:
     """Run one decoder. Each has its own idea of how to be told where to write."""
     name = decoder.name
+    flags = _flags_for(look)
 
     if name == "darktable-cli":
         return _run([name, str(source), str(target)])
@@ -233,7 +270,7 @@ def _develop_with(decoder: Decoder, source: Path, target: Path) -> tuple[bool, s
         # LibRaw's tool writes beside its input, so give it a staged copy and
         # let it litter the working directory instead of the user's folder.
         staged = _stage(source, target.parent)
-        ok, problem = _run([name, *DEVELOP_FLAGS, str(staged)])
+        ok, problem = _run([name, *flags, str(staged)])
         if ok:
             # It appends its own suffix to the name it was given.
             for candidate in (staged.with_suffix(staged.suffix + ".tiff"),
@@ -249,7 +286,7 @@ def _develop_with(decoder: Decoder, source: Path, target: Path) -> tuple[bool, s
         try:
             with open(target, "wb") as handle:
                 result = subprocess.run(
-                    [name, *DEVELOP_FLAGS, "-c", str(source)],
+                    [name, *flags, "-c", str(source)],
                     stdout=handle, stderr=subprocess.PIPE, timeout=300, **_no_window(),
                 )
         except (OSError, subprocess.SubprocessError) as exc:

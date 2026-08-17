@@ -1035,14 +1035,25 @@ _LIMITS = {
 }
 
 
-def _spec_from_request(raw: dict) -> JobSpec:
-    """Build a JobSpec from the interface, ignoring anything unexpected."""
+#: Fields the program works out for itself. The interface has no business
+#: setting them, and letting it would mean a stray value in a request could
+#: quietly wreck the colour of every picture in a batch.
+_INTERNAL_FIELDS = frozenset({"image_saturation"})
+
+
+def _spec_from_request(body: dict) -> JobSpec:
+    """Build a JobSpec from the interface, ignoring anything unexpected.
+
+    The argument is deliberately not called `raw`: that is the name of the
+    camera RAW module, imported at the top of this file, and shadowing it here
+    made `raw.LOOKS` a puzzling AttributeError.
+    """
     spec = JobSpec()
     defaults = JobSpec()
     annotations = {f.name: str(f.type) for f in fields(JobSpec)}
 
-    for key, value in (raw or {}).items():
-        if key not in annotations:
+    for key, value in (body or {}).items():
+        if key not in annotations or key in _INTERNAL_FIELDS:
             continue
         coerced = _coerce(value, annotations[key], getattr(defaults, key))
         if coerced is not None and key in _LIMITS:
@@ -1060,6 +1071,8 @@ def _spec_from_request(raw: dict) -> JobSpec:
         spec.quality_mode = defaults.quality_mode
     if spec.image_format not in images.IMAGE_FORMATS:
         spec.image_format = defaults.image_format
+    if spec.raw_look not in raw.LOOKS:
+        spec.raw_look = defaults.raw_look
 
     return spec
 

@@ -8,6 +8,7 @@ a flag here, so it can be scripted or run over SSH.
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import shutil
 import sys
 from pathlib import Path
@@ -99,12 +100,34 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Shrink so the longest side is at most this many pixels.")
     stills.add_argument("--background", metavar="COLOUR",
                         help="Background colour when flattening transparency.")
+    stills.add_argument("--raw-look", choices=["natural", "neutral"],
+                        help="How a camera RAW should look: natural, like the "
+                             "photograph, or neutral and flat for editing.")
 
     extras = parser.add_argument_group("extras")
     extras.add_argument("--keep-subtitles", action="store_true", help="Carry subtitles across.")
     extras.add_argument("--no-metadata", action="store_true", help="Strip dates and camera information.")
 
     return parser
+
+
+def _looks_like_still(tools, path: Path) -> bool:
+    """Whether a file would take the picture route rather than the video one."""
+    try:
+        return probe(tools, path).is_image
+    except ProbeError:
+        return False
+
+
+def _assumed_shape(path: Path):
+    """A stand-in for a RAW's shape, which cannot be measured until it is
+    developed. Only the dry run needs this: it prints a command rather than
+    running one, and the size only affects whether a resize is added."""
+    from .probe import MediaInfo
+
+    return MediaInfo(path=path, size_bytes=0, duration=0.0, container="tiff_pipe",
+                     has_video=True, has_audio=False, width=6000, height=4000,
+                     frame_count=1)
 
 
 def spec_from_args(args: argparse.Namespace) -> JobSpec:
@@ -178,6 +201,8 @@ def spec_from_args(args: argparse.Namespace) -> JobSpec:
         spec.image_max_dimension = args.max_dimension
     if args.background:
         spec.image_background = args.background
+    if args.raw_look:
+        spec.raw_look = args.raw_look
 
     return spec
 
@@ -372,9 +397,41 @@ def main(argv: list[str] | None = None) -> int:
     output_dir = Path(args.output).expanduser() if args.output else OUTPUT_DIR
 
     if args.dry_run:
-        from .encode import build_command, choose_encoder, normalise, uses_two_pass
+        from . import raw
+        from .encode import (build_command, choose_encoder, image_spec_of, normalise,
+                             uses_two_pass)
+        from .images import build_command as build_image_command
+        from .images import output_name
 
         for path in files:
+            # Stills and camera RAW never touch the video pipeline, so showing a
+            # video command for them is not a preview of anything. This printed
+            # an H.265 command for a photograph, which was worse than useless.
+            if raw.is_raw(path):
+                print(f"# {path.name} is a {raw.camera_of(path)} RAW file.")
+                decoder = raw.find_decoder()
+                if decoder is None:
+                    print(f"  # No decoder installed, the camera's preview would be used."
+                          f" Install one: {raw.install_hint()}")
+                else:
+                    look = spec.raw_look if spec.raw_look in raw.LOOKS else raw.NATURAL
+                    flags = " ".join(raw._flags_for(look))
+                    print(f"  {decoder.name} {flags} <staged copy>   # develop, {look} look")
+                    spec = replace(spec, image_saturation=raw.saturation_for(look))
+                print("  # then, as an ordinary picture:")
+
+            if raw.is_raw(path) or _looks_like_still(tools, path):
+                image = image_spec_of(spec)
+                destination = output_dir / output_name(path, image)
+                shape = probe(tools, path) if not raw.is_raw(path) else None
+                command, notes = build_image_command(
+                    image, shape or _assumed_shape(path), tools, destination
+                )
+                print(" ".join(str(part) for part in command))
+                for note in notes:
+                    print(f"  # {note}")
+                continue
+
             info = probe(tools, path)
             normalised, notes = normalise(spec, info, tools)
             destination = output_dir / f"{path.stem}.{normalised.container}"

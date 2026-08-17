@@ -197,7 +197,8 @@
             <small id="imageFormatNote" class="muted"></small></label>
           <label class="field" id="imageQualityField"><span>Quality</span>
             <input id="imageQuality" type="range" min="1" max="100" value="82">
-            <small class="muted"><span id="imageQualityValue" class="tabular">82</span> of 100</small></label>
+            <small class="muted"><span id="imageQualityValue" class="tabular">82</span> of 100</small>
+            <small id="imageQualityHint" class="muted"></small></label>
           <label class="field"><span>Longest side (pixels)</span>
             <select id="imageMaxDimension">
               <option value="">Keep original size</option>
@@ -216,6 +217,15 @@
               <option value="gray">Grey</option>
             </select>
             <small class="muted">Used only when the target format cannot store transparency.</small>
+          </label>
+          <label class="field" id="rawLookField"><span>Camera RAW should look</span>
+            <select id="rawLook">
+              <option value="natural">Like the photograph</option>
+              <option value="neutral">Flat, for editing</option>
+            </select>
+            <small class="muted">A RAW file is what the sensor recorded, not a finished
+              picture. "Like the photograph" renders it the way your camera would.
+              "Flat" keeps everything for editing and looks duller on its own.</small>
           </label>
         </div>
         <div class="checks">

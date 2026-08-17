@@ -189,10 +189,27 @@ different curve, which nothing records in the file, so every viewer reads the
 result as too dark. That is why a converted photograph used to look flatter and
 greyer than the same shot straight out of the camera.
 
-A neutral development is not the same as the camera's own picture style. Cameras
-apply their own contrast and colour to the JPEGs they produce. VidSqueeze does
-not try to imitate that, because it would be guessing, and because a neutral
-starting point is what you want if you intend to edit the photograph.
+### How a RAW should look
+
+A RAW file is not a photograph. It is what the sensor measured, and something has
+to decide how bright the picture is and how strong its colour should be. A decoder
+left to itself decides "barely at all", because its job is faithfulness to the
+sensor, not to the scene. The result is correct and looks flat and grey beside the
+same shot out of the camera.
+
+| Choice                  | What you get                                             |
+| ----------------------- | -------------------------------------------------------- |
+| **Like the photograph** | The default. Close to how the camera would render it.    |
+| **Flat, for editing**   | Faithful to the sensor. Duller alone, better to edit.    |
+
+The natural setting was measured rather than chosen: two photographs in very
+different light were rendered by the operating system's own RAW handling and used
+as the target, and the values are the ones that come closest without clipping any
+highlight, within about 8 per cent on both brightness and colour. Values that
+matched one photograph exactly overshot the other by 15 per cent.
+
+Either way, VidSqueeze does not imitate a particular camera's picture style, which
+would be guessing.
 
 **If none of them is installed**, VidSqueeze uses the preview image the camera
 stored inside the RAW file. That needs nothing installed and always produces

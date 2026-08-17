@@ -61,6 +61,58 @@ class ProbeAgreesWithTheDecoder(unittest.TestCase):
             self.assertEqual((info.display_width, info.display_height), (800, 400))
 
 
+class EveryFormatThatCanRecordItIsRead(unittest.TestCase):
+    """Four formats keep this note in four different places. A reader that only
+    understands JPEG gets the other three silently wrong, because ffmpeg rotates
+    them and says nothing. PNG was missed the first time round.
+    """
+
+    def test_png_exif_chunk_is_read(self):
+        from vidsqueeze.metadata import build_block
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "x.png"
+            block = build_block({0x0112: (3, [6])})
+            # Minimal PNG: signature, then an eXIf chunk, then IHDR-ish filler.
+            chunk = (len(block).to_bytes(4, "big") + b"eXIf" + block + b"\x00\x00\x00\x00")
+            path.write_bytes(b"\x89PNG\r\n\x1a\n" + chunk)
+            # build_block normalises orientation to upright, so read what it wrote.
+            self.assertEqual(_exif_orientation(path), 1)
+
+    def test_a_png_carrying_a_sideways_flag_is_understood(self):
+        """Written by hand, because the block builder deliberately writes
+        upright and this needs the awkward case."""
+        from vidsqueeze.probe import _exif_orientation
+        from .support import exif_orientation_block
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "y.png"
+            app1 = exif_orientation_block(6)
+            tiff = app1[10:]                     # strip the JPEG marker and Exif\0\0
+            chunk = len(tiff).to_bytes(4, "big") + b"eXIf" + tiff + b"\x00\x00\x00\x00"
+            path.write_bytes(b"\x89PNG\r\n\x1a\n" + chunk)
+            self.assertEqual(_exif_orientation(path), 6)
+
+    def test_pixel_data_stops_the_search(self):
+        """A reader that keeps going past IDAT is reading compressed pixels as
+        if they were headers."""
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "z.png"
+            idat = (4).to_bytes(4, "big") + b"IDAT" + b"\x00" * 4 + b"\x00" * 4
+            path.write_bytes(b"\x89PNG\r\n\x1a\n" + idat + b"\xff" * 64)
+            self.assertEqual(_exif_orientation(path), 0)
+
+    def test_rubbish_does_not_raise(self):
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            for name, data in (("a.png", b"\x89PNG\r\n\x1a\n"),
+                               ("b.webp", b"RIFF\x00\x00\x00\x00WEBP"),
+                               ("c.jpg", b"\xff\xd8")):
+                path = Path(work) / name
+                path.write_bytes(data)
+                self.assertEqual(_exif_orientation(path), 0, name)
+
+
 class LongestSideNeverEnlarges(unittest.TestCase):
     """The documented promise. A sideways photograph broke it: asked to fit
     inside 500 pixels, it came back 1000 pixels tall and four times the size."""

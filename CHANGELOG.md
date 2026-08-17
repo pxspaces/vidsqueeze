@@ -7,6 +7,40 @@ Dates are the day the change was made.
 
 ---
 
+## 1.7.0 - 2026-08-17
+
+### Fixed
+
+- **Converted photographs looked flat and grey next to the original.** A RAW file
+  is what the sensor recorded, not a finished photograph, and something has to
+  decide how bright it is and how strong its colour should be. VidSqueeze was
+  leaving that to the decoder, which chooses "barely at all", because it is being
+  faithful to the sensor rather than to the scene. Measured against the same two
+  photographs rendered by the computer's own RAW handling, conversions were about
+  18 per cent too dark and 40 per cent short on colour. They now come out close
+  to it, within 8 per cent on both counts.
+
+  There is a new setting for this. **Like the photograph** is the default and is
+  what almost everybody wants. **Flat, for editing** gives the old faithful
+  rendering, which is the better starting point if you are going to edit the
+  picture yourself.
+- **PNG and TIFF could not be asked for full colour depth from the window.** The
+  quality dial decides how much depth is kept for these formats, 16 bits per
+  colour at 90 and above, but the dial was hidden for them because they are
+  lossless and it looked as though it had nothing to do. So the interface could
+  only ever produce 8 bit PNGs. The dial is now shown, and says what it does.
+- **Choosing a lossless format still shrank the picture to 2560 pixels.** Asking
+  for PNG is asking for fidelity, so the size limit now clears itself when you
+  pick a lossless format. Set it again if you did want a smaller one.
+- **Sideways photographs stored as PNG or WebP were still resized wrongly.** The
+  fix in 1.6.0 read the orientation note out of JPEG and TIFF files but not out
+  of PNG or WebP, which keep it somewhere else again.
+- **`--dry-run` printed a video command for a photograph**, including for camera
+  RAW, which was not a preview of anything that would happen. It now shows the
+  develop step and the picture command.
+
+---
+
 ## 1.6.0 - 2026-08-17
 
 ### Fixed

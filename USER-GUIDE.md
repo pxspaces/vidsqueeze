@@ -259,13 +259,21 @@ installed, so VidSqueeze used the preview picture your camera stored inside the
 file. It tells you when this happens, and names the command to fix it. Install
 that and convert again for full quality.
 
-**My photographs look flatter than the camera's own JPEG.** They should look
-correct, but they will not be identical. Your camera adds its own contrast and
-colour to the JPEGs it makes. A RAW file is what the sensor recorded, and
-VidSqueeze develops it plainly rather than imitating a look. The result holds
-more detail in the brightest and darkest parts, which is what you want if you
-are going to edit it. There is more on this in
-[Working with photos and images](docs/GUIDE-IMAGES.md).
+**My photographs look flatter and greyer than the original.** Fixed in 1.7.0. A
+RAW file is what the sensor recorded, not a finished photograph, and VidSqueeze
+was leaving the decision about brightness and colour to the decoder, which errs
+heavily towards faithful rather than attractive. Update, and they will come out
+close to how your camera renders them.
+
+If you preferred the old flat rendering, because you edit your photographs
+afterwards, set **Camera RAW should look** to **Flat, for editing** under Advanced
+image settings.
+
+**My PNG is not as good as I expected.** Two settings to check, both fixed in
+1.7.0 but worth knowing. The quality dial decides colour depth for PNG, so set it
+to 90 or more for all 16 bits; it used to be hidden for PNG entirely. And the
+longest side used to stay at 2560, so a big photograph came out at under half its
+size; choosing PNG now clears that for you.
 
 **My converted picture looks dark or muddy.** It should not. This was a genuine
 fault in versions before 1.5.0, where photographs were developed with the wrong

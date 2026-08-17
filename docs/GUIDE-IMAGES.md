@@ -60,6 +60,15 @@ below 90 they are written at 8 bits per channel, which is what screens show and
 what every program reads. This is why a photograph converted to PNG is around
 36 MB at the default and around 120 MB at 95.
 
+Two things worth knowing if you pick PNG expecting the best possible copy:
+
+- **Set the quality to 90 or more** if you want all 16 bits. The dial looks as
+  though it should not matter for a lossless format, and for compression it does
+  not. It decides depth.
+- **Check the longest side.** Choosing PNG now clears the size limit for you,
+  because asking for PNG is usually asking for fidelity. Before that it stayed at
+  2560, so a 26 megapixel photograph quietly came out at under half its size.
+
 ---
 
 ## Longest side
@@ -143,6 +152,30 @@ A note on expectations: this is a conversion, not a RAW editor. VidSqueeze
 develops the file with sensible defaults. Recovering blown highlights or
 changing white balance needs a proper RAW editor such as darktable or
 RawTherapee, both of which are free.
+
+### How it should look
+
+There is a setting for this, under **Advanced image settings**, called
+**Camera RAW should look**.
+
+| Choice                  | What you get                                        |
+| ----------------------- | --------------------------------------------------- |
+| **Like the photograph** | The default. Rendered roughly the way your camera would. |
+| **Flat, for editing**   | Faithful to the sensor. Duller on its own, better to edit. |
+
+The reason there is a choice at all is that a RAW file is not a photograph. It is
+what the sensor measured, and something has to decide how bright the picture is
+and how strong its colour should be. Left to itself a RAW decoder decides "barely
+at all", because its job is to be faithful to the sensor rather than flattering to
+the scene. That is the right answer if you are about to edit the picture and the
+wrong one if you just want your photograph.
+
+**Like the photograph** was not arrived at by taste. Two photographs in very
+different light were rendered by the computer's own RAW handling and used as a
+target, and the settings are the ones that get closest to it without blowing out
+any highlight: within about 8 per cent on both brightness and colour. Settings
+that matched one of the two photographs exactly overshot the other by 15 per
+cent, which is what happens when you tune against a single image.
 
 ### Why it does not look identical to the camera's own JPEG
 

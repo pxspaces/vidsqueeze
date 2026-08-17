@@ -52,6 +52,7 @@ class ImageSpec:
     lossless: bool = False         # WebP and JPEG XL only
     max_dimension: int | None = None   # longest side, in pixels
     background: str = "white"      # used when flattening transparency
+    saturation: float = 1.0        # 1.0 leaves colour exactly as it arrived
     keep_metadata: bool = True
     strip_colour_profile: bool = False
     extra_args: list[str] = field(default_factory=list)
@@ -183,6 +184,12 @@ def build_command(
     command = [str(tools.ffmpeg), "-hide_banner", "-nostdin", "-y", "-loglevel", "error"]
 
     filters: list[str] = []
+
+    # Colour first, while the picture is still at full size, so the adjustment
+    # is measured on the same pixels whatever resizing follows.
+    if abs(spec.saturation - 1.0) > 0.001:
+        filters.append(f"eq=saturation={spec.saturation:g}")
+
     if spec.max_dimension and info.display_width and info.display_height:
         longest = max(info.display_width, info.display_height)
         if longest > spec.max_dimension:

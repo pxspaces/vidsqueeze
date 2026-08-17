@@ -142,6 +142,11 @@ class JobSpec:
     image_max_dimension: int | None = None
     image_background: str = "white"
 
+    # Camera RAW. A sensor reading is not a photograph, and something has to
+    # decide how bright it is and how strong its colour is; see raw.py.
+    raw_look: str = "natural"          # natural | neutral
+    image_saturation: float = 1.0      # set from raw_look, not by the user
+
     # Practicalities
     hardware: str = "off"              # off | auto | an explicit encoder name
     faststart: bool = True             # put the index first, for web playback
@@ -801,6 +806,7 @@ def image_spec_of(spec: JobSpec) -> ImageSpec:
         max_dimension=spec.image_max_dimension,
         background=spec.image_background,
         keep_metadata=spec.keep_metadata,
+        saturation=spec.image_saturation,
     )
 
 
@@ -943,14 +949,20 @@ def _encode_raw(
     except OSError:
         source_bytes = 0
 
+    look = spec.raw_look if spec.raw_look in raw.LOOKS else raw.NATURAL
+
     with tempfile.TemporaryDirectory(prefix="vidsqueeze-raw-") as tmp:
         try:
-            developed, note = raw.develop(source, Path(tmp))
+            developed, note = raw.develop(source, Path(tmp), look=look)
         except raw.RawError as exc:
             return JobResult(source=source, output=None, ok=False,
                              message=str(exc), source_bytes=source_bytes)
         if on_note:
             on_note(note)
+
+        # The decoder can be told how bright to make it but has no way to say
+        # how strong the colour should be, so that half is applied afterwards.
+        spec = replace(spec, image_saturation=raw.saturation_for(look))
 
         try:
             info = probe(tools, developed)

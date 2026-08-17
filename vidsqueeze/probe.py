@@ -330,9 +330,47 @@ def _exif_orientation(path: Path) -> int:
                 return _tiff_orientation(handle, base) if base is not None else 0
             if start in (b"II", b"MM"):                 # TIFF, and most RAW
                 return _tiff_orientation(handle, 0)
+            if start == b"\x89P":                       # PNG
+                base = _chunk_exif_offset(handle, b"eXIf", png=True)
+                return _tiff_orientation(handle, base) if base is not None else 0
+            if start == b"RI":                          # RIFF, which means WebP
+                base = _chunk_exif_offset(handle, b"EXIF", png=False)
+                return _tiff_orientation(handle, base) if base is not None else 0
     except OSError:
         return 0
     return 0
+
+
+def _chunk_exif_offset(handle, want: bytes, png: bool) -> int | None:
+    """Find an EXIF chunk in a PNG or a WebP.
+
+    Both are chunked formats that park a TIFF block inside a named chunk, which
+    is a third and a fourth place a photograph can record which way up it is.
+    A reader that only understands JPEG gets these silently wrong, because
+    ffmpeg rotates them and says nothing.
+
+    PNG counts big endian and pads nothing. RIFF counts little endian and pads
+    odd-sized chunks to an even boundary.
+    """
+    order = "big" if png else "little"
+    handle.seek(8 if png else 12)                       # past the signature
+    for _ in range(64):                                 # bounded: headers are near the front
+        header = handle.read(8)
+        if len(header) < 8:
+            return None
+        if png:
+            size, name = int.from_bytes(header[0:4], order), header[4:8]
+        else:
+            name, size = header[0:4], int.from_bytes(header[4:8], order)
+        if name == want:
+            return handle.tell()
+        if name in (b"IDAT", b"IEND"):                  # pixel data, too late
+            return None
+        skip = size + (4 if png else 0)                 # PNG chunks carry a CRC
+        if not png and size % 2:
+            skip += 1                                   # RIFF pads to even
+        handle.seek(skip, 1)
+    return None
 
 
 def _jpeg_exif_offset(handle) -> int | None:
