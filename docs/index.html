@@ -6,11 +6,20 @@
 <title>VidSqueeze: compress video, audio, photos and camera RAW on your own computer</title>
 <meta name="description" content="Free, open source converter that makes video, audio, photo and camera RAW files smaller. Runs on your own computer, works offline, nothing is uploaded. Windows, macOS and Linux, with no dependencies to install.">
 <link rel="canonical" href="https://pxspaces.github.io/vidsqueeze/">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<meta name="theme-color" content="#2436C8">
 <meta property="og:type" content="website">
 <meta property="og:title" content="VidSqueeze: make video, audio and photo files smaller">
 <meta property="og:description" content="Compress and convert video, audio, photos and camera RAW on your own computer. Nothing is uploaded. Windows, macOS and Linux.">
 <meta property="og:url" content="https://pxspaces.github.io/vidsqueeze/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://pxspaces.github.io/vidsqueeze/social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="VidSqueeze">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://pxspaces.github.io/vidsqueeze/social.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -35,7 +44,9 @@
 body { margin:0; background:var(--bg); color:var(--ink); line-height:1.65;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
 main { max-width:46rem; margin:0 auto; padding:3rem 1.25rem 5rem; }
-h1 { font-size:2rem; line-height:1.2; margin:0 0 .5rem; }
+.brand { display:flex; align-items:center; gap:.85rem; margin:0 0 .5rem; }
+.brand img { flex:none; border-radius:14px; }
+h1 { font-size:2rem; line-height:1.2; margin:0; }
 h2 { font-size:1.25rem; margin:2.5rem 0 .75rem; }
 p.lede { font-size:1.1rem; color:var(--soft); margin:0 0 2rem; }
 a { color:var(--link); }
@@ -50,7 +61,10 @@ footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); 
 </head>
 <body>
 <main>
-<h1>VidSqueeze</h1>
+<div class="brand">
+  <img src="icon.svg" width="60" height="60" alt="VidSqueeze logo">
+  <h1>VidSqueeze</h1>
+</div>
 <p class="lede">Make video, audio, photo and camera RAW files smaller, on your own
 computer. Nothing is uploaded anywhere.</p>
 
