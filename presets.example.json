@@ -1,0 +1,17 @@
+[
+  {
+    "key": "my-preset",
+    "name": "My preset",
+    "description": "Rename this file to presets.json to switch it on.",
+    "group": "My presets",
+    "spec": {
+      "video_codec": "h265",
+      "container": "mp4",
+      "audio_codec": "opus",
+      "audio_bitrate": 128,
+      "quality": "balanced",
+      "speed": "veryfast",
+      "scale": 1080
+    }
+  }
+]

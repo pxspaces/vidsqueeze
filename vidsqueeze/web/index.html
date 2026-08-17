@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" data-token="__VIDSQUEEZE_TOKEN__">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VidSqueeze</title>
+  <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img class="mark" src="/static/icon.svg" alt="" width="20" height="20">
+    <span class="wordmark">VidSqueeze</span>
+  </div>
+  <div id="modeSelector" class="segmented small-seg" hidden></div>
+  <div class="topbar-meta">
+    <span id="lifetimeSaved" class="lifetime" hidden></span>
+    <span id="updateDot" class="lifetime update-dot" hidden>Update</span>
+    <button id="updatesBtn" class="btn quiet tiny" type="button">Updates</button>
+    <span id="ffmpegBadge" class="badge" hidden></span>
+    <button id="quitBtn" class="btn quiet tiny" type="button">Quit</button>
+  </div>
+</header>
+
+<!-- First run -->
+<div id="setupScreen" class="centre-screen" hidden>
+  <div class="panel setup">
+    <img class="setup-mark" src="/static/icon.svg" alt="" width="44" height="44">
+    <h1 class="display">Nearly ready</h1>
+    <p class="lede">
+      VidSqueeze uses <strong>ffmpeg</strong> to do the actual conversion, and it is
+      not on this computer yet.
+    </p>
+    <p class="muted">
+      The download is <span id="setupSize">small</span>, needs no administrator
+      permission, and lands inside the VidSqueeze folder. Nothing else on your
+      computer is touched, and deleting the folder removes it completely.
+    </p>
+    <div id="setupProgress" class="progress" hidden>
+      <div class="track"><div id="setupBar" class="fill"></div></div>
+      <p id="setupMessage" class="muted tiny-text"></p>
+    </div>
+    <p id="setupError" class="notice bad" hidden></p>
+    <button id="setupBtn" class="btn primary wide" type="button">Download and continue</button>
+    <details class="disclosure">
+      <summary>I would rather install it myself</summary>
+      <p class="muted tiny-text">Run this, then restart VidSqueeze:</p>
+      <pre id="installHint"></pre>
+    </details>
+  </div>
+</div>
+
+<!-- What are you working with? Asked once. -->
+<div id="modeScreen" class="centre-screen" hidden>
+  <div class="panel">
+    <img class="setup-mark" src="/static/icon.svg" alt="" width="44" height="44">
+    <h1 class="display">What do you work with?</h1>
+    <p class="lede">
+      This just decides which settings you are shown. You can change it whenever
+      you like, and nothing is locked away.
+    </p>
+    <div id="modeChoices" class="mode-grid"></div>
+  </div>
+</div>
+
+<!-- Main -->
+<main id="workspace" class="workspace" hidden>
+
+  <!-- LEFT: sources -->
+  <section id="paneSources" class="pane" data-side="left">
+    <div class="pane-head">
+      <button class="collapser" type="button" data-collapse="paneSources" title="Collapse">&#8249;</button>
+      <h2>Sources</h2>
+      <span id="sourceCount" class="count"></span>
+      <div class="grow"></div>
+      <button id="addBtn" class="btn quiet tiny" type="button">Add</button>
+      <button id="clearBtn" class="btn quiet tiny" type="button" hidden>Clear</button>
+    </div>
+
+    <div id="sourcesEmpty" class="empty-state">
+      <p class="empty-title">Nothing added yet</p>
+      <p class="muted tiny-text">Videos, music or photos. Add single files, or a whole folder.</p>
+      <button id="addBtnEmpty" class="btn primary" type="button">Choose files or a folder</button>
+    </div>
+
+    <ul id="sourceList" class="file-list"></ul>
+
+    <div id="rawNotice" class="notice warn inset" hidden>
+      <p id="rawText"></p>
+      <pre id="rawHint"></pre>
+    </div>
+
+    <div id="upgradeOffer" class="notice warn inset" hidden>
+      <p id="upgradeText"></p>
+      <button id="upgradeBtn" class="btn secondary tiny" type="button">Download a newer ffmpeg</button>
+    </div>
+
+    <div id="sourcesFoot" class="pane-foot" hidden>
+      <span id="sourcesTotal" class="muted tiny-text"></span>
+    </div>
+    <div class="rail" aria-hidden="true"><span>Sources</span></div>
+  </section>
+
+  <!-- MIDDLE: workspace -->
+  <section id="paneWork" class="pane">
+    <nav class="tabs" role="tablist">
+      <button id="tabBtnSettings" class="tab" type="button" role="tab" aria-selected="true">Settings</button>
+      <button id="tabBtnPreview" class="tab" type="button" role="tab" aria-selected="false">Preview</button>
+      <button id="tabBtnCompare" class="tab" type="button" role="tab" aria-selected="false">Compare</button>
+      <button id="tabBtnWatch" class="tab" type="button" role="tab" aria-selected="false">Watch</button>
+      <button id="tabBtnHistory" class="tab" type="button" role="tab" aria-selected="false">History</button>
+    </nav>
+
+    <!-- Settings -->
+    <div id="tabSettings" class="tab-panel" role="tabpanel">
+      <p id="kindNotice" class="notice inset" hidden></p>
+
+      <section class="block">
+        <h3 class="block-title">What do you want?</h3>
+        <div id="presetGroups"></div>
+      </section>
+
+      <!-- Video and audio controls -->
+      <details id="advanced" class="disclosure block">
+        <summary>Advanced video and audio settings</summary>
+        <div class="fields">
+          <label class="field"><span>Video format</span><select id="videoCodec"></select></label>
+          <label class="field"><span>File type</span><select id="container"></select></label>
+          <label class="field"><span>Quality mode</span>
+            <select id="qualityMode">
+              <option value="quality">Quality level</option>
+              <option value="size">Fit a file size</option>
+              <option value="bitrate">Exact bitrate</option>
+            </select>
+          </label>
+          <label class="field" id="qualityField"><span>Quality level</span><select id="quality"></select></label>
+          <label class="field" id="sizeField" hidden><span>Target size (MB)</span>
+            <input id="targetSize" type="number" min="1" step="1" value="25"></label>
+          <label class="field" id="bitrateField" hidden><span>Video bitrate (kbps)</span>
+            <input id="videoBitrate" type="number" min="100" step="100" value="4000"></label>
+          <label class="field"><span>Encoding speed</span><select id="speed"></select></label>
+          <label class="field"><span>Resize</span>
+            <select id="scale">
+              <option value="">Keep original size</option>
+              <option value="2160">4K (2160p)</option>
+              <option value="1440">1440p</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
+            </select>
+          </label>
+          <label class="field"><span>Framerate</span>
+            <select id="fpsMode">
+              <option value="">Keep original</option>
+              <option value="60">Cap at 60</option>
+              <option value="30">Cap at 30</option>
+              <option value="25">Cap at 25</option>
+              <option value="24">Cap at 24</option>
+            </select>
+          </label>
+          <label class="field"><span>Audio</span><select id="audioCodec"></select></label>
+          <label class="field"><span>Audio bitrate</span>
+            <select id="audioBitrate">
+              <option value="64">64 kbps (speech)</option>
+              <option value="96">96 kbps</option>
+              <option value="128">128 kbps</option>
+              <option value="160">160 kbps</option>
+              <option value="192">192 kbps (music)</option>
+              <option value="256">256 kbps</option>
+              <option value="320">320 kbps</option>
+            </select>
+          </label>
+          <label class="field"><span>Trim start (s)</span>
+            <input id="trimStart" type="number" min="0" step="0.1" placeholder="none"></label>
+          <label class="field"><span>Trim end (s)</span>
+            <input id="trimEnd" type="number" min="0" step="0.1" placeholder="none"></label>
+        </div>
+        <div class="checks">
+          <label><input id="tenBit" type="checkbox"> <span>10-bit colour <em>better gradients, slightly larger</em></span></label>
+          <label><input id="tonemapHdr" type="checkbox" checked> <span>Convert HDR to standard range <em>stops washed-out colours</em></span></label>
+          <label><input id="denoise" type="checkbox"> <span>Reduce grain and noise <em>helps low-light footage compress</em></span></label>
+          <label><input id="deinterlace" type="checkbox"> <span>Fix interlaced video <em>old camcorder and TV footage</em></span></label>
+          <label><input id="faststart" type="checkbox" checked> <span>Optimise for web playback</span></label>
+          <label><input id="keepSubtitles" type="checkbox"> <span>Keep subtitles</span></label>
+          <label><input id="keepMetadata" type="checkbox" checked> <span>Keep dates and camera information</span></label>
+        </div>
+      </details>
+
+      <!-- Image controls -->
+      <details id="imageAdvanced" class="disclosure block" hidden>
+        <summary>Advanced image settings</summary>
+        <div class="fields">
+          <label class="field"><span>Convert to</span><select id="imageFormat"></select>
+            <small id="imageFormatNote" class="muted"></small></label>
+          <label class="field" id="imageQualityField"><span>Quality</span>
+            <input id="imageQuality" type="range" min="1" max="100" value="82">
+            <small class="muted"><span id="imageQualityValue" class="tabular">82</span> of 100</small></label>
+          <label class="field"><span>Longest side (pixels)</span>
+            <select id="imageMaxDimension">
+              <option value="">Keep original size</option>
+              <option value="4096">4096</option>
+              <option value="2560">2560</option>
+              <option value="1920">1920</option>
+              <option value="1600">1600</option>
+              <option value="1080">1080</option>
+              <option value="512">512</option>
+            </select>
+          </label>
+          <label class="field" id="imageBackgroundField"><span>Background when flattening</span>
+            <select id="imageBackground">
+              <option value="white">White</option>
+              <option value="black">Black</option>
+              <option value="gray">Grey</option>
+            </select>
+            <small class="muted">Used only when the target format cannot store transparency.</small>
+          </label>
+        </div>
+        <div class="checks">
+          <label id="imageLosslessRow"><input id="imageLossless" type="checkbox">
+            <span>Lossless <em>WebP and JPEG XL only. Larger, but pixel perfect.</em></span></label>
+        </div>
+      </details>
+
+      <section class="block" id="speedBlock">
+        <h3 class="block-title">Speed</h3>
+        <div id="speedChoices" class="segmented"></div>
+        <p id="speedNote" class="muted tiny-text"></p>
+        <label class="row-check" id="concurrencyRow" hidden>
+          <input id="concurrency" type="checkbox">
+          <span>Encode two files at once <em>helps batches of shorter clips</em></span>
+        </label>
+      </section>
+
+      <section class="block">
+        <h3 class="block-title">Results go to</h3>
+        <div class="path-row">
+          <code id="outputPath" class="path"></code>
+          <button id="revealBtn" class="btn quiet tiny" type="button">Open</button>
+        </div>
+        <p class="muted tiny-text">Free space here: <span id="freeSpace"></span></p>
+        <label class="danger">
+          <input id="replaceOriginals" type="checkbox">
+          <span><strong>Delete each original afterwards</strong>
+            <em>Only once the new file is verified readable, complete, the right
+            length and smaller. If any check fails the original is kept. This
+            cannot be undone.</em></span>
+        </label>
+      </section>
+
+      <div class="actions">
+        <button id="startBtn" class="btn primary wide" type="button" disabled>Squeeze</button>
+        <div class="row two-up">
+          <button id="sampleBtn" class="btn secondary" type="button" disabled>Test a short sample</button>
+          <button id="bakeoffBtn" class="btn secondary" type="button" disabled>Try several settings</button>
+        </div>
+        <p id="actionHint" class="muted tiny-text"></p>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div id="tabPreview" class="tab-panel" role="tabpanel" hidden>
+      <div id="previewEmpty" class="empty-state small">
+        <p class="empty-title">Nothing selected</p>
+        <p class="muted tiny-text">Choose a file on the left to preview it and set trim points.</p>
+      </div>
+      <div id="previewBody" hidden>
+        <h3 id="previewName" class="block-title"></h3>
+        <div id="previewStage" class="preview-stage"></div>
+        <p id="previewMeta" class="muted tiny-text"></p>
+
+        <section id="trimBlock" class="block" hidden>
+          <h3 class="block-title">Trim</h3>
+          <div id="filmstrip" class="filmstrip"></div>
+          <div class="trim-controls">
+            <label><span class="muted tiny-text">Start</span>
+              <input id="trimStartRange" type="range" min="0" max="1000" value="0"></label>
+            <label><span class="muted tiny-text">End</span>
+              <input id="trimEndRange" type="range" min="0" max="1000" value="1000"></label>
+          </div>
+          <div class="row">
+            <span id="trimReadout" class="muted tiny-text tabular"></span>
+            <div class="grow"></div>
+            <button id="trimApply" class="btn secondary tiny" type="button">Use these trim points</button>
+            <button id="trimReset" class="btn quiet tiny" type="button">Reset</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Compare -->
+    <div id="tabCompare" class="tab-panel" role="tabpanel" hidden>
+      <div id="compareEmpty" class="empty-state small">
+        <p class="empty-title">Nothing to compare yet</p>
+        <p class="muted tiny-text">Once something has been converted, pick it in Results to see it against the original.</p>
+      </div>
+
+      <div id="compareBody" hidden>
+        <h3 id="compareName" class="block-title"></h3>
+
+        <div class="verdict">
+          <div class="verdict-figure"><b id="compareRatio"></b><span>smaller</span></div>
+          <div class="verdict-bars">
+            <div class="size-row"><span class="size-label">Original</span>
+              <div class="size-track"><div id="barBefore" class="size-fill before"></div></div>
+              <span id="sizeBefore" class="size-value"></span></div>
+            <div class="size-row"><span class="size-label">New</span>
+              <div class="size-track"><div id="barAfter" class="size-fill after"></div></div>
+              <span id="sizeAfter" class="size-value"></span></div>
+          </div>
+        </div>
+
+        <div class="compare-modes">
+          <div id="compareModeBtns" class="segmented"></div>
+          <div class="grow"></div>
+          <button id="openBefore" class="btn quiet tiny" type="button">Open original</button>
+          <button id="openAfter" class="btn quiet tiny" type="button">Open result</button>
+        </div>
+
+        <div id="frameMode">
+          <div id="frameStage" class="frame-stage">
+            <img id="frameAfter" class="frame-img" alt="Converted frame">
+            <div id="frameBeforeWrap" class="frame-clip"><img id="frameBefore" class="frame-img" alt="Original frame"></div>
+            <div id="frameHandle" class="frame-handle"><span></span></div>
+            <div class="frame-tag left">Original</div>
+            <div class="frame-tag right">New</div>
+            <div id="frameLoading" class="frame-loading" hidden>Loading frames</div>
+          </div>
+          <label class="scrub" id="frameScrub">
+            <span class="muted tiny-text">Position</span>
+            <input id="frameTime" type="range" min="0" max="100" value="33" step="0.5">
+            <span id="frameTimeLabel" class="muted tiny-text tabular"></span>
+          </label>
+          <p class="muted tiny-text">Drag the divider, or use the arrow keys, to wipe between the two.</p>
+        </div>
+
+        <div id="playMode" hidden>
+          <div id="playPair" class="video-pair"></div>
+          <div class="row">
+            <button id="syncPlay" class="btn secondary tiny" type="button" hidden>Play both together</button>
+            <button id="syncPause" class="btn quiet tiny" type="button" hidden>Pause both</button>
+            <span id="playWarn" class="muted tiny-text"></span>
+          </div>
+        </div>
+
+        <table class="facts"><thead><tr><th></th><th>Original</th><th>New</th></tr></thead>
+          <tbody id="factsBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- Watch -->
+    <div id="tabWatch" class="tab-panel" role="tabpanel" hidden>
+      <section class="block">
+        <h3 class="block-title">Watch a folder</h3>
+        <p class="muted tiny-text">
+          VidSqueeze can keep an eye on a folder and add anything new to the Sources
+          list. It waits until a file has finished copying, and it never starts
+          converting on its own: you always press Squeeze yourself.
+        </p>
+        <div class="path-row">
+          <code id="watchPath" class="path">No folder chosen</code>
+          <button id="watchPick" class="btn quiet tiny" type="button">Choose</button>
+        </div>
+        <div class="checks">
+          <label><input id="watchRecursive" type="checkbox" checked> <span>Include subfolders</span></label>
+          <label><input id="watchExisting" type="checkbox"> <span>Also add files already in there</span></label>
+        </div>
+        <div class="row">
+          <button id="watchStart" class="btn primary" type="button" disabled>Start watching</button>
+          <button id="watchStop" class="btn secondary" type="button" hidden>Stop watching</button>
+        </div>
+        <p id="watchStatus" class="muted tiny-text"></p>
+      </section>
+    </div>
+
+    <!-- History -->
+    <div id="tabHistory" class="tab-panel" role="tabpanel" hidden>
+      <div class="history-head">
+        <div><b id="historyTotal" class="display-sm"></b>
+          <p class="muted tiny-text">reclaimed across <span id="historyCount"></span></p></div>
+        <div class="grow"></div>
+        <button id="historyClear" class="btn quiet tiny" type="button">Clear</button>
+      </div>
+      <ul id="historyList" class="history-list"></ul>
+      <p id="historyEmpty" class="muted tiny-text" hidden>Nothing converted yet.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT: results -->
+  <section id="paneResults" class="pane" data-side="right">
+    <div class="pane-head">
+      <h2>Results</h2>
+      <span id="resultCount" class="count"></span>
+      <div class="grow"></div>
+      <button id="openOutput" class="btn quiet tiny" type="button">Folder</button>
+      <button class="collapser" type="button" data-collapse="paneResults" title="Collapse">&#8250;</button>
+    </div>
+
+    <div id="resultsEmpty" class="empty-state">
+      <p class="empty-title">No results yet</p>
+      <p class="muted tiny-text">Finished files appear here. Select one to compare it with the original.</p>
+    </div>
+
+    <ul id="resultList" class="file-list"></ul>
+
+    <div id="resultsFoot" class="pane-foot" hidden>
+      <div class="track"><div id="overallBar" class="fill"></div></div>
+      <span id="resultsTotal" class="muted tiny-text"></span>
+      <button id="cancelBtn" class="btn quiet tiny" type="button" hidden>Stop</button>
+    </div>
+    <div class="rail" aria-hidden="true"><span>Results</span></div>
+  </section>
+</main>
+
+<!-- Sample / bake-off results -->
+<div id="sampleModal" class="modal" hidden>
+  <div class="modal-box narrow">
+    <div class="modal-head">
+      <h2 id="sampleTitle">Sample test</h2>
+      <button id="sampleClose" class="btn quiet tiny" type="button">Close</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted tiny-text" id="sampleIntro"></p>
+      <div id="sampleProgress" class="progress" hidden>
+        <div class="track indeterminate"><div class="fill"></div></div>
+        <p id="sampleMessage" class="muted tiny-text"></p>
+      </div>
+      <p id="sampleError" class="notice bad" hidden></p>
+      <div id="sampleResults" class="sample-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Updates -->
+<div id="updatesModal" class="modal" hidden>
+  <div class="modal-box narrow">
+    <div class="modal-head">
+      <h2>Updates</h2>
+      <button id="updatesClose" class="btn quiet tiny" type="button">Close</button>
+    </div>
+    <div class="modal-body">
+      <div id="updatesBody" class="update-list"></div>
+      <div id="updateProgress" class="progress" hidden>
+        <div class="track"><div id="updateBar" class="fill"></div></div>
+        <p id="updateMessage" class="muted tiny-text"></p>
+      </div>
+      <p id="updatesError" class="notice bad" hidden></p>
+      <div class="row">
+        <button id="updatesRecheck" class="btn secondary tiny" type="button">Check again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- File browser -->
+<div id="browser" class="modal" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="browserTitle">Choose files</h2>
+      <button id="browserClose" class="btn quiet tiny" type="button">Close</button>
+    </div>
+    <div class="browser-body">
+      <aside class="places"><h3>Places</h3><ul id="placesList"></ul></aside>
+      <div class="listing">
+        <div class="crumbs">
+          <button id="upBtn" class="btn quiet tiny" type="button">Up</button>
+          <code id="currentPath" class="path"></code>
+        </div>
+        <div id="browserError" class="notice bad" hidden></div>
+        <div class="lists">
+          <ul id="folderList" class="folders"></ul>
+          <ul id="fileBrowseList" class="browse-files"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <label class="inline"><input id="recursive" type="checkbox" checked> Include subfolders</label>
+      <div class="grow"></div>
+      <button id="addFolderBtn" class="btn secondary" type="button">Use this folder</button>
+      <button id="addSelectedBtn" class="btn primary" type="button" disabled>Add selected</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
