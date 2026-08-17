@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VidSqueeze: compress video, audio, photos and camera RAW on your own computer</title>
+<meta name="description" content="Free, open source converter that makes video, audio, photo and camera RAW files smaller. Runs on your own computer, works offline, nothing is uploaded. Windows, macOS and Linux, with no dependencies to install.">
+<link rel="canonical" href="https://pxspaces.github.io/vidsqueeze/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VidSqueeze: make video, audio and photo files smaller">
+<meta property="og:description" content="Compress and convert video, audio, photos and camera RAW on your own computer. Nothing is uploaded. Windows, macOS and Linux.">
+<meta property="og:url" content="https://pxspaces.github.io/vidsqueeze/">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "VidSqueeze",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "softwareVersion": "1.10.0",
+  "description": "Open source converter that makes video, audio, photo and camera RAW files smaller. Runs entirely on your own computer with nothing uploaded.",
+  "url": "https://pxspaces.github.io/vidsqueeze/",
+  "codeRepository": "https://github.com/pxspaces/vidsqueeze",
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<style>
+:root { --ink:#16191e; --soft:#5b6472; --bg:#ffffff; --line:#e4e7ec; --link:#2d4bd8; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#e9edf3; --soft:#99a3b2; --bg:#0e1013; --line:#262b33; --link:#8fa6ff; }
+}
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); line-height:1.65;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+main { max-width:46rem; margin:0 auto; padding:3rem 1.25rem 5rem; }
+h1 { font-size:2rem; line-height:1.2; margin:0 0 .5rem; }
+h2 { font-size:1.25rem; margin:2.5rem 0 .75rem; }
+p.lede { font-size:1.1rem; color:var(--soft); margin:0 0 2rem; }
+a { color:var(--link); }
+table { width:100%; border-collapse:collapse; margin:1rem 0; display:block; overflow-x:auto; }
+th, td { text-align:left; padding:.5rem .6rem; border-bottom:1px solid var(--line); font-size:.95rem; }
+code, pre { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.9rem; }
+pre { background:rgba(127,127,127,.10); padding:.9rem 1rem; border-radius:6px; overflow-x:auto; }
+.cta { display:inline-block; margin:.5rem .5rem .5rem 0; padding:.6rem 1.1rem; border-radius:6px;
+  background:var(--link); color:#fff; text-decoration:none; font-weight:600; }
+footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); color:var(--soft); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>VidSqueeze</h1>
+<p class="lede">Make video, audio, photo and camera RAW files smaller, on your own
+computer. Nothing is uploaded anywhere.</p>
+
+<p><a class="cta" href="https://github.com/pxspaces/vidsqueeze">Get it on GitHub</a>
+<a class="cta" href="https://github.com/pxspaces/vidsqueeze/releases/latest">Download the latest release</a></p>
+
+<h2>What it does</h2>
+<p>VidSqueeze compresses and converts media files. It opens in the browser you
+already use, and it also works entirely from a terminal. Version 1.10.0.</p>
+<table>
+<tr><th>Kind</th><th>Reads</th><th>Writes</th></tr>
+<tr><td>Video</td><td>MP4, MOV, MKV, AVI, WebM, MPEG, WMV, FLV, and more</td><td>MP4, MKV, WebM, MOV with H.265, H.264, AV1 or VP9</td></tr>
+<tr><td>Audio</td><td>MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF</td><td>Opus, AAC, MP3, FLAC</td></tr>
+<tr><td>Photos</td><td>JPEG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, JPEG XL</td><td>JPEG, PNG, WebP, AVIF, JPEG XL, TIFF, BMP</td></tr>
+<tr><td>Camera RAW</td><td>CR2, CR3, NEF, ARW, RAF, ORF, RW2, DNG and twenty more</td><td>Any photo format above</td></tr>
+</table>
+
+<h2>Why run a converter on your own computer</h2>
+<p>Most converters on the web want you to upload the file first. That means your
+holiday videos, your client photographs or your recordings sit on somebody
+else's server, subject to their size limits and their privacy policy.</p>
+<p>VidSqueeze does the work locally. The interface is a small server on your own
+machine that only your browser can reach, and the only thing it ever downloads
+is ffmpeg, once. Your files never leave the computer.</p>
+
+<h2>Made for photographers as much as for video</h2>
+<p>Camera RAW is handled properly rather than as an afterthought. RAW files are
+developed at 16 bits per colour with the camera's own white balance and a correct
+sRGB curve, so a converted photograph looks like the photograph rather than a
+flat, grey approximation of it. The camera, the lens, the exposure and the date
+the picture was taken are all kept, and the date taken becomes the date on the
+file so a shoot stays in order.</p>
+<p>There are contact sheets too: one image showing small versions of every
+photograph in a folder with the file names underneath, which is still the fastest
+way to pick which of sixty frames are worth keeping.</p>
+
+<h2>Getting started</h2>
+<p>There is nothing to install. No administrator rights are needed, nothing is
+put anywhere else on your computer, and deleting the folder removes VidSqueeze
+completely.</p>
+
+<h3>1. Download it</h3>
+<p>Take <a href="https://github.com/pxspaces/vidsqueeze/releases/latest">the latest
+release</a> and download the <strong>Source code (zip)</strong> file at the bottom
+of it. If you would rather have the very newest work, use the green
+<strong>Code</strong> button on
+<a href="https://github.com/pxspaces/vidsqueeze">the repository page</a> and choose
+<strong>Download ZIP</strong>.</p>
+
+<h3>2. Unpack it somewhere permanent</h3>
+<p>The zip unpacks into a folder with a long name such as
+<code>vidsqueeze-1.10.0</code>. Rename it to <code>VidSqueeze</code>, which is
+tidier, and move it to:</p>
+<table>
+<tr><th>System</th><th>Where to put it</th></tr>
+<tr><td>Windows</td><td><code>C:\Users\&lt;you&gt;\Documents\VidSqueeze</code></td></tr>
+<tr><td>macOS</td><td><code>~/Documents/VidSqueeze</code></td></tr>
+<tr><td>Linux</td><td><code>~/Documents/VidSqueeze</code></td></tr>
+</table>
+<p><strong>Not your Downloads folder</strong>, and not a temporary one. VidSqueeze
+keeps the tools it fetches, and by default your converted files, inside its own
+folder, so it needs to stay put. Keep the folder together as well: the launcher
+only works from inside it, so move the whole folder rather than dragging the
+launcher out of it. Make a shortcut if you want one on your desktop.</p>
+
+<h3>3. Start it</h3>
+<table>
+<tr><th>System</th><th>What to click</th></tr>
+<tr><td>Windows</td><td>Double click <code>Start VidSqueeze.bat</code></td></tr>
+<tr><td>macOS</td><td><strong>Right click</strong> <code>Start VidSqueeze.command</code>, choose <strong>Open</strong>, then confirm</td></tr>
+<tr><td>Linux</td><td>Double click <code>start-vidsqueeze.sh</code>, or run <code>./start-vidsqueeze.sh</code></td></tr>
+</table>
+<p>macOS needs the right click the first time only, because the file came from the
+internet. After that, double clicking works normally.</p>
+
+<p>VidSqueeze then opens in your browser. On first run it fetches ffmpeg, which it
+uses to do the encoding, into its own folder. If Python is missing, Windows
+downloads a private copy of about 11 MB into that folder too, and macOS and Linux
+tell you the one command that installs it.</p>
+
+<h3>If you use git</h3>
+<pre>cd ~/Documents
+git clone https://github.com/pxspaces/vidsqueeze.git VidSqueeze
+cd VidSqueeze
+python3 -m vidsqueeze</pre>
+<p>Cloning has one advantage worth knowing: when a new version comes out, the
+Updates button inside the program can pull it for you.</p>
+
+<h2>From a terminal</h2>
+<pre>vidsqueeze holiday.mp4                      compress one video
+vidsqueeze ~/Videos                         compress a whole folder
+vidsqueeze -p whatsapp clip.mov             fit a sharing limit
+vidsqueeze --image-format jpeg photo.cr2    develop a camera RAW
+vidsqueeze --contact-sheet ~/Photos         one sheet from a shoot</pre>
+
+<h2>Reading further</h2>
+<ul>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/README.md">README</a></li>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/USER-GUIDE.md">User guide</a></li>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/FEATURES.md">Every feature in detail</a></li>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-VIDEO.md">Working with video</a></li>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-IMAGES.md">Working with photos and images</a></li>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-AUDIO.md">Working with audio</a></li>
+<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/CHANGELOG.md">What changed in each version</a></li>
+</ul>
+
+<footer>
+<p>VidSqueeze is free and open source under the MIT licence. It uses
+<a href="https://ffmpeg.org/">ffmpeg</a> to do the encoding.</p>
+</footer>
+</main>
+</body>
+</html>

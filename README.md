@@ -1,15 +1,33 @@
-<img src="vidsqueeze/web/icon.svg" width="52" alt="">
+<img src="vidsqueeze/web/icon.svg" width="52" alt="VidSqueeze logo">
 
 # VidSqueeze
 
-Make video, audio and photo files smaller, on Windows, macOS or Linux, without
-knowing anything about codecs.
+**Compress and convert video, audio, photos and camera RAW on your own computer.**
+Free and open source, for Windows, macOS and Linux. Nothing is uploaded anywhere,
+there are no file size limits, and you need to know nothing about codecs.
+
+Most converters on the web want the file uploaded first, which puts your holiday
+videos, your client photographs or your recordings on somebody else's server under
+their size limits and their privacy policy. VidSqueeze does the work locally
+instead. The only thing it ever downloads is ffmpeg, once, into its own folder.
 
 Double-click one file. VidSqueeze opens in your browser. Choose your files, pick
 what you want, press Squeeze. If a tool it needs is missing, it offers to fetch
 that tool and keeps it inside its own folder.
 
 People who prefer a terminal get every feature as command line flags.
+
+| Kind           | Reads                                                        | Writes                                       |
+| -------------- | ------------------------------------------------------------ | -------------------------------------------- |
+| **Video**      | MP4, MOV, MKV, AVI, WebM, MPEG, WMV, FLV and more            | MP4, MKV, WebM, MOV in H.265, H.264, AV1, VP9 |
+| **Audio**      | MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF               | Opus, AAC, MP3, FLAC                          |
+| **Photos**     | JPEG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, JPEG XL         | JPEG, PNG, WebP, AVIF, JPEG XL, TIFF, BMP     |
+| **Camera RAW** | CR2, CR3, NEF, ARW, RAF, ORF, RW2, PEF, DNG and twenty more  | any photo format above                        |
+
+Camera RAW is handled properly rather than as an afterthought: developed at 16 bits
+per colour with the camera's own white balance, keeping the camera, lens, exposure
+and the date the photograph was taken. There are contact sheets too, for picking
+which of sixty frames are worth keeping.
 
 **Documentation:** [User guide](USER-GUIDE.md) &middot;
 [Everything it can do](FEATURES.md) &middot; [What changed](CHANGELOG.md) &middot;
