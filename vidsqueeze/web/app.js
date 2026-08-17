@@ -1096,7 +1096,12 @@ function renderSamples(status) {
       const time = document.createElement('b');
       time.textContent = formatTime(result.estimated_seconds);
       info.append(est);
-      est.append('Whole file would be about ', size, ', taking roughly ', time);
+      if (result.exact) {
+        // A still was converted whole, so this is the result, not a guess.
+        est.append('Comes out at ', size, ', in ', time);
+      } else {
+        est.append('Whole file would be about ', size, ', taking roughly ', time);
+      }
     } else {
       est.textContent = result.message || 'This setting failed.';
       info.append(est);
@@ -1485,15 +1490,21 @@ function renderUpdates(report) {
   const app = report.app || {};
   const ff = report.ffmpeg || {};
 
+  const self_ = report.self || {};
   host.append(updateRow({
     title: 'VidSqueeze',
-    detail: app.checked
+    detail: (app.checked
       ? (app.update_available
         ? `You have ${app.current}. Version ${app.latest} is available.`
         : `You have ${app.current}, which is the newest.`)
-      : `You have ${app.current}. No published version to compare against yet.`,
+      : `You have ${app.current}. No published version to compare against yet.`)
+      + (app.update_available && self_.explanation ? ' ' + self_.explanation : ''),
     stale: !!app.update_available,
-    action: app.update_available ? { label: 'How to update', href: app.url } : null,
+    action: app.update_available
+      ? (self_.can_update
+        ? { label: 'Update now', onClick: runSelfUpdate }
+        : { label: 'How to update', href: app.url })
+      : null,
   }));
 
   host.append(updateRow({
@@ -1550,6 +1561,59 @@ function updateRow({ title, detail, stale, action }) {
     }
   }
   return row;
+}
+
+async function runSelfUpdate(button) {
+  if (!window.confirm(
+    'Update VidSqueeze to the newest version?\n\n' +
+    'Your converted files, settings and history are untouched, and the current ' +
+    'version is kept so it can be put back.'
+  )) return;
+
+  button.disabled = true;
+  show('updateProgress', true);
+  show('updatesError', false);
+  setText($('updateMessage'), 'Starting');
+  try {
+    await post('/api/updates/self');
+  } catch (error) {
+    setText($('updatesError'), error.message);
+    show('updatesError', true);
+    button.disabled = false;
+    return;
+  }
+
+  const timer = setInterval(async () => {
+    const status = await api('/api/updates/self').catch(() => null);
+    if (!status) return;
+    setText($('updateMessage'), status.message || '');
+    $('updateBar').style.width = status.fraction >= 0 ? `${status.fraction * 100}%` : '100%';
+    if (status.error) {
+      clearInterval(timer);
+      setText($('updatesError'), status.error);
+      show('updatesError', true);
+      button.disabled = false;
+    } else if (!status.running && status.done) {
+      clearInterval(timer);
+      show('updateProgress', false);
+      // The running program is the old one until it is started again, so there
+      // is nothing useful left to do in this tab.
+      $('updatesBody').innerHTML = '';
+      const done = document.createElement('div');
+      done.className = 'update-row stale';
+      const info = document.createElement('div');
+      info.className = 'info';
+      const strong = document.createElement('strong');
+      strong.textContent = 'Updated';
+      const detail = document.createElement('div');
+      detail.className = 'detail';
+      detail.textContent = status.result +
+        ' Close this window, stop VidSqueeze in the window it opened from, and start it again.';
+      info.append(strong, detail);
+      done.append(info);
+      $('updatesBody').append(done);
+    }
+  }, 700);
 }
 
 async function runFfmpegUpdate(button) {

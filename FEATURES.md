@@ -3,7 +3,7 @@
 A complete inventory. This is a living document: anything added to the program
 is added here in the same change.
 
-Last updated for version 1.3.0.
+Last updated for version 1.4.0.
 
 ---
 
@@ -176,9 +176,23 @@ anyway.
 ## Updates
 
 The **Updates** button reports two separate things: whether a newer VidSqueeze
-exists, and whether a newer ffmpeg exists. ffmpeg can be updated in place, which
-downloads a current build into the VidSqueeze folder and uses it from then on,
-leaving whatever the system has alone.
+exists, and whether a newer ffmpeg exists. Both can be updated from there.
+
+**Updating VidSqueeze** needs no terminal and no git knowledge. Press **Update
+now**. A folder cloned with git is updated with git, because that is what
+someone who cloned it will expect; anything else has the newest release
+downloaded and unpacked over it. Either way:
+
+- your converted files, settings, history and downloaded ffmpeg are untouched
+- the previous version is kept in `.cache/previous-version`, so a bad update can
+  be undone
+- a copy with local changes is refused rather than overwritten
+- restart VidSqueeze afterwards to run the new version
+
+`vidsqueeze --update` does the same from a terminal.
+
+**Updating ffmpeg** downloads a current build into the VidSqueeze folder and
+uses it from then on, leaving whatever the system has alone.
 
 Nothing is checked unless you press the button. VidSqueeze does not contact
 anything on startup.

@@ -14,6 +14,7 @@ import time
 from dataclasses import dataclass, replace
 from pathlib import Path
 
+from . import raw
 from .deps import Tools, _no_window
 from .encode import JobSpec, build_command, normalise, output_duration
 from .paths import CACHE_DIR, human_size
@@ -124,6 +125,9 @@ class SampleResult:
     estimated_bytes: int
     estimated_seconds: float
     message: str = ""
+    #: True when the whole file was converted, so the figures are the real ones
+    #: rather than scaled up from a slice.
+    exact: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -139,7 +143,57 @@ class SampleResult:
             "estimated_size": human_size(self.estimated_bytes),
             "estimated_seconds": round(self.estimated_seconds),
             "message": self.message,
+            "exact": self.exact,
         }
+
+
+def _looks_like_image(tools: Tools, source: Path) -> bool:
+    """Whether this is a still, without letting a failure decide the answer."""
+    try:
+        return probe(tools, source).is_image
+    except Exception:  # noqa: BLE001 - unreadable files are handled further on
+        return False
+
+
+def _sample_image(
+    tools: Tools,
+    source: Path,
+    spec: JobSpec,
+    key: str,
+    label: str,
+    description: str,
+) -> SampleResult:
+    """Convert a still in full, and report the real result.
+
+    Imported here rather than at the top because the encoder imports this
+    module for frame extraction, and a cycle at import time would break both.
+    """
+    from .encode import encode_one
+
+    started = time.monotonic()
+    notes: list[str] = []
+    result = encode_one(tools, source, spec, SAMPLE_DIR, on_note=notes.append)
+    elapsed = time.monotonic() - started
+
+    if not result.ok or result.output is None:
+        return SampleResult(key, label, description, False, None, 0, 0, elapsed, 0, 0,
+                            result.message or "This setting could not be applied.")
+
+    return SampleResult(
+        key=key,
+        label=label,
+        description=description,
+        ok=True,
+        output=result.output,
+        sample_bytes=result.output_bytes,
+        sample_seconds=0.0,
+        elapsed=elapsed,
+        # The whole image was converted, so this is the finished size, exactly.
+        estimated_bytes=result.output_bytes,
+        estimated_seconds=elapsed,
+        message="  ".join(notes) if notes else "",
+        exact=True,
+    )
 
 
 def sample_window(info: MediaInfo, spec: JobSpec, seconds: float) -> tuple[float, float]:
@@ -165,9 +219,18 @@ def encode_sample(
     description: str = "",
     seconds: float = 8.0,
 ) -> SampleResult:
-    """Encode a short stretch and extrapolate the result to the full file."""
+    """Encode a short stretch and extrapolate the result to the full file.
+
+    Still images take a different route. There is no such thing as eight
+    seconds of a photograph, so the whole thing is converted, which makes the
+    reported size the real one rather than an estimate. Sending an image
+    through the video pipeline produced an empty MP4 and a baffling error.
+    """
     source = Path(source)
     SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
+
+    if raw.is_raw(source) or _looks_like_image(tools, source):
+        return _sample_image(tools, source, spec, key, label, description)
 
     try:
         info = probe(tools, source)

@@ -122,8 +122,8 @@ presets on offer change to suit whatever you selected.
   happens only after the result passes every check.
 - **It asks once what you work with**, then shows you only the settings that
   matter. Change it any time from the header.
-- **Updates are checked when you ask**, never on startup, for both VidSqueeze
-  and ffmpeg.
+- **Updates are checked when you ask**, never on startup, and VidSqueeze can
+  update itself in place. No terminal, no git, nothing to re-download.
 
 ---
 

@@ -19,7 +19,7 @@ from .paths import OUTPUT_DIR, ensure_dirs, human_duration, human_size
 from .probe import ProbeError, probe
 from .server import expand_selection
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -49,6 +49,8 @@ def build_parser() -> argparse.ArgumentParser:
     modes.add_argument("--browser", metavar="NAME",
                        help="Which browser to open, for example chromium or firefox. Remembered for next time.")
     modes.add_argument("--setup", action="store_true", help="Download ffmpeg and exit.")
+    modes.add_argument("--update", action="store_true",
+                       help="Update VidSqueeze itself to the newest published version.")
     modes.add_argument("--list-presets", action="store_true", help="Show the available presets and exit.")
     modes.add_argument("--info", action="store_true", help="Describe the input files and exit.")
     modes.add_argument("--dry-run", action="store_true", help="Show the ffmpeg command without running it.")
@@ -271,6 +273,21 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\r  {message}: {fraction * 100:5.1f}%", end="", flush=True)
         else:
             print(f"\r  {message}...", end="", flush=True)
+
+    if args.update:
+        from . import selfupdate
+
+        how = selfupdate.describe()
+        print(f"\n  {how['explanation']}\n")
+        if not how["can_update"]:
+            return 1
+        try:
+            message = selfupdate.perform(progress)
+        except selfupdate.UpdateError as exc:
+            print(f"\n  {exc}\n")
+            return 1
+        print(f"\n  {message}\n")
+        return 0
 
     if args.setup:
         try:

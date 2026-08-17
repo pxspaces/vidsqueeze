@@ -21,13 +21,13 @@ import subprocess
 import threading
 import webbrowser
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from . import deps, history, hwaccel, images, media, presets, raw, updates, watch
+from . import deps, history, hwaccel, images, media, presets, raw, selfupdate, updates, watch
 from .encode import (
     CODEC_LABELS,
     CONTAINER_RULES,
@@ -80,6 +80,8 @@ class Session:
         self.setup_state = {"running": False, "message": "", "fraction": -1.0, "error": "", "done": False}
         self.sample_state: dict = {"running": False, "source": "", "results": [], "error": "", "done": False}
         self.watcher: watch.Watcher | None = None
+        self.update_state = {"running": False, "message": "", "fraction": -1.0,
+                             "error": "", "done": False, "result": ""}
         self.lock = threading.Lock()
         self.should_quit = threading.Event()
 
@@ -384,7 +386,11 @@ class Handler(BaseHTTPRequestHandler):
             self._json(self._watch_state())
         elif route == "/api/updates":
             force = (query.get("force") or ["0"])[0] in ("1", "true")
-            self._json(updates.check(VERSION, SESSION.tools, force=force))
+            report = updates.check(VERSION, SESSION.tools, force=force)
+            report["self"] = selfupdate.describe()
+            self._json(report)
+        elif route == "/api/updates/self":
+            self._json(SESSION.update_state)
         else:
             self._error("Not found", 404)
 
@@ -438,6 +444,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json(self._watch_state())
         elif route == "/api/upgrade":
             self._upgrade_tools()
+        elif route == "/api/updates/self":
+            self._update_self()
         elif route == "/api/history/clear":
             history.clear()
             self._json({"cleared": True})
@@ -823,6 +831,36 @@ class Handler(BaseHTTPRequestHandler):
         SESSION.watcher.start(include_existing=bool(body.get("include_existing")))
         self._json(SESSION.watcher.to_dict())
 
+    def _update_self(self) -> None:
+        """Replace the program's own files with the newest published version."""
+        if SESSION.update_state.get("running"):
+            self._error("An update is already in progress.")
+            return
+        SESSION.update_state.update(
+            {"running": True, "message": "Starting", "fraction": -1.0,
+             "error": "", "done": False, "result": ""}
+        )
+
+        def progress(message: str, fraction: float) -> None:
+            SESSION.update_state["message"] = message
+            SESSION.update_state["fraction"] = fraction
+
+        def work() -> None:
+            try:
+                SESSION.update_state["result"] = selfupdate.perform(progress)
+                SESSION.update_state["done"] = True
+                SESSION.update_state["message"] = SESSION.update_state["result"]
+                SESSION.update_state["fraction"] = 1.0
+            except selfupdate.UpdateError as exc:
+                SESSION.update_state["error"] = str(exc)
+            except Exception as exc:  # noqa: BLE001 - surfaced in the interface
+                SESSION.update_state["error"] = f"Unexpected problem: {exc}"
+            finally:
+                SESSION.update_state["running"] = False
+
+        threading.Thread(target=work, daemon=True).start()
+        self._json({"started": True})
+
     def _upgrade_tools(self) -> None:
         """Fetch a current ffmpeg when the installed one cannot read something."""
         if SESSION.setup_state.get("running"):
@@ -939,32 +977,90 @@ class Handler(BaseHTTPRequestHandler):
         self._json({"started": True, "count": len(paths), "problems": problems})
 
 
+#: Values that mean "off" when a browser sends a checkbox or a select as text.
+_FALSE_WORDS = {"", "0", "false", "no", "off", "none", "null"}
+
+
+def _coerce(value, annotation: str, fallback):
+    """Turn one value from the interface into the type the field declares.
+
+    This reads the type off the dataclass rather than a list of field names
+    kept by hand. That list once omitted the image fields, so a chosen image
+    size arrived as the text "2560" and every later comparison against it threw
+    a type error. Deriving it means a new field cannot be forgotten.
+    """
+    text = annotation.replace(" ", "")
+    optional = "None" in text
+    base = text.split("|")[0]
+
+    if value is None:
+        return None if optional else fallback
+    if isinstance(value, str) and value.strip() == "":
+        return None if optional else fallback
+
+    try:
+        if base == "bool":
+            if isinstance(value, str):
+                return value.strip().lower() not in _FALSE_WORDS
+            return bool(value)
+        if base == "int":
+            # float() first, so "1080.0" and 1080.0 are both accepted.
+            return int(float(value))
+        if base == "float":
+            return float(value)
+        if base == "str":
+            return str(value)
+        if base.startswith("list"):
+            return [str(v) for v in value] if isinstance(value, (list, tuple)) else []
+        if base.startswith("tuple"):
+            return tuple(int(v) for v in value) if value else None
+    except (TypeError, ValueError):
+        # Anything unusable falls back to the default rather than travelling
+        # onwards as the wrong type and failing somewhere less obvious.
+        return None if optional else fallback
+    return value
+
+
+#: Numeric fields that have a meaningful range. Anything outside it is clamped
+#: rather than refused, because a slider that has been dragged past the end is
+#: not worth an error message.
+_LIMITS = {
+    "image_quality": (1, 100),
+    "audio_bitrate": (8, 512),
+    "crf": (0, 63),
+    "scale": (16, 16384),
+    "image_max_dimension": (16, 65536),
+    "video_bitrate": (16, 500000),
+    "target_size_mb": (0.05, 1000000.0),
+}
+
+
 def _spec_from_request(raw: dict) -> JobSpec:
     """Build a JobSpec from the interface, ignoring anything unexpected."""
     spec = JobSpec()
-    for key, value in raw.items():
-        if not hasattr(spec, key):
+    defaults = JobSpec()
+    annotations = {f.name: str(f.type) for f in fields(JobSpec)}
+
+    for key, value in (raw or {}).items():
+        if key not in annotations:
             continue
-        current = getattr(spec, key)
-        if value is None:
-            setattr(spec, key, None)
-            continue
-        if isinstance(current, bool) or key in ("ten_bit", "allow_upscale", "tonemap_hdr",
-                                                "denoise", "deinterlace", "faststart",
-                                                "keep_subtitles", "keep_metadata"):
-            setattr(spec, key, bool(value))
-        elif key in ("audio_bitrate", "scale", "video_bitrate"):
-            setattr(spec, key, int(value) if value != "" else None)
-        elif key in ("crf",):
-            setattr(spec, key, int(value) if value not in ("", None) else None)
-        elif key in ("target_size_mb", "fps", "fps_max", "trim_start", "trim_end"):
-            setattr(spec, key, float(value) if value != "" else None)
-        elif key == "scale_exact":
-            setattr(spec, key, tuple(int(v) for v in value) if value else None)
-        elif key == "extra_args":
-            setattr(spec, key, [str(v) for v in value] if isinstance(value, list) else [])
-        else:
-            setattr(spec, key, str(value))
+        coerced = _coerce(value, annotations[key], getattr(defaults, key))
+        if coerced is not None and key in _LIMITS:
+            low, high = _LIMITS[key]
+            coerced = max(low, min(high, coerced))
+        setattr(spec, key, coerced)
+
+    # Choices that must be one of a known set. A stray value would otherwise
+    # only be noticed deep inside the encoder.
+    if spec.speed not in SPEEDS:
+        spec.speed = defaults.speed
+    if spec.quality not in QUALITY_LABELS:
+        spec.quality = defaults.quality
+    if spec.quality_mode not in ("quality", "size", "bitrate"):
+        spec.quality_mode = defaults.quality_mode
+    if spec.image_format not in images.IMAGE_FORMATS:
+        spec.image_format = defaults.image_format
+
     return spec
 
 

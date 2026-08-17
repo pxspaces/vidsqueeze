@@ -7,6 +7,35 @@ Dates are the day the change was made.
 
 ---
 
+## 1.4.0 - 2026-08-17
+
+### Fixed
+
+- **Choosing an image size made conversion fail** with a type error. Values
+  arriving from the interface were converted using a list of field names kept by
+  hand, and that list had never been extended to the image settings, so a chosen
+  size arrived as the text "2560" and every later comparison against it threw.
+  Conversion now reads each field's declared type from the definition itself, so
+  no field can be forgotten. Values outside a sensible range are brought back
+  into it, and a choice that is not one of the offered options falls back to the
+  default rather than travelling on to fail somewhere less obvious.
+- **Test a short sample failed on photographs.** There is no such thing as eight
+  seconds of a still, and sending one through the video pipeline produced an
+  empty file and a confusing error. Images are now converted whole, which also
+  makes the size reported the real one rather than an estimate, and it says so.
+
+### Added
+
+- **Update VidSqueeze from inside VidSqueeze.** The Updates window now has an
+  Update now button, so nobody needs git or a terminal or to hunt down the
+  download page again. A folder cloned with git is updated with git; anything
+  else has the newest release downloaded and unpacked over it. Converted files,
+  settings, history and the downloaded ffmpeg are untouched, and the previous
+  version is kept so a bad update can be undone.
+- `vidsqueeze --update` does the same from a terminal.
+
+---
+
 ## 1.3.0 - 2026-08-17
 
 ### Fixed

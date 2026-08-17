@@ -3,7 +3,7 @@
 Step by step, for people who have never touched a video setting. If you can
 double-click a file, you can use this.
 
-Living document, last updated for version 1.3.0.
+Living document, last updated for version 1.4.0.
 
 **Jump to:** [Windows](#getting-started-on-windows) &middot;
 [macOS](#getting-started-on-macos) &middot; [Linux](#getting-started-on-linux) &middot;
@@ -259,9 +259,13 @@ installed, so VidSqueeze used the preview picture your camera stored inside the
 file. It tells you when this happens, and names the command to fix it. Install
 that and convert again for full quality.
 
-**How do I check for updates?** Press **Updates** in the header. It reports
-whether a newer VidSqueeze or ffmpeg exists, and can update ffmpeg for you.
-Nothing is checked unless you press it.
+**How do I update?** Press **Updates** in the header, then **Update now**. That
+is all: no terminal, no git, no downloading a ZIP again. Your converted files,
+settings and history are left alone, and the previous version is kept in case
+you want it back. Restart VidSqueeze afterwards.
+
+The same button updates ffmpeg separately, if a newer one exists. Nothing is
+checked unless you press Updates.
 
 **Colours look washed out and grey.** The source is HDR. Make sure **Convert
 HDR to standard range** is ticked in Advanced settings.
