@@ -15,10 +15,6 @@ __pycache__/
 *.py[cod]
 .venv/
 
-# Never published. CLAUDE.md is tracked in the private development repository
-# and removed by tools/prepare-public.sh when building the public copy.
-.claude/
-
 # Editors and operating systems
 .DS_Store
 Thumbs.db
