@@ -7,6 +7,30 @@ Dates are the day the change was made.
 
 ---
 
+## 1.13.0 - 2026-08-18
+
+### Changed
+
+- **Updating now restarts VidSqueeze for you.** It used to finish by saying
+  "Restart VidSqueeze to use the new version. Close this window, stop VidSqueeze
+  in the window it opened from, and start it again", which is four steps and
+  assumes you know what a terminal is.
+
+  It now starts the new version itself and opens it in a new tab. The tab you
+  pressed the button in stops working at that moment, so you can close it: every
+  run of VidSqueeze uses its own private key for the interface, and the new run
+  has a new one. The message says so rather than leaving you looking at a page
+  that has quietly died.
+
+  If the restart does not happen, and it says how long to wait, the old
+  instructions are still there to fall back on. And if starting the new copy fails
+  outright, it says that too rather than closing and leaving you with nothing.
+
+  `vidsqueeze --update` from a terminal still just says to start the program
+  again, because that command has no running copy to restart.
+
+---
+
 ## 1.12.0 - 2026-08-18
 
 ### Fixed

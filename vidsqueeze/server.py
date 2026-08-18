@@ -18,7 +18,9 @@ import shutil
 import socket
 import string
 import subprocess
+import sys
 import threading
+import time
 import webbrowser
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, fields
@@ -85,9 +87,13 @@ class Session:
                                   "output": "", "notes": [], "done_count": 0, "total": 0}
         self.watcher: watch.Watcher | None = None
         self.update_state = {"running": False, "message": "", "fraction": -1.0,
+                             "restarting": False,
                              "error": "", "done": False, "result": ""}
         self.lock = threading.Lock()
         self.should_quit = threading.Event()
+        #: The listening server, so a restart can release the port before the
+        #: replacement tries to claim it.
+        self.httpd = None
 
     # -- dependency setup --------------------------------------------------
 
@@ -272,6 +278,54 @@ def expand_selection(
 # --------------------------------------------------------------------------
 # Request handling
 # --------------------------------------------------------------------------
+
+
+def restart_after_update() -> None:
+    """Start a fresh copy of the program, then stop this one.
+
+    Done in a background thread so the reply describing the update reaches the
+    browser before this process goes away.
+
+    The new copy gets a new access token, because every start does, which means
+    the tab this was pressed in cannot be carried over: its key stops working
+    the moment the old process dies. So the replacement opens a tab of its own,
+    which is what it already does on startup, and the message tells the user to
+    expect that.
+
+    Nothing from the current command line is passed on. In particular
+    --no-browser must not be, or the replacement would start with no window and
+    no way to reach it. A fresh port is chosen for the same reason: it is better
+    to land somewhere that is definitely free than to fight for the old one.
+    """
+    def work() -> None:
+        # Long enough for the reply to have been written and read.
+        time.sleep(1.5)
+        try:
+            if SESSION.httpd is not None:
+                SESSION.httpd.shutdown()
+                SESSION.httpd.server_close()
+        except Exception:      # noqa: BLE001 - we are on the way out regardless
+            pass
+
+        spawn = {"cwd": str(APP_DIR), "stdin": subprocess.DEVNULL}
+        if system_key() == "windows":
+            # Detach, or the replacement dies with the console that started it.
+            spawn["creationflags"] = 0x00000008 | 0x00000200
+        else:
+            spawn["start_new_session"] = True
+        try:
+            subprocess.Popen([sys.executable, "-m", "vidsqueeze"], **spawn)
+        except OSError as exc:
+            # Say so rather than exiting into nothing.
+            SESSION.update_state["message"] = (
+                f"{selfupdate.CHANGED} The new version could not be started "
+                f"automatically ({exc}). Close this window, stop VidSqueeze in "
+                f"the window it opened from, and start it again."
+            )
+            return
+        SESSION.should_quit.set()
+
+    threading.Thread(target=work, daemon=True).start()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -939,10 +993,22 @@ class Handler(BaseHTTPRequestHandler):
 
         def work() -> None:
             try:
-                SESSION.update_state["result"] = selfupdate.perform(progress)
+                result = selfupdate.perform(progress)
+                SESSION.update_state["result"] = result
                 SESSION.update_state["done"] = True
-                SESSION.update_state["message"] = SESSION.update_state["result"]
                 SESSION.update_state["fraction"] = 1.0
+                if selfupdate.changed(result):
+                    SESSION.update_state["restarting"] = True
+                    SESSION.update_state["message"] = (
+                        "Updated. VidSqueeze is restarting to use the new version, "
+                        "and will open in a new tab. This tab stops working once it "
+                        "does, so you can close it. If nothing happens within about "
+                        "fifteen seconds, close this window, stop VidSqueeze in the "
+                        "window it opened from, and start it again."
+                    )
+                    restart_after_update()
+                else:
+                    SESSION.update_state["message"] = result
             except selfupdate.UpdateError as exc:
                 SESSION.update_state["error"] = str(exc)
             except Exception as exc:  # noqa: BLE001 - surfaced in the interface
@@ -1267,6 +1333,7 @@ def serve(open_browser: bool = True, port: int | None = None, browser: str | Non
     chosen = port or _free_port()
     httpd = ThreadingHTTPServer(("127.0.0.1", chosen), Handler)
     httpd.daemon_threads = True
+    SESSION.httpd = httpd
 
     url = f"http://127.0.0.1:{chosen}/?token={SESSION.token}"
 

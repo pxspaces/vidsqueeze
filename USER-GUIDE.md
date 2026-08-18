@@ -3,7 +3,7 @@
 Step by step, for people who have never touched a video setting. If you can
 double-click a file, you can use this.
 
-Living document, last updated for version 1.4.0.
+Living document, last updated for version 1.13.0.
 
 **Jump to:** [Windows](#getting-started-on-windows) &middot;
 [macOS](#getting-started-on-macos) &middot; [Linux](#getting-started-on-linux) &middot;
@@ -318,7 +318,10 @@ which roughly triples the size.
 to take, the window lists what was fixed and what was added, so you can decide
 before installing rather than afterwards.
 
-**How do I update?** Press **Updates** in the header, then **Update now**. That
+**How do I update?** Press **Updates** in the header, then **Update now**. From
+1.13.0 VidSqueeze restarts itself and opens in a new tab when it is done, so there
+is nothing to do by hand. The tab you pressed the button in stops working at that
+point and can be closed. That
 is all: no terminal, no git, no downloading a ZIP again. Your converted files,
 settings and history are left alone, and the previous version is kept in case
 you want it back. Restart VidSqueeze afterwards.

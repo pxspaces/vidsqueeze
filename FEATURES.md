@@ -3,7 +3,7 @@
 A complete inventory. This is a living document: anything added to the program
 is added here in the same change.
 
-Last updated for version 1.12.0.
+Last updated for version 1.13.0.
 
 ---
 
@@ -282,7 +282,8 @@ downloaded and unpacked over it. Either way:
 - the previous version is kept in `.cache/previous-version`, so a bad update can
   be undone
 - a copy with local changes is refused rather than overwritten
-- restart VidSqueeze afterwards to run the new version
+- VidSqueeze restarts itself afterwards and opens in a new tab, so there is
+  nothing to do by hand
 
 `vidsqueeze --update` does the same from a terminal.
 

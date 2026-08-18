@@ -440,7 +440,11 @@ def main(argv: list[str] | None = None) -> int:
         except selfupdate.UpdateError as exc:
             print(f"\n  {exc}\n")
             return 1
-        print(f"\n  {message}\n")
+        if selfupdate.changed(message):
+            # Nothing to restart here: this invocation is about to exit anyway.
+            print("\n  Updated. Start VidSqueeze to use the new version.\n")
+        else:
+            print(f"\n  {message}\n")
         return 0
 
     if args.setup:

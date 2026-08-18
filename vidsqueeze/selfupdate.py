@@ -51,6 +51,17 @@ DISTRIBUTED = [
 ProgressFn = Callable[[str, float], None]
 
 
+#: What perform() says when it changed something, and when it did not. The server
+#: compares against these to decide whether a restart is worth attempting, so they
+#: are constants rather than strings written out twice.
+NO_CHANGE = "Already the newest version."
+CHANGED = "Updated."
+
+
+def changed(result: str) -> bool:
+    """Whether an update actually replaced anything."""
+    return bool(result) and result != NO_CHANGE
+
 class UpdateError(RuntimeError):
     """Raised when an update cannot be carried out."""
 
@@ -120,8 +131,8 @@ def _update_with_git(progress: ProgressFn | None) -> str:
     if not ok:
         raise UpdateError(f"git could not update this copy: {output[-300:]}")
     if "Already up to date" in output or "Already up-to-date" in output:
-        return "Already the newest version."
-    return "Updated. Restart VidSqueeze to use the new version."
+        return NO_CHANGE
+    return CHANGED
 
 
 def _download_tarball(progress: ProgressFn | None) -> bytes:
@@ -203,7 +214,7 @@ def _update_with_download(progress: ProgressFn | None) -> str:
                 f"Installing failed part way: {exc}. The previous version is in {BACKUP_DIR}."
             ) from exc
 
-    return "Updated. Restart VidSqueeze to use the new version."
+    return CHANGED
 
 
 def _back_up() -> None:
