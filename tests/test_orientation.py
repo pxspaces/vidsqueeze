@@ -169,3 +169,54 @@ def _stub():
     return Tools(ffmpeg=Path("ffmpeg"), ffprobe=Path("ffprobe"), version="9.0",
                  encoders=frozenset({"mjpeg", "png", "libwebp", "libsvtav1", "tiff", "bmp"}),
                  source="system")
+
+
+class TheCameraPreviewIsNotLeftSideways(unittest.TestCase):
+    """When no RAW decoder is installed, the camera's own preview is used. Which
+    way up it goes is recorded in the RAW's directory, not inside the preview, so
+    the extracted bytes say nothing about rotation. Every portrait photograph came
+    out sideways on exactly the machines that depend on this path."""
+
+    def test_the_orientation_is_carried_into_the_preview(self):
+        from vidsqueeze import metadata
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            preview = Path(work) / "p.jpg"
+            from .support import make_test_image
+            make_test_image(preview, size="80x60")
+            self.assertEqual(_exif_orientation(preview), 0, "nothing to start with")
+            metadata.splice_into_jpeg(preview, metadata.orientation_block(8))
+            self.assertEqual(_exif_orientation(preview), 8)
+
+    def test_an_orientation_block_records_what_it_is_given(self):
+        """Unlike build_block, which forces upright because the pixels it
+        describes have already been turned. Two opposite jobs, two functions."""
+        from vidsqueeze import metadata
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            for wanted in (1, 3, 6, 8):
+                path = Path(work) / f"o{wanted}.jpg"
+                from .support import make_test_image
+                make_test_image(path, size="60x40")
+                metadata.splice_into_jpeg(path, metadata.orientation_block(wanted))
+                self.assertEqual(_exif_orientation(path), wanted)
+
+    def test_build_block_still_forces_upright(self):
+        from vidsqueeze import metadata
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "dev.jpg"
+            from .support import make_test_image
+            make_test_image(path, size="60x40")
+            metadata.splice_into_jpeg(path, metadata.build_block({0x0112: (3, [6])}))
+            self.assertEqual(_exif_orientation(path), 1)
+
+    def test_rubbish_orientation_falls_back_to_upright(self):
+        from vidsqueeze import metadata
+        from vidsqueeze.probe import _exif_orientation
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / "bad.jpg"
+            from .support import make_test_image
+            make_test_image(path, size="60x40")
+            metadata.splice_into_jpeg(path, metadata.orientation_block(99))
+            self.assertEqual(_exif_orientation(path), 1)

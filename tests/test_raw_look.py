@@ -123,3 +123,47 @@ def _stub():
     return Tools(ffmpeg=Path("ffmpeg"), ffprobe=Path("ffprobe"), version="9.0",
                  encoders=frozenset({"mjpeg", "png", "libwebp", "libsvtav1", "tiff", "bmp"}),
                  source="system")
+
+
+class AutomaticBrighteningIsOff(unittest.TestCase):
+    """The one finding here that needed no reference image at all.
+
+    The decoder's automatic brightening normalises every picture so a fraction of
+    it is white. On an ordinary scene that is roughly right. On a deliberately
+    dark one it is the removal of the photographer's intention: it lifted a
+    low-key photograph from a brightness of 77 to 157. Measured across ten
+    photographs it left the error swinging between 0.53 and 1.15 of the camera's
+    own rendering, so no fixed exposure could compensate. With it off the error is
+    a steady 6 to 14 per cent, which one constant does fix.
+    """
+
+    def test_natural_turns_it_off(self):
+        self.assertIn("-W", raw._flags_for(raw.NATURAL))
+
+    def test_neutral_leaves_the_decoder_to_its_own_judgement(self):
+        self.assertNotIn("-W", raw._flags_for(raw.NEUTRAL))
+
+    def test_a_fixed_exposure_replaces_it(self):
+        flags = raw._flags_for(raw.NATURAL)
+        self.assertEqual(arg_after(flags, "-b"), raw.NATURAL_BRIGHTNESS)
+        self.assertGreater(float(raw.NATURAL_BRIGHTNESS), 1.0)
+
+
+class CalibratedAgainstTheCameraNotAnOperatingSystem(unittest.TestCase):
+    """An earlier version was tuned against one platform's RAW rendering, which
+    was wrong twice over: it exists on only one of the three systems this runs on,
+    and it is that vendor's opinion rather than the photograph. The reference is
+    now the camera's own full size JPEG, which every RAW carries inside it and
+    which is therefore available everywhere. The wrong reference had the colour 20
+    per cent too strong on nearly every picture."""
+
+    def test_saturation_is_the_camera_calibrated_value(self):
+        # 1.35 was the value derived from the wrong reference. Anything at or
+        # above it means somebody has calibrated against a platform again.
+        self.assertLess(raw.NATURAL_SATURATION, 1.30)
+        self.assertGreater(raw.NATURAL_SATURATION, 1.0)
+
+    def test_the_reference_is_available_on_every_platform(self):
+        """extract_preview reads the camera's JPEG out of the RAW with no
+        external tool, so the reference can be reproduced anywhere."""
+        self.assertTrue(callable(raw.extract_preview))

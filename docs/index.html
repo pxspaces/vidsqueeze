@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VidSqueeze: compress video, audio, photos and camera RAW on your own computer</title>
-<meta name="description" content="Free, open source converter that makes video, audio, photo and camera RAW files smaller. Runs on your own computer, works offline, nothing is uploaded. Windows, macOS and Linux, with no dependencies to install.">
+<meta name="description" content="Free, open source converter that makes video, audio, photo and camera RAW files smaller. Works offline with no internet needed after setup, no uploads, no file size limits. Windows, macOS and Linux, nothing to install.">
 <link rel="canonical" href="https://pxspaces.github.io/vidsqueeze/">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -27,7 +27,7 @@
   "name": "VidSqueeze",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Windows, macOS, Linux",
-  "softwareVersion": "1.11.0",
+  "softwareVersion": "1.12.0",
   "description": "Open source converter that makes video, audio, photo and camera RAW files smaller. Runs entirely on your own computer with nothing uploaded.",
   "url": "https://pxspaces.github.io/vidsqueeze/",
   "codeRepository": "https://github.com/pxspaces/vidsqueeze",
@@ -73,7 +73,7 @@ computer. Nothing is uploaded anywhere.</p>
 
 <h2>What it does</h2>
 <p>VidSqueeze compresses and converts media files. It opens in the browser you
-already use, and it also works entirely from a terminal. Version 1.11.0.</p>
+already use, and it also works entirely from a terminal. Version 1.12.0.</p>
 <table>
 <tr><th>Kind</th><th>Reads</th><th>Writes</th></tr>
 <tr><td>Video</td><td>MP4, MOV, MKV, AVI, WebM, MPEG, WMV, FLV, and more</td><td>MP4, MKV, WebM, MOV with H.265, H.264, AV1 or VP9</td></tr>
@@ -82,13 +82,17 @@ already use, and it also works entirely from a terminal. Version 1.11.0.</p>
 <tr><td>Camera RAW</td><td>CR2, CR3, NEF, ARW, RAF, ORF, RW2, DNG and twenty more</td><td>Any photo format above</td></tr>
 </table>
 
-<h2>Why run a converter on your own computer</h2>
-<p>Most converters on the web want you to upload the file first. That means your
-holiday videos, your client photographs or your recordings sit on somebody
-else's server, subject to their size limits and their privacy policy.</p>
-<p>VidSqueeze does the work locally. The interface is a small server on your own
-machine that only your browser can reach, and the only thing it ever downloads
-is ffmpeg, once. Your files never leave the computer.</p>
+<h2>It needs the internet once, and then never again</h2>
+<p>On first run VidSqueeze fetches ffmpeg into its own folder. After that you can
+turn the network off and it keeps working: on a plane, on a train, on a machine
+that has never been online, or on one you would rather did not talk to anything.</p>
+<p>That is the real difference from a converter on the web. Those want the file
+uploaded first, which puts your holiday videos, your client photographs or your
+recordings on somebody else's server, subject to their size limits, their queue,
+their privacy policy, and their decision about how long to keep a copy.</p>
+<p>Nothing you convert here leaves the computer, because there is nowhere for it to
+go. The interface is a small server on your own machine that only your own browser
+can reach.</p>
 
 <h2>Made for photographers as much as for video</h2>
 <p>Camera RAW is handled properly rather than as an afterthought. RAW files are
@@ -116,7 +120,7 @@ of it. If you would rather have the very newest work, use the green
 
 <h3>2. Unpack it somewhere permanent</h3>
 <p>The zip unpacks into a folder with a long name such as
-<code>vidsqueeze-1.11.0</code>. Rename it to <code>VidSqueeze</code>, which is
+<code>vidsqueeze-1.12.0</code>. Rename it to <code>VidSqueeze</code>, which is
 tidier, and move it to:</p>
 <table>
 <tr><th>System</th><th>Where to put it</th></tr>

@@ -3,7 +3,7 @@
 A complete inventory. This is a living document: anything added to the program
 is added here in the same change.
 
-Last updated for version 1.4.0.
+Last updated for version 1.12.0.
 
 ---
 
@@ -490,8 +490,16 @@ Flags: `--codec --container --quality --crf --size --bitrate --speed --scale
 
 ## Privacy and security
 
-Nothing is uploaded anywhere. The only network access is downloading ffmpeg, and
-only when you ask for it.
+**It needs the internet once, and then never again.** On first run it fetches
+ffmpeg. After that you can turn the network off and everything still works: on a
+plane, on a train, or on a machine that has never been online and never will be.
+The only other time it reaches out is when you press the update button.
+
+Nothing is uploaded anywhere, because there is nowhere for it to go. That is the
+real difference from a converter on the web, which wants the file uploaded first
+and puts your holiday videos, your client photographs or your recordings on
+somebody else's server, under their size limits, their queue, their privacy policy
+and their decision about how long to keep a copy.
 
 The interface is a server on `127.0.0.1` that your own browser talks to. It is
 not reachable from your network. Every request must carry a key generated fresh

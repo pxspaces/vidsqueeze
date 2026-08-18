@@ -194,7 +194,8 @@ def build_block(fields: dict) -> bytes:
 
     # The rotation has already been applied to the pixels by this point, so the
     # picture is upright and must say so. Leaving the original value here would
-    # turn it a second time in every viewer that honours it.
+    # turn it a second time in every viewer that honours it. A caller that needs
+    # to record a real orientation wants orientation_block instead.
     main[ORIENTATION] = (SHORT, [1])
 
     if not details:
@@ -258,6 +259,30 @@ def _payload(kind: int, values) -> bytes:
         else:
             out += int(value).to_bytes(_WIDTHS[kind], "little")
     return out
+
+
+def orientation_block(value: int) -> bytes:
+    """An EXIF block carrying nothing but an orientation.
+
+    Needed for the camera preview pulled out of a RAW file. That preview is a
+    complete JPEG, but which way up it goes is recorded in the RAW's own
+    directory rather than inside the preview, so the extracted bytes say nothing
+    about rotation. Without this a portrait photograph came out sideways on any
+    machine with no RAW decoder installed, which is the only path where the
+    preview is used at all.
+
+    Built here rather than through build_block, whose entire job is to force the
+    orientation upright because the pixels it describes have already been turned.
+    Two opposite requirements in one function would be a trap.
+    """
+    turned = int(value) if 1 <= int(value) <= 8 else 1
+    return (b"II\x2a\x00" + (8).to_bytes(4, "little")     # header, IFD at 8
+            + (1).to_bytes(2, "little")                    # one entry
+            + ORIENTATION.to_bytes(2, "little")
+            + SHORT.to_bytes(2, "little")
+            + (1).to_bytes(4, "little")
+            + turned.to_bytes(2, "little") + b"\x00\x00"
+            + b"\x00\x00\x00\x00")                     # no next IFD
 
 
 def splice_into_jpeg(path: Path, block: bytes) -> bool:

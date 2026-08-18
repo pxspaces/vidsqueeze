@@ -6,10 +6,15 @@
 Free and open source, for Windows, macOS and Linux. Nothing is uploaded anywhere,
 there are no file size limits, and you need to know nothing about codecs.
 
-Most converters on the web want the file uploaded first, which puts your holiday
-videos, your client photographs or your recordings on somebody else's server under
-their size limits and their privacy policy. VidSqueeze does the work locally
-instead. The only thing it ever downloads is ffmpeg, once, into its own folder.
+**It needs the internet once, and then never again.** On first run it fetches
+ffmpeg into its own folder. After that you can turn the network off and VidSqueeze
+keeps working, on a plane, on a train, or on a machine that has never been online.
+
+That is the real difference from a converter on the web. Those want the file
+uploaded first, which puts your holiday videos, your client photographs or your
+recordings on somebody else's server, under their size limits, their queue, their
+privacy policy and their decision about how long to keep a copy. Nothing you
+convert here leaves the computer, because there is nowhere for it to go.
 
 Double-click one file. VidSqueeze opens in your browser. Choose your files, pick
 what you want, press Squeeze. If a tool it needs is missing, it offers to fetch

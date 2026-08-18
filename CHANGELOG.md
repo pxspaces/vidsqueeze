@@ -7,6 +7,38 @@ Dates are the day the change was made.
 
 ---
 
+## 1.12.0 - 2026-08-18
+
+### Fixed
+
+- **Photographs were still not coming out like the photograph.** Two causes, and
+  the larger one was a mistake in how the previous attempt was judged.
+
+  The decoder's automatic brightening was left on. It normalises every picture so
+  that a fraction of it is white, which is roughly right for an ordinary scene and
+  badly wrong for a deliberately dark one: it lifted one low-key photograph's
+  brightness from 77 to 157, turning a moody room into a flat bright one and
+  losing the detail in a white dress entirely. Measured across ten photographs it
+  left the error swinging between 0.53 and 1.15 of the camera's own rendering, so
+  no fixed exposure setting could ever have compensated for it. It is now off,
+  with a fixed exposure in its place, and the error is a steady few per cent.
+
+  The colour was also 20 per cent too strong, because the previous settings were
+  measured against the operating system's own RAW rendering. That was the wrong
+  yardstick twice over: it exists on only one of the three systems VidSqueeze runs
+  on, and it is that vendor's opinion rather than the photograph. The reference is
+  now **the camera's own full size JPEG**, which every RAW file carries inside it,
+  so the target is the manufacturer's reading of its own sensor and is the same on
+  every machine.
+
+- **Camera photographs came out sideways when no RAW decoder was installed.** In
+  that case VidSqueeze uses the preview the camera stored inside the file, and
+  which way up it goes is recorded in the RAW's own directory rather than inside
+  that preview. So every portrait photograph was rotated, on exactly the machines
+  that depend on this path. The rotation is now carried across.
+
+---
+
 ## 1.11.0 - 2026-08-17
 
 ### Added

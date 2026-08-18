@@ -54,16 +54,36 @@ NATURAL = "natural"     # looks like the photograph. The default.
 NEUTRAL = "neutral"     # flat and faithful, for editing afterwards
 LOOKS = (NATURAL, NEUTRAL)
 
-#: The natural look, arrived at by measuring rather than by taste.
+#: The natural look, measured against ten photographs rather than chosen by taste.
 #:
-#: Two photographs in very different light were rendered by the operating
-#: system's own RAW pipeline, and these are the values that bring a plain
-#: develop closest to it without clipping any highlight. Brightness lands within
-#: 8 per cent on both, and colour within 8 per cent on one and 3 on the other.
-#: Values that matched one photograph exactly overshot the other by 15 per cent,
-#: which is what tuning against a single image buys you.
-NATURAL_BRIGHTNESS = "1.4"      # given to the decoder, before the tone curve
-NATURAL_SATURATION = 1.30       # applied afterwards; no decoder here can do it
+#: The reference is **the camera's own JPEG**, which every RAW file carries inside
+#: it at full size. That matters more than it sounds. An earlier attempt used the
+#: operating system's RAW rendering as the target, which was wrong twice over: it
+#: only exists on one of the three platforms this program runs on, and it is that
+#: vendor's opinion rather than the photograph. The camera's own rendering is the
+#: manufacturer's interpretation of its own sensor, it is what the photographer saw
+#: on the back of the camera, and it is available on every machine because it is in
+#: the file. Calibrating against the wrong reference had the colour 20 per cent too
+#: strong on nearly every picture.
+#:
+#: The important finding was not a number but a flag: automatic brightening has to
+#: be off. It normalises every picture so a fraction of it is white, which is
+#: roughly right for an ordinary scene and badly wrong for a deliberately dark one.
+#: It lifted a low-key photograph from a brightness of 77 to 157, which is not a
+#: correction but the removal of the photographer's intention, and it left the
+#: error swinging between 0.53 and 1.15 across the ten, so no fixed exposure could
+#: ever have compensated for it.
+#:
+#: With it off, these values land brightness within 5 per cent of the camera on
+#: most of the ten and 11 per cent at worst, colour within 1 per cent on average,
+#: and clip no highlight in any of them.
+#:
+#: One picture resists and always will: a white dress against a white wall, which
+#: the camera renders almost neutral and any fixed multiplier oversaturates. A
+#: constant cannot know that. It is the price of not second-guessing the scene.
+NATURAL_NO_AUTO_BRIGHT = "-W"   # the flag that made the rest possible
+NATURAL_BRIGHTNESS = "1.65"     # fixed exposure, since nothing adapts it now
+NATURAL_SATURATION = 1.15       # applied afterwards; no decoder here can do it
 
 
 def saturation_for(look: str) -> float:
@@ -73,7 +93,10 @@ def saturation_for(look: str) -> float:
 
 def _flags_for(look: str) -> list[str]:
     if look == NATURAL:
-        return DEVELOP_FLAGS + ["-b", NATURAL_BRIGHTNESS]
+        return DEVELOP_FLAGS + [NATURAL_NO_AUTO_BRIGHT, "-b", NATURAL_BRIGHTNESS]
+    # Neutral keeps the decoder's automatic brightening, because somebody asking
+    # for a flat starting point is asking for the decoder's own judgement rather
+    # than ours.
     return DEVELOP_FLAGS
 
 #: Formats produced by digital cameras. Not every decoder reads every one, but
@@ -234,6 +257,12 @@ def develop(source: Path, workdir: Path, decoder: Decoder | None = None,
     preview = workdir / f"{source.stem}-preview.jpg"
     dimensions = extract_preview(source, preview)
     if dimensions:
+        # The preview is a whole JPEG, but which way up it goes is recorded in the
+        # RAW's own directory rather than inside it, so the extracted bytes say
+        # nothing about rotation. Every portrait photograph came out sideways on
+        # machines with no decoder installed, which is the one path where this
+        # fallback is used at all.
+        _carry_orientation(source, preview)
         width, height = dimensions
         return preview, (
             f"{note_prefix}Used the preview image the camera stored inside the file "
@@ -244,6 +273,19 @@ def develop(source: Path, workdir: Path, decoder: Decoder | None = None,
         f"{note_prefix}There is no preview inside the file either. "
         f"Install a RAW decoder and try again: {install_hint()}"
     )
+
+
+def _carry_orientation(source: Path, preview: Path) -> None:
+    """Tell the extracted preview which way up it goes. Never fatal."""
+    try:
+        from .metadata import orientation_block, splice_into_jpeg
+        from .probe import _exif_orientation
+
+        turned = _exif_orientation(source)
+        if turned > 1:
+            splice_into_jpeg(preview, orientation_block(turned))
+    except Exception:      # noqa: BLE001 - a sideways picture beats no picture
+        pass
 
 
 def _develop_with(decoder: Decoder, source: Path, target: Path,
