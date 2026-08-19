@@ -144,11 +144,17 @@ launcher out of it. Make a shortcut if you want one on your desktop.</p>
 <table>
 <tr><th>System</th><th>What to click</th></tr>
 <tr><td>Windows</td><td>Double click <code>Start HalveIt.bat</code></td></tr>
-<tr><td>macOS</td><td><strong>Right click</strong> <code>Start HalveIt.command</code>, choose <strong>Open</strong>, then confirm</td></tr>
+<tr><td>macOS</td><td>Double click <code>Start HalveIt.command</code></td></tr>
 <tr><td>Linux</td><td>Double click <code>start-halveit.sh</code>, or run <code>./start-halveit.sh</code></td></tr>
 </table>
-<p>macOS needs the right click the first time only, because the file came from the
-internet. After that, double clicking works normally.</p>
+<p><strong>If macOS refuses to open it</strong>, that is because a browser downloaded
+it, and macOS marks anything a browser fetches. Cloning the repository or
+downloading from a terminal does not do this. Let it refuse once, so the refusal is
+recorded, then open <strong>System Settings</strong>, go to
+<strong>Privacy and Security</strong>, scroll to the bottom, and press
+<strong>Open Anyway</strong>. On macOS 14 and earlier the older route still works:
+right click the file, choose <strong>Open</strong>, then press
+<strong>Open</strong> again. Either way it is once, not every time.</p>
 
 <p>HalveIt then opens in your browser. On first run it fetches ffmpeg, which it
 uses to do the encoding, into its own folder. If Python is missing, Windows

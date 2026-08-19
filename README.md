@@ -81,11 +81,22 @@ above.
 | System      | What to do                                                                |
 | ----------- | ------------------------------------------------------------------------- |
 | **Windows** | Double-click **`Start HalveIt.bat`**                                    |
-| **macOS**   | **Right-click** **`Start HalveIt.command`**, choose **Open**, confirm    |
+| **macOS**   | Double-click **`Start HalveIt.command`**                                  |
 | **Linux**   | Double-click **`start-halveit.sh`**, or run `./start-halveit.sh`      |
 
-macOS needs the right-click the first time only, because the file came from the
-internet. After that, double-clicking works.
+**If macOS refuses to open it**, that is because a browser downloaded it. macOS
+marks anything a browser fetches and asks before running it once. It does not
+happen if you cloned this repository or downloaded it from a terminal, only if
+you used a browser. Try to open it first, so the refusal is recorded, then:
+
+- **macOS 15 Sequoia and later:** open **System Settings**, go to
+  **Privacy & Security**, scroll to the bottom, and press **Open Anyway** beside
+  the message about HalveIt. Confirm, and it never asks again.
+- **macOS 14 and earlier:** right-click the file, choose **Open**, then press
+  **Open** in the warning.
+
+Either way it is once, not every time. A terminal is not affected at all, so
+`bash "Start HalveIt.command"` works whatever macOS thinks.
 
 Missing Python? On Windows HalveIt downloads a private copy, about 11 MB,
 into its own folder. On macOS and Linux it names the one command that installs

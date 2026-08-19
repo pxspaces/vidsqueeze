@@ -7,6 +7,29 @@ Dates are the day the change was made.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- **The macOS starting instructions were out of date, and could have left people
+  stuck at the first step.** They said to right-click the launcher and choose
+  Open. Apple removed that route in macOS 15 Sequoia, so on any recent Mac it is
+  no longer there to follow.
+
+  The instructions now give both: **System Settings**, **Privacy & Security**,
+  **Open Anyway** for macOS 15 and later, and the old right-click for macOS 14
+  and earlier. They also say the step that macOS itself does not make obvious,
+  which is that you have to let it refuse you once before the way past appears.
+
+  Worth knowing, because it explains why this was not spotted sooner: macOS only
+  asks about files a **browser** downloaded. A browser marks what it fetches; a
+  clone or a download from a terminal is not marked, and opens with no fuss at
+  all. Both routes are now described, so it is clear which applies to you.
+
+  A terminal is not affected either way, and that is written down too.
+
+---
+
 ## 2.0.0 - 2026-08-19
 
 ### Changed

@@ -73,18 +73,46 @@ wait, then run the command again.
 double-click it in Finder, and drag the unpacked **HalveIt** folder into
 **Documents**.
 
-### 2. Let macOS run it
+### 2. Start it, and let macOS run it if it asks
 
-macOS blocks programs downloaded from the internet until you say otherwise. Do
-this once:
+In Finder, open **Documents** then **HalveIt**, and double-click
+**`Start HalveIt.command`**.
 
-- In Finder, open **Documents** then **HalveIt**.
-- **Right-click** (or hold `Control` and click) **`Start HalveIt.command`**.
-- Choose **Open** from the menu.
-- A warning appears. Click **Open** again.
+That may be all you need. macOS only asks about programs a **browser**
+downloaded, because a browser marks the file as having come from the internet.
+If you cloned this with `git`, or downloaded it with a command in Terminal,
+nothing marked it and it simply opens.
 
-You must use right-click then Open the first time. Double-clicking gives you a
-warning with no way past it. After this once, double-clicking works forever.
+**If it refuses**, say "cannot be opened", or nothing appears to happen, do this
+once. Which steps you need depends on your version of macOS, which is under the
+Apple menu, **About This Mac**.
+
+**macOS 15 Sequoia and later**
+
+1. Double-click the file and let it be refused. macOS only offers the way past
+   after it has turned you down once, so this step is not optional.
+2. Open **System Settings**, then **Privacy & Security**.
+3. Scroll to the bottom, to **Security**. There is a line saying
+   `Start HalveIt.command` was blocked.
+4. Press **Open Anyway**, then confirm.
+
+**macOS 14 Sonoma and earlier**
+
+1. **Right-click** (or hold `Control` and click) **`Start HalveIt.command`**.
+2. Choose **Open** from the menu.
+3. A warning appears. Press **Open** again.
+
+Apple removed that right-click route in macOS 15, which is why there are two
+sets of steps. After doing whichever applies to you once, double-clicking works
+forever.
+
+**If you would rather not do any of that**, a terminal is not affected. Neither
+of the steps above is needed for:
+
+```
+cd ~/Documents/HalveIt
+bash "Start HalveIt.command"
+```
 
 ### 3. If double-clicking does nothing at all
 

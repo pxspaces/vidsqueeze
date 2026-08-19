@@ -163,3 +163,55 @@ def _tools():
         encoders=frozenset({"mjpeg", "png", "libwebp", "libsvtav1", "tiff", "bmp", "libjxl"}),
         source="system",
     )
+
+
+class TheMacInstructionsCoverBothMacOSGenerations(unittest.TestCase):
+    """Apple removed the Control-click override in macOS 15, so instructions that
+    only give that route strand anybody on a current Mac. They only strand people
+    who downloaded through a **browser**: that is what marks a file as having come
+    from the internet, and a clone or a terminal download is not marked at all,
+    which is why this went unnoticed. Verified on this machine: a cloned checkout
+    carries no quarantine attribute, a curl download carries none either, and one
+    that does carry it is refused by spctl but still runs from a terminal.
+
+    A test cannot know when Apple changes something again. What it can do is stop
+    somebody tidying one of the two routes away.
+    """
+
+    ROOT = Path(__file__).resolve().parent.parent
+
+    def documents(self):
+        for name in ("README.md", "USER-GUIDE.md"):
+            path = self.ROOT / name
+            if path.exists():
+                yield name, path.read_text()
+
+    def test_the_newer_route_is_given(self):
+        for name, text in self.documents():
+            with self.subTest(document=name):
+                self.assertIn("Open Anyway", text,
+                              f"{name} does not say how to start it on macOS 15 or later")
+                self.assertIn("Privacy", text)
+
+    def test_the_older_route_is_still_given(self):
+        """Not everyone is on a current Mac."""
+        for name, text in self.documents():
+            with self.subTest(document=name):
+                self.assertRegex(text.lower(), r"right.click",
+                                 f"{name} dropped the route for macOS 14 and earlier")
+
+    def test_the_landing_page_says_the_same(self):
+        script = self.ROOT / "tools" / "prepare-public.sh"
+        if not script.exists():
+            self.skipTest("this is the published copy, which does not carry the script")
+        text = script.read_text()
+        self.assertIn("Open Anyway", text)
+        self.assertIn("right click", text.lower())
+
+    def test_nothing_claims_the_right_click_is_required(self):
+        """The old wording said you *must* use right click and that double clicking
+        gives a warning with no way past it. Both are now wrong."""
+        for name, text in self.documents():
+            with self.subTest(document=name):
+                self.assertNotIn("You must use right-click", text)
+                self.assertNotIn("with no way past it", text)
