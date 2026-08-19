@@ -4,7 +4,7 @@ ffmpeg cannot read camera RAW. Its "raw" decoders are Cintel, DPX and OpenEXR,
 none of which is what comes off a Canon or a Nikon. Reading CR2, NEF, ARW and
 their relatives means using a decoder built for the job.
 
-So VidSqueeze looks for one, in descending order of how good the result is, and
+So HalveIt looks for one, in descending order of how good the result is, and
 uses the best it finds to develop the RAW into an ordinary image. That image
 then goes through the normal picture pipeline, so every setting behaves exactly
 as it does for a JPEG.

@@ -5,8 +5,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from vidsqueeze.encode import JobSpec, _scaled_dimensions
-from vidsqueeze.probe import MediaInfo
+from halveit.encode import JobSpec, _scaled_dimensions
+from halveit.probe import MediaInfo
 
 
 def video(width=1920, height=1080, duration=60.0, size_bytes=100_000_000):

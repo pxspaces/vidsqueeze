@@ -1,4 +1,4 @@
-# VidSqueeze user guide
+# HalveIt user guide
 
 Step by step, for people who have never touched a video setting. If you can
 double-click a file, you can use this.
@@ -14,36 +14,36 @@ Living document, last updated for version 1.13.0.
 
 ## Before you start: where to put it
 
-Put the VidSqueeze folder somewhere permanent:
+Put the HalveIt folder somewhere permanent:
 
 | System  | Where                                  |
 | ------- | -------------------------------------- |
-| Windows | `C:\Users\<you>\Documents\VidSqueeze`   |
-| macOS   | `/Users/<you>/Documents/VidSqueeze`     |
-| Linux   | `/home/<you>/Documents/VidSqueeze`      |
+| Windows | `C:\Users\<you>\Documents\HalveIt`   |
+| macOS   | `/Users/<you>/Documents/HalveIt`     |
+| Linux   | `/home/<you>/Documents/HalveIt`      |
 
 Two things matter:
 
 1. **Keep the folder together.** The launcher only works from inside it. Move
    the whole folder, and make a shortcut or alias if you want it on your desktop.
-2. **Do not leave it in Downloads.** VidSqueeze keeps the tools it downloads,
+2. **Do not leave it in Downloads.** HalveIt keeps the tools it downloads,
    and by default your converted files, inside its own folder. If you empty that
    location periodically you will lose both.
 
 Nothing is installed anywhere else, and no administrator password is needed.
-Deleting the folder removes VidSqueeze completely.
+Deleting the folder removes HalveIt completely.
 
 ---
 
 ## Getting started on Windows
 
 1. Download the ZIP from the repository page and open it.
-2. Drag the **VidSqueeze** folder into your **Documents** folder.
-3. Open it and double-click **`Start VidSqueeze.bat`**.
+2. Drag the **HalveIt** folder into your **Documents** folder.
+3. Open it and double-click **`Start HalveIt.bat`**.
 4. A black window appears. Leave it open, it is doing the work.
-5. Your browser opens at VidSqueeze.
+5. Your browser opens at HalveIt.
 
-If Windows says Python is missing, VidSqueeze offers to download a private copy,
+If Windows says Python is missing, HalveIt offers to download a private copy,
 about 11 MB, into its own folder. Say yes. It needs no administrator rights.
 
 If Windows SmartScreen warns about an unrecognised app, choose **More info**,
@@ -63,14 +63,14 @@ then paste this and press Return:
 
 ```
 cd ~/Documents
-git clone https://github.com/pxspaces/vidsqueeze.git VidSqueeze
+git clone https://github.com/pxspaces/halveit.git HalveIt
 ```
 
 If `git` is not installed, macOS offers to install the developer tools. Accept,
 wait, then run the command again.
 
 **No Terminal, no git?** Download the ZIP from the repository page instead,
-double-click it in Finder, and drag the unpacked **VidSqueeze** folder into
+double-click it in Finder, and drag the unpacked **HalveIt** folder into
 **Documents**.
 
 ### 2. Let macOS run it
@@ -78,8 +78,8 @@ double-click it in Finder, and drag the unpacked **VidSqueeze** folder into
 macOS blocks programs downloaded from the internet until you say otherwise. Do
 this once:
 
-- In Finder, open **Documents** then **VidSqueeze**.
-- **Right-click** (or hold `Control` and click) **`Start VidSqueeze.command`**.
+- In Finder, open **Documents** then **HalveIt**.
+- **Right-click** (or hold `Control` and click) **`Start HalveIt.command`**.
 - Choose **Open** from the menu.
 - A warning appears. Click **Open** again.
 
@@ -92,8 +92,8 @@ The file lost its permission to run, which happens with some ZIP downloads. In
 Terminal:
 
 ```
-cd ~/Documents/VidSqueeze
-chmod +x "Start VidSqueeze.command"
+cd ~/Documents/HalveIt
+chmod +x "Start HalveIt.command"
 ```
 
 Then try step 2 again.
@@ -106,21 +106,21 @@ macOS ships without Python until the developer tools are installed. In Terminal:
 xcode-select --install
 ```
 
-Accept the installer, wait for it to finish, then start VidSqueeze again.
-VidSqueeze offers to do this for you as well.
+Accept the installer, wait for it to finish, then start HalveIt again.
+HalveIt offers to do this for you as well.
 
 ### 5. First run
 
-A Terminal window opens and your default browser opens at VidSqueeze. If ffmpeg
+A Terminal window opens and your default browser opens at HalveIt. If ffmpeg
 is not on your Mac, press **Download and continue**, wait about a minute, and
 you are ready.
 
-**Leave the Terminal window open** while you work. Closing it stops VidSqueeze.
+**Leave the Terminal window open** while you work. Closing it stops HalveIt.
 Press **Quit** in the browser, or `Control` + `C` in Terminal, when finished.
 
 ### Making it easier to start
 
-Drag `Start VidSqueeze.command` onto your Dock, or right-click it in Finder and
+Drag `Start HalveIt.command` onto your Dock, or right-click it in Finder and
 choose **Make Alias**, then move the alias to your desktop. Do not move the
 original out of the folder.
 
@@ -131,14 +131,14 @@ original out of the folder.
 1. Get the folder:
    ```
    cd ~/Documents
-   git clone https://github.com/pxspaces/vidsqueeze.git VidSqueeze
+   git clone https://github.com/pxspaces/halveit.git HalveIt
    ```
 2. Start it:
    ```
-   cd VidSqueeze
-   ./start-vidsqueeze.sh
+   cd HalveIt
+   ./start-halveit.sh
    ```
-   Or double-click `start-vidsqueeze.sh` in your file manager and choose
+   Or double-click `start-halveit.sh` in your file manager and choose
    **Run in Terminal**.
 3. To add it to your applications menu, once:
    ```
@@ -152,7 +152,7 @@ command for your distribution.
 
 ## The first question
 
-The first time it opens, VidSqueeze asks what you work with: **Anything**,
+The first time it opens, HalveIt asks what you work with: **Anything**,
 **Video**, **Audio** or **Photos**. This only decides which settings you are
 shown, so nothing is hidden permanently. Pick **Anything** if you are not sure.
 
@@ -187,7 +187,7 @@ header as a row of buttons, so you can change it whenever you like.
    settings** to compare two or three at once and pick the winner. This is worth
    doing before a long batch.
 
-4. **Press Squeeze.** Progress shows on each file. Finished files appear in
+4. **Press Compress.** Progress shows on each file. Finished files appear in
    Results on the right.
 
 5. **Check the result.** Click a finished file in Results. The Compare tab shows
@@ -195,7 +195,7 @@ header as a row of buttons, so you can change it whenever you like.
    If you want to watch them properly, switch to Play, or press **Open result**
    to open it in your usual player.
 
-6. **Find your files.** They are in the `output` folder inside VidSqueeze. Press
+6. **Find your files.** They are in the `output` folder inside HalveIt. Press
    **Folder** at the top of the Results pane to open it.
 
 ---
@@ -206,7 +206,7 @@ header as a row of buttons, so you can change it whenever you like.
 2. Under Trim, a strip of thumbnails shows the video across its length.
 3. Drag **Start** and **End**. The readout shows what you are keeping.
 4. Press **Use these trim points**.
-5. Press **Squeeze**.
+5. Press **Compress**.
 
 Trim points apply to every file in the batch, so trim one at a time unless they
 all need the same cut.
@@ -221,10 +221,10 @@ Useful for a folder your camera or phone dumps files into.
 2. Press **Choose** and pick the folder.
 3. Press **Start watching**.
 
-New files appear in Sources as they arrive. VidSqueeze waits until a file has
+New files appear in Sources as they arrive. HalveIt waits until a file has
 finished copying before adding it.
 
-**It never converts anything on its own.** You always press Squeeze yourself.
+**It never converts anything on its own.** You always press Compress yourself.
 
 ---
 
@@ -243,7 +243,7 @@ This cannot be undone. There is no recycle bin.
 
 ## When something goes wrong
 
-**A file failed.** Open the `logs` folder inside VidSqueeze. Every failure
+**A file failed.** Open the `logs` folder inside HalveIt. Every failure
 records the exact command and what went wrong.
 
 
@@ -269,12 +269,12 @@ to take, the window lists what was fixed and what was added, so you can decide
 before installing rather than afterwards.
 
 **How do I update?** Press **Updates** in the header, then **Update now**. From
-1.13.0 VidSqueeze restarts itself and opens in a new tab when it is done, so there
+1.13.0 HalveIt restarts itself and opens in a new tab when it is done, so there
 is nothing to do by hand. The tab you pressed the button in stops working at that
 point and can be closed. That
 is all: no terminal, no git, no downloading a ZIP again. Your converted files,
 settings and history are left alone, and the previous version is kept in case
-you want it back. Restart VidSqueeze afterwards.
+you want it back. Restart HalveIt afterwards.
 
 The same button updates ffmpeg separately, if a newer one exists. Nothing is
 checked unless you press Updates.
@@ -289,17 +289,17 @@ compressed. Try a lower quality level or a smaller size.
 speed, reduce the resolution, or turn on graphics card acceleration under Speed
 if your machine offers it. H.265 is about three times slower than H.264.
 
-**The browser did not open.** The address is printed in the window VidSqueeze
+**The browser did not open.** The address is printed in the window HalveIt
 opened. Copy it into your browser. It only listens on your own computer, and the
 address contains a key that changes every time.
 
 **It opened in the wrong browser.** Start it with the one you want, once:
 ```
-python3 -m vidsqueeze --browser firefox
+python3 -m halveit --browser firefox
 ```
 
 **Nothing works and I want to start again.** Delete the `bin`, `runtime` and
-`.cache` folders inside VidSqueeze and start it again. Your converted files in
+`.cache` folders inside HalveIt and start it again. Your converted files in
 `output` are not touched.
 
 ---

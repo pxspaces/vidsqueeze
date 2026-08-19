@@ -26,7 +26,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.fast:
-        os.environ["VIDSQUEEZE_TESTS_FAST"] = "1"
+        os.environ["HALVEIT_TESTS_FAST"] = "1"
 
     # Import only after the flag is set, so support.py reads it at import time.
     if str(ROOT) not in sys.path:
@@ -40,7 +40,7 @@ def main() -> int:
     from tests import support
     if not args.fast and support.tools() is None:
         print("  ffmpeg was not found, so the tests that measure real output "
-              "will skip.\n  Run 'python3 -m vidsqueeze --setup' to fetch it.\n")
+              "will skip.\n  Run 'python3 -m halveit --setup' to fetch it.\n")
 
     runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1)
     return 0 if runner.run(suite).wasSuccessful() else 1

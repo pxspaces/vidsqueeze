@@ -1,7 +1,7 @@
 """Where everything lives.
 
-VidSqueeze is deliberately self-contained: the tools it downloads, the files it
-writes and the settings it remembers all stay inside the VidSqueeze folder.
+HalveIt is deliberately self-contained: the tools it downloads, the files it
+writes and the settings it remembers all stay inside the HalveIt folder.
 Nothing is scattered across the user's machine, and deleting the folder removes
 every trace of the program.
 """
@@ -13,7 +13,7 @@ import platform
 import sys
 from pathlib import Path
 
-#: The VidSqueeze folder itself, i.e. the parent of this package. When the
+#: The HalveIt folder itself, i.e. the parent of this package. When the
 #: program is started from a launcher this is the folder the user downloaded.
 APP_DIR = Path(__file__).resolve().parent.parent
 
@@ -63,7 +63,7 @@ def writable(path: Path) -> bool:
     """Check we can actually create files in a directory."""
     try:
         path.mkdir(parents=True, exist_ok=True)
-        probe = path / ".vidsqueeze-write-test"
+        probe = path / ".halveit-write-test"
         probe.write_text("ok", encoding="utf-8")
         probe.unlink()
         return True

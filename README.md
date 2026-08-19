@@ -1,13 +1,13 @@
-<img src="vidsqueeze/web/icon.svg" width="52" alt="VidSqueeze logo">
+<img src="halveit/web/icon.svg" width="52" alt="HalveIt logo">
 
-# VidSqueeze
+# HalveIt
 
 **Compress and convert video and audio on your own computer.**
 Free and open source, for Windows, macOS and Linux. Nothing is uploaded anywhere,
 there are no file size limits, and you need to know nothing about codecs.
 
 **It needs the internet once, and then never again.** On first run it fetches
-ffmpeg into its own folder. After that you can turn the network off and VidSqueeze
+ffmpeg into its own folder. After that you can turn the network off and HalveIt
 keeps working, on a plane, on a train, or on a machine that has never been online.
 
 That is the real difference from a converter on the web. Those want the file
@@ -16,8 +16,8 @@ recordings on somebody else's server, under their size limits, their queue, thei
 privacy policy and their decision about how long to keep a copy. Nothing you
 convert here leaves the computer, because there is nowhere for it to go.
 
-Double-click one file. VidSqueeze opens in your browser. Choose your files, pick
-what you want, press Squeeze. If a tool it needs is missing, it offers to fetch
+Double-click one file. HalveIt opens in your browser. Choose your files, pick
+what you want, press Compress. If a tool it needs is missing, it offers to fetch
 that tool and keeps it inside its own folder.
 
 People who prefer a terminal get every feature as command line flags.
@@ -28,6 +28,17 @@ People who prefer a terminal get every feature as command line flags.
 | **Audio**      | MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF               | Opus, AAC, MP3, FLAC                          |
 
 
+<!-- SOON:START -->
+### Pictures are coming later
+
+Stills and camera RAW are being worked on and are not in this version. They were
+close, but not close enough to hand somebody a wedding shoot and tell them it was
+fine, so they wait. When they arrive it will be as a release of its own, with
+measurements published alongside it rather than a promise.
+
+Video and audio are finished work, and are what this version does.
+<!-- SOON:END -->
+
 **Documentation:** [User guide](USER-GUIDE.md) &middot;
 [Everything it can do](FEATURES.md) &middot; [What changed](CHANGELOG.md) &middot;
 [Audio](docs/GUIDE-AUDIO.md)
@@ -36,22 +47,22 @@ People who prefer a terminal get every feature as command line flags.
 
 ## Where to put it
 
-**Put the VidSqueeze folder somewhere permanent before you use it:**
+**Put the HalveIt folder somewhere permanent before you use it:**
 
 | System  | Suggested location                     |
 | ------- | -------------------------------------- |
-| Windows | `C:\Users\<you>\Documents\VidSqueeze`   |
-| macOS   | `~/Documents/VidSqueeze`               |
-| Linux   | `~/Documents/VidSqueeze`               |
+| Windows | `C:\Users\<you>\Documents\HalveIt`   |
+| macOS   | `~/Documents/HalveIt`               |
+| Linux   | `~/Documents/HalveIt`               |
 
 1. **Keep the folder together.** The launcher only works from inside it, so move
    the whole folder rather than dragging the launcher out. Make a shortcut if you
    want it on your desktop.
-2. **Avoid Downloads and temporary folders.** VidSqueeze stores the tools it
+2. **Avoid Downloads and temporary folders.** HalveIt stores the tools it
    downloads, and by default your converted files, inside its own folder.
 
 No administrator rights are needed, and nothing is installed anywhere else.
-Deleting the folder removes VidSqueeze completely.
+Deleting the folder removes HalveIt completely.
 
 ---
 
@@ -59,7 +70,7 @@ Deleting the folder removes VidSqueeze completely.
 
 ```
 cd ~/Documents
-git clone https://github.com/pxspaces/vidsqueeze.git VidSqueeze
+git clone https://github.com/pxspaces/halveit.git HalveIt
 ```
 
 Or download the ZIP from the repository page and unpack it into the location
@@ -69,14 +80,14 @@ above.
 
 | System      | What to do                                                                |
 | ----------- | ------------------------------------------------------------------------- |
-| **Windows** | Double-click **`Start VidSqueeze.bat`**                                    |
-| **macOS**   | **Right-click** **`Start VidSqueeze.command`**, choose **Open**, confirm    |
-| **Linux**   | Double-click **`start-vidsqueeze.sh`**, or run `./start-vidsqueeze.sh`      |
+| **Windows** | Double-click **`Start HalveIt.bat`**                                    |
+| **macOS**   | **Right-click** **`Start HalveIt.command`**, choose **Open**, confirm    |
+| **Linux**   | Double-click **`start-halveit.sh`**, or run `./start-halveit.sh`      |
 
 macOS needs the right-click the first time only, because the file came from the
 internet. After that, double-clicking works.
 
-Missing Python? On Windows VidSqueeze downloads a private copy, about 11 MB,
+Missing Python? On Windows HalveIt downloads a private copy, about 11 MB,
 into its own folder. On macOS and Linux it names the one command that installs
 it.
 
@@ -87,11 +98,11 @@ each one misbehaves.
 
 ## First run
 
-VidSqueeze needs **ffmpeg**, which does the actual conversion. If it is not
+HalveIt needs **ffmpeg**, which does the actual conversion. If it is not
 already on your computer, press **Download and continue**, roughly 60 to 75 MB,
 saved in the `bin` folder next to this file.
 
-Prefer to install it yourself? Any of these work, and VidSqueeze will find it:
+Prefer to install it yourself? Any of these work, and HalveIt will find it:
 
 ```
 winget install Gyan.FFmpeg      # Windows
@@ -131,7 +142,7 @@ presets on offer change to suit whatever you selected.
   happens only after the result passes every check.
 - **It asks once what you work with**, then shows you only the settings that
   matter. Change it any time from the header.
-- **Updates are checked when you ask**, never on startup, and VidSqueeze can
+- **Updates are checked when you ask**, never on startup, and HalveIt can
   update itself in place. No terminal, no git, nothing to re-download.
 
 ---
@@ -139,23 +150,23 @@ presets on offer change to suit whatever you selected.
 ## Using it from a terminal
 
 ```
-vidsqueeze                          open the interface
-vidsqueeze holiday.mp4              convert one file with the default settings
-vidsqueeze ~/Videos                 convert everything in a folder
-vidsqueeze -p whatsapp clip.mov     fit WhatsApp's size limit
-vidsqueeze --terminal               step-by-step questions instead of flags
-vidsqueeze --list-presets           show every preset
-vidsqueeze --info video.mp4         describe a file without changing it
-vidsqueeze --dry-run video.mp4      show the command without running it
+halveit                          open the interface
+halveit holiday.mp4              convert one file with the default settings
+halveit ~/Videos                 convert everything in a folder
+halveit -p whatsapp clip.mov     fit WhatsApp's size limit
+halveit --terminal               step-by-step questions instead of flags
+halveit --list-presets           show every preset
+halveit --info video.mp4         describe a file without changing it
+halveit --dry-run video.mp4      show the command without running it
+```
 
-
-Run it as `python3 -m vidsqueeze` from inside the folder, or use the launcher.
+Run it as `python3 -m halveit` from inside the folder, or use the launcher.
 `--help` lists every option.
 
-VidSqueeze opens your computer's default browser. To use a different one, once:
+HalveIt opens your computer's default browser. To use a different one, once:
 
 ```
-vidsqueeze --browser firefox
+halveit --browser firefox
 ```
 
 ---
@@ -177,7 +188,7 @@ The interface is a small server bound to `127.0.0.1` that your browser talks to.
 It is not reachable from your network, every request must carry a key generated
 fresh at startup, and requests arriving under any other hostname are refused.
 
-ffmpeg does the encoding. VidSqueeze builds the command, runs it, reads its
+ffmpeg does the encoding. HalveIt builds the command, runs it, reads its
 progress, and checks the result.
 
 Nothing is uploaded anywhere. The only network access is downloading ffmpeg.
@@ -199,5 +210,5 @@ command can still ruin the image, and only measuring catches that.
 
 MIT. See [LICENSE](LICENSE).
 
-ffmpeg is a separate program under its own licence. VidSqueeze downloads it at
+ffmpeg is a separate program under its own licence. HalveIt downloads it at
 runtime rather than bundling it, and does not modify it.

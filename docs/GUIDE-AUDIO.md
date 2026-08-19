@@ -1,6 +1,6 @@
 # Working with audio
 
-VidSqueeze extracts audio from video, and converts audio files.
+HalveIt extracts audio from video, and converts audio files.
 
 ---
 
@@ -8,7 +8,7 @@ VidSqueeze extracts audio from video, and converts audio files.
 
 1. Add the video.
 2. Choose **Extract audio as MP3** or **Extract audio as M4A**.
-3. Press **Squeeze**.
+3. Press **Compress**.
 
 The video is discarded and you are left with an audio file, typically a
 fiftieth of the size.
@@ -21,7 +21,7 @@ Choose MP3 if you are not sure where it is going.
 
 ## Converting audio files
 
-Add audio files and the same presets apply. VidSqueeze notices there is no video
+Add audio files and the same presets apply. HalveIt notices there is no video
 and does not try to invent one.
 
 ---

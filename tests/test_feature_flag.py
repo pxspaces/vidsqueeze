@@ -22,8 +22,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from vidsqueeze import features, probe
-from vidsqueeze.probe import KIND_AUDIO, KIND_IMAGE, KIND_VIDEO
+from halveit import features, probe
+from halveit.probe import KIND_AUDIO, KIND_IMAGE, KIND_VIDEO
 
 
 def without_pictures():
@@ -97,7 +97,7 @@ class NoFilterDoesNotMeanEverything(unittest.TestCase):
 
 class TheSelectionSaysWhyRatherThanSwallowing(unittest.TestCase):
     def test_a_named_photograph_produces_a_sentence(self):
-        from vidsqueeze.server import expand_selection
+        from halveit.server import expand_selection
 
         with without_pictures(), tempfile.TemporaryDirectory() as work:
             shot = Path(work) / "holiday.jpg"
@@ -108,7 +108,7 @@ class TheSelectionSaysWhyRatherThanSwallowing(unittest.TestCase):
             self.assertIn("holiday.jpg", problems[0])
 
     def test_a_folder_of_photographs_is_not_a_folder_of_nothing_in_particular(self):
-        from vidsqueeze.server import expand_selection
+        from halveit.server import expand_selection
 
         with without_pictures(), tempfile.TemporaryDirectory() as work:
             for name in ("a.jpg", "b.cr2"):
@@ -118,7 +118,7 @@ class TheSelectionSaysWhyRatherThanSwallowing(unittest.TestCase):
             self.assertTrue(problems)
 
     def test_video_in_the_same_folder_is_still_picked_up(self):
-        from vidsqueeze.server import expand_selection
+        from halveit.server import expand_selection
 
         with without_pictures(), tempfile.TemporaryDirectory() as work:
             (Path(work) / "a.jpg").write_bytes(b"\x00")
@@ -133,7 +133,7 @@ class TheEncoderRefusesAsWell(unittest.TestCase):
     a caller skips it, which is the only kind of gate worth having."""
 
     def test_a_photograph_reaching_the_encoder_is_refused_not_converted(self):
-        from vidsqueeze.encode import JobSpec, encode_one
+        from halveit.encode import JobSpec, encode_one
         from .support import tools
 
         with without_pictures(), tempfile.TemporaryDirectory() as work:
@@ -148,7 +148,7 @@ class TheEncoderRefusesAsWell(unittest.TestCase):
             self.assertEqual(list(out.iterdir()), [], "something was written anyway")
 
     def test_camera_raw_is_refused_too(self):
-        from vidsqueeze.encode import JobSpec, encode_one
+        from halveit.encode import JobSpec, encode_one
         from .support import tools
 
         with without_pictures(), tempfile.TemporaryDirectory() as work:
@@ -173,12 +173,12 @@ class TheFlagIsTheOnlyDifference(unittest.TestCase):
         this file is published, so it has to pass in both.
         """
         source = (Path(__file__).resolve().parent.parent
-                  / "vidsqueeze" / "features.py").read_text()
+                  / "halveit" / "features.py").read_text()
         self.assertRegex(source, r"(?m)^IMAGES = (?:True|False)\s*# FEATURE_IMAGES$")
 
     def test_nothing_else_hard_codes_the_answer(self):
         """Every module that cares must ask features, not decide for itself."""
-        root = Path(__file__).resolve().parent.parent / "vidsqueeze"
+        root = Path(__file__).resolve().parent.parent / "halveit"
         for path in sorted(root.glob("*.py")):
             if path.name == "features.py":
                 continue
@@ -195,7 +195,7 @@ class TheStateSentToThePageMatchesTheBuild(unittest.TestCase):
     with no picture settings and no RAW."""
 
     def test_no_picture_defaults_are_offered(self):
-        from vidsqueeze.server import _offered_defaults
+        from halveit.server import _offered_defaults
 
         with without_pictures():
             leaked = [k for k in _offered_defaults() if k.startswith("image_")]
@@ -205,7 +205,7 @@ class TheStateSentToThePageMatchesTheBuild(unittest.TestCase):
 
     def test_the_contact_sheet_route_refuses(self):
         source = (Path(__file__).resolve().parent.parent
-                  / "vidsqueeze" / "server.py").read_text()
+                  / "halveit" / "server.py").read_text()
         self.assertIn("Contact sheets are not part of this version.", source)
 
 
@@ -218,7 +218,7 @@ class ThePageSurvivesLosingItsPictureControls(unittest.TestCase):
     these read the two files and check they still agree.
     """
 
-    WEB = Path(__file__).resolve().parent.parent / "vidsqueeze" / "web"
+    WEB = Path(__file__).resolve().parent.parent / "halveit" / "web"
 
     def marked_ids(self) -> list:
         """Every element id inside a section the publishing script removes."""
@@ -262,3 +262,96 @@ class ThePageSurvivesLosingItsPictureControls(unittest.TestCase):
         js = (self.WEB / "app.js").read_text()
         self.assertIn("if (!OPTIONAL.has(id))", js)
         self.assertIn("console.warn", js)
+
+
+class TheNoteSayingPicturesAreStillToCome(unittest.TestCase):
+    """The published copy says pictures are coming later. That sentence is true
+    there and false here, where they are present, so the private documents cannot
+    carry it: the publishing script adds it. An insertion whose anchor has moved
+    would quietly add nothing at all, which is the failure mode this guards.
+
+    Skipped in the published copy, which has no publishing script.
+    """
+
+    ROOT = Path(__file__).resolve().parent.parent
+
+    def script(self) -> str:
+        path = self.ROOT / "tools" / "prepare-public.sh"
+        if not path.exists():
+            self.skipTest("this is the published copy, which does not carry the script")
+        return path.read_text()
+
+    def test_the_anchor_it_inserts_at_still_exists(self):
+        import re
+
+        anchors = re.findall(r'^\s*\("([^"]+)",\s*"([^"]+)",',
+                             self.script(), re.M)
+        self.assertTrue(anchors, "the script no longer lists any insertions")
+        for name, anchor in anchors:
+            with self.subTest(document=name):
+                text = (self.ROOT / name).read_text()
+                self.assertIn(anchor, text,
+                              f"{name} has no {anchor!r} for the note to go before")
+
+    def test_a_missing_anchor_stops_the_build_rather_than_doing_nothing(self):
+        self.assertIn("would have gone in nowhere", self.script())
+
+    def test_the_exemption_is_for_marked_blocks_only(self):
+        """The check has to allow the one passage that names pictures in order to
+        say they are absent. Allowing anything more would switch the check off."""
+        text = self.script()
+        self.assertIn("SOON:START", text)
+        self.assertIn("camera raw|\\.cr2|photograph|contact sheet|--image-format", text)
+
+    def test_the_private_documents_do_not_claim_pictures_are_missing(self):
+        """They are not missing here, so nothing in this copy may say so."""
+        self.script()   # skips in the published copy, where the note is correct
+        for name in ("README.md", "FEATURES.md", "USER-GUIDE.md"):
+            with self.subTest(document=name):
+                self.assertNotIn("SOON:START", (self.ROOT / name).read_text())
+
+
+class TrimmingLeavesTheDocumentsWellFormed(unittest.TestCase):
+    """A marked section that ends after a closing code fence takes the fence with
+    it. Nothing fails, the file is still valid Markdown, and every paragraph after
+    it renders as one long code block. That is exactly what went out in the README
+    of 1.14.0, and it was found by reading the published page rather than by any
+    check, which is why there is now one.
+    """
+
+    ROOT = Path(__file__).resolve().parent.parent
+
+    def test_no_marked_section_ends_between_a_pair_of_fences(self):
+        import re
+
+        for name in ("README.md", "FEATURES.md", "USER-GUIDE.md", "CHANGELOG.md"):
+            path = self.ROOT / name
+            if not path.exists():
+                continue
+            with self.subTest(document=name):
+                lines = path.read_text().split("\n")
+                inside = False
+                for number, line in enumerate(lines, 1):
+                    if line.startswith("```"):
+                        inside = not inside
+                    elif "IMAGES:START" in line or "IMAGES:END" in line:
+                        self.assertFalse(
+                            inside,
+                            f"{name}:{number}: a marker sits inside a code fence, so "
+                            f"removing the section would unbalance the fences",
+                        )
+
+    def test_the_fences_are_balanced_to_begin_with(self):
+        for path in sorted(self.ROOT.glob("*.md")) + sorted((self.ROOT / "docs").glob("*.md")):
+            with self.subTest(document=path.name):
+                fences = [line for line in path.read_text().split("\n")
+                          if line.startswith("```")]
+                self.assertEqual(len(fences) % 2, 0, f"{path.name} has an unclosed fence")
+
+    def test_the_publishing_script_checks_this_too(self):
+        """The case above reads this copy. The script has to check the trimmed one,
+        because that is where the fence actually goes missing."""
+        path = self.ROOT / "tools" / "prepare-public.sh"
+        if not path.exists():
+            self.skipTest("this is the published copy, which does not carry the script")
+        self.assertIn("code fences, so one is", path.read_text())

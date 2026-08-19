@@ -12,12 +12,12 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from vidsqueeze import deps
-from vidsqueeze.probe import MediaInfo
+from halveit import deps
+from halveit.probe import MediaInfo
 
 #: Set by the runner when --fast is given. Anything that shells out to ffmpeg
 #: checks this and skips itself.
-FAST_ONLY = bool(os.environ.get("VIDSQUEEZE_TESTS_FAST"))
+FAST_ONLY = bool(os.environ.get("HALVEIT_TESTS_FAST"))
 
 _tools = None
 _looked = False

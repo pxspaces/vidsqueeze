@@ -13,13 +13,13 @@ import re
 import unittest
 from pathlib import Path
 
-from vidsqueeze import images, raw
-from vidsqueeze.images import ImageSpec
+from halveit import images, raw
+from halveit.images import ImageSpec
 
 from .support import arg_after, fake_image_info
 
-WEB = Path(__file__).resolve().parent.parent / "vidsqueeze" / "web"
-SOURCE = Path(__file__).resolve().parent.parent / "vidsqueeze"
+WEB = Path(__file__).resolve().parent.parent / "halveit" / "web"
+SOURCE = Path(__file__).resolve().parent.parent / "halveit"
 
 
 class ScalingKeepsEvenDimensions(unittest.TestCase):
@@ -156,7 +156,7 @@ class RawDevelopment(unittest.TestCase):
 def _tools():
     """A stand-in toolchain. Command building only reads the ffmpeg path and
     the encoder list, so a real install is not needed here."""
-    from vidsqueeze.deps import Tools
+    from halveit.deps import Tools
 
     return Tools(
         ffmpeg=Path("ffmpeg"), ffprobe=Path("ffprobe"), version="9.0",

@@ -1,14 +1,14 @@
 #!/bin/bash
-# VidSqueeze launcher for Linux.
+# HalveIt launcher for Linux.
 #
 # Double-click it in your file manager (choose "Run" or "Run in Terminal"),
-# or run ./start-vidsqueeze.sh from a terminal.
+# or run ./start-halveit.sh from a terminal.
 
 cd "$(dirname "$0")" || exit 1
 
 echo
-echo "  VidSqueeze"
-echo "  ----------"
+echo "  HalveIt"
+echo "  -------"
 echo
 
 PYTHON=""
@@ -22,7 +22,7 @@ for candidate in python3 python3.13 python3.12 python3.11 python3.10 python; do
 done
 
 if [ -z "$PYTHON" ]; then
-    echo "  VidSqueeze needs Python 3.9 or newer."
+    echo "  HalveIt needs Python 3.9 or newer."
     echo
     if command -v apt >/dev/null 2>&1; then
         echo "    sudo apt install python3"
@@ -38,12 +38,12 @@ if [ -z "$PYTHON" ]; then
     exit 1
 fi
 
-"$PYTHON" -m vidsqueeze "$@"
+"$PYTHON" -m halveit "$@"
 STATUS=$?
 
 if [ "$STATUS" -ne 0 ]; then
     echo
-    echo "  VidSqueeze stopped unexpectedly (code $STATUS)."
+    echo "  HalveIt stopped unexpectedly (code $STATUS)."
     echo "  The logs folder may explain why."
     echo
     read -r -p "  Press Enter to close. " _

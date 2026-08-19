@@ -51,13 +51,13 @@ Videos are never enlarged, so choosing 1080p leaves a 720p clip alone.
 ## Fitting a size limit
 
 Choose **Fit a file size** and give a number, or use a preset that already has
-one. VidSqueeze works out the bitrate needed and uses two passes, so the result
+one. HalveIt works out the bitrate needed and uses two passes, so the result
 lands close to, and under, the limit.
 
 It is a ceiling, not a quota. A video that already fits is not inflated to fill
 the budget.
 
-If the target is impossible, for instance ten minutes into 10 MB, VidSqueeze
+If the target is impossible, for instance ten minutes into 10 MB, HalveIt
 says so rather than producing something unwatchable.
 
 ---
@@ -75,7 +75,7 @@ Leave it on unless you know you want to keep HDR.
 ## Trimming
 
 Select the video, open **Preview**, drag the Start and End handles under the
-filmstrip, press **Use these trim points**, then **Squeeze**.
+filmstrip, press **Use these trim points**, then **Compress**.
 
 Trim applies to the whole batch, so trim one file at a time unless every file
 needs the same cut.
@@ -84,7 +84,7 @@ needs the same cut.
 
 ## Graphics card acceleration
 
-Under **Speed**. Only offered if VidSqueeze proved your hardware works by
+Under **Speed**. Only offered if HalveIt proved your hardware works by
 actually running a short encode, because plenty of hardware claims encoders it
 cannot use.
 

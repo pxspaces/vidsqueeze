@@ -1,4 +1,4 @@
-"""Allows `python -m vidsqueeze`."""
+"""Allows `python -m halveit`."""
 
 import sys
 

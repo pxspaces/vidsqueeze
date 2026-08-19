@@ -149,7 +149,7 @@ def places() -> list[dict]:
         if candidate.is_dir():
             entries.append({"name": label, "path": str(candidate), "kind": "folder"})
 
-    entries.append({"name": "VidSqueeze output", "path": str(OUTPUT_DIR), "kind": "output"})
+    entries.append({"name": "HalveIt output", "path": str(OUTPUT_DIR), "kind": "output"})
 
     if system_key() == "windows":
         entries += _windows_drives()
@@ -321,12 +321,12 @@ def restart_after_update() -> None:
         else:
             spawn["start_new_session"] = True
         try:
-            subprocess.Popen([sys.executable, "-m", "vidsqueeze"], **spawn)
+            subprocess.Popen([sys.executable, "-m", "halveit"], **spawn)
         except OSError as exc:
             # Say so rather than exiting into nothing.
             SESSION.update_state["message"] = (
                 f"{selfupdate.CHANGED} The new version could not be started "
-                f"automatically ({exc}). Close this window, stop VidSqueeze in "
+                f"automatically ({exc}). Close this window, stop HalveIt in "
                 f"the window it opened from, and start it again."
             )
             return
@@ -336,7 +336,7 @@ def restart_after_update() -> None:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VidSqueeze"
+    server_version = "HalveIt"
     protocol_version = "HTTP/1.1"
 
     # -- plumbing ---------------------------------------------------------
@@ -377,7 +377,7 @@ class Handler(BaseHTTPRequestHandler):
         return host in ("127.0.0.1", "localhost", "::1", "")
 
     def _authorised(self, query: dict) -> bool:
-        supplied = self.headers.get("X-VidSqueeze-Token") or (query.get("token") or [""])[0]
+        supplied = self.headers.get("X-HalveIt-Token") or (query.get("token") or [""])[0]
         return secrets.compare_digest(supplied, SESSION.token)
 
     def _body(self) -> dict:
@@ -400,15 +400,15 @@ class Handler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
 
         if not self._host_is_local():
-            self._error("Refused: VidSqueeze only accepts local connections.", 403)
+            self._error("Refused: HalveIt only accepts local connections.", 403)
             return
 
         if route in ("/", "/index.html"):
             if not self._authorised(query):
                 self._send(
                     HTTPStatus.FORBIDDEN,
-                    b"<h1>VidSqueeze</h1><p>This link is missing its access token. "
-                    b"Please use the address printed in the VidSqueeze window.</p>",
+                    b"<h1>HalveIt</h1><p>This link is missing its access token. "
+                    b"Please use the address printed in the HalveIt window.</p>",
                     "text/html; charset=utf-8",
                 )
                 return
@@ -467,7 +467,7 @@ class Handler(BaseHTTPRequestHandler):
         query = parse_qs(parsed.query)
 
         if not self._host_is_local():
-            self._error("Refused: VidSqueeze only accepts local connections.", 403)
+            self._error("Refused: HalveIt only accepts local connections.", 403)
             return
         if not self._authorised(query):
             self._error("Not authorised", 403)
@@ -570,7 +570,7 @@ class Handler(BaseHTTPRequestHandler):
 
         data = candidate.read_bytes()
         if candidate.name == "index.html":
-            data = data.replace(b"__VIDSQUEEZE_TOKEN__", SESSION.token.encode("ascii"))
+            data = data.replace(b"__HALVEIT_TOKEN__", SESSION.token.encode("ascii"))
         self._send(200, data, content_type)
 
     def _serve_frame(self, query: dict) -> None:
@@ -1013,10 +1013,10 @@ class Handler(BaseHTTPRequestHandler):
                 if selfupdate.changed(result):
                     SESSION.update_state["restarting"] = True
                     SESSION.update_state["message"] = (
-                        "Updated. VidSqueeze is restarting to use the new version, "
+                        "Updated. HalveIt is restarting to use the new version, "
                         "and will open in a new tab. This tab stops working once it "
                         "does, so you can close it. If nothing happens within about "
-                        "fifteen seconds, close this window, stop VidSqueeze in the "
+                        "fifteen seconds, close this window, stop HalveIt in the "
                         "window it opened from, and start it again."
                     )
                     restart_after_update()
@@ -1365,7 +1365,7 @@ def serve(open_browser: bool = True, port: int | None = None, browser: str | Non
     url = f"http://127.0.0.1:{chosen}/?token={SESSION.token}"
 
     print()
-    print("  VidSqueeze is running.")
+    print("  HalveIt is running.")
     print()
     print(f"  Open this address in your browser if it did not open by itself:")
     print(f"  {url}")
@@ -1388,4 +1388,4 @@ def serve(open_browser: bool = True, port: int | None = None, browser: str | Non
         if SESSION.queue and SESSION.queue.running:
             SESSION.queue.cancel()
         httpd.shutdown()
-        print("  VidSqueeze has stopped.")
+        print("  HalveIt has stopped.")

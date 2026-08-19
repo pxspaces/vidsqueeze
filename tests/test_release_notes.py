@@ -17,9 +17,9 @@ import re
 import unittest
 from pathlib import Path
 
-from vidsqueeze import updates
+from halveit import updates
 
-SCRIPT = (Path(__file__).resolve().parent.parent / "vidsqueeze" / "web" / "app.js").read_text()
+SCRIPT = (Path(__file__).resolve().parent.parent / "halveit" / "web" / "app.js").read_text()
 
 
 class TheNotesAreCarriedThrough(unittest.TestCase):

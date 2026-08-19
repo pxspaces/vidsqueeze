@@ -19,22 +19,22 @@ import sys
 import unittest
 from pathlib import Path
 
-import vidsqueeze
-from vidsqueeze import cli
+import halveit
+from halveit import cli
 
-SOURCE = Path(__file__).resolve().parent.parent / "vidsqueeze"
+SOURCE = Path(__file__).resolve().parent.parent / "halveit"
 ROOT = SOURCE.parent
 
 
 class ThereIsOnlyOneVersion(unittest.TestCase):
     def test_the_command_line_and_the_package_agree(self):
-        self.assertEqual(cli.VERSION, vidsqueeze.__version__)
+        self.assertEqual(cli.VERSION, halveit.__version__)
 
     def test_the_interface_reads_the_same_one(self):
         """The interface and the update check import it from the package. If
         that import ever changes to a literal, this fails."""
-        from vidsqueeze import server
-        self.assertEqual(server.VERSION, vidsqueeze.__version__)
+        from halveit import server
+        self.assertEqual(server.VERSION, halveit.__version__)
 
     def test_nothing_else_writes_a_version_literal(self):
         """A grep, deliberately. One definition is only true while it stays the
@@ -46,23 +46,23 @@ class ThereIsOnlyOneVersion(unittest.TestCase):
                 if pattern.match(line):
                     offenders.append(f"{path.relative_to(ROOT)}:{number}: {line.strip()}")
         self.assertEqual(
-            offenders, [f"vidsqueeze/__init__.py:{_version_line()}: "
-                        f'__version__ = "{vidsqueeze.__version__}"'],
+            offenders, [f"halveit/__init__.py:{_version_line()}: "
+                        f'__version__ = "{halveit.__version__}"'],
             "the version must be written in __init__.py and nowhere else",
         )
 
     def test_it_looks_like_a_version(self):
-        self.assertRegex(vidsqueeze.__version__, r"^\d+\.\d+\.\d+$")
+        self.assertRegex(halveit.__version__, r"^\d+\.\d+\.\d+$")
 
 
 class TheReportedVersionIsTheRealOne(unittest.TestCase):
     def test_version_flag_prints_the_package_version(self):
         result = subprocess.run(
-            [sys.executable, "-m", "vidsqueeze", "--version"],
+            [sys.executable, "-m", "halveit", "--version"],
             cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             text=True, errors="replace", timeout=120,
         )
-        self.assertIn(vidsqueeze.__version__, result.stdout)
+        self.assertIn(halveit.__version__, result.stdout)
 
 
 class TheChangelogKeepsUp(unittest.TestCase):
@@ -72,8 +72,8 @@ class TheChangelogKeepsUp(unittest.TestCase):
     def test_the_current_version_has_an_entry(self):
         changelog = (ROOT / "CHANGELOG.md").read_text()
         self.assertIn(
-            f"## {vidsqueeze.__version__}", changelog,
-            f"CHANGELOG.md has no entry for {vidsqueeze.__version__}",
+            f"## {halveit.__version__}", changelog,
+            f"CHANGELOG.md has no entry for {halveit.__version__}",
         )
 
 

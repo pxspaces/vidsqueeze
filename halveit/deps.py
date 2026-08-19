@@ -1,9 +1,9 @@
-"""Finding, and if necessary fetching, the tools VidSqueeze needs.
+"""Finding, and if necessary fetching, the tools HalveIt needs.
 
 The only external tools required are ffmpeg and ffprobe. If they are already on
 the machine we use them. If they are not, we download a self-contained build
-into VidSqueeze/bin. That path needs no administrator rights, touches nothing
-outside the VidSqueeze folder, and works identically on all three platforms.
+into HalveIt/bin. That path needs no administrator rights, touches nothing
+outside the HalveIt folder, and works identically on all three platforms.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from typing import Callable, Iterable
 
 from .paths import BIN_DIR, CACHE_DIR, arch_key, exe, system_key
 
-USER_AGENT = "VidSqueeze/1.0 (+https://github.com/pxspaces/vidsqueeze)"
+USER_AGENT = "HalveIt/1.0 (+https://github.com/pxspaces/halveit)"
 
 # Builds for macOS and Linux. These redirect URLs always resolve to the current
 # release build, so they do not need updating when ffmpeg publishes a version.
@@ -290,7 +290,7 @@ def download_size_estimate() -> str:
 
 
 def install_ffmpeg(progress: ProgressFn | None = None) -> Tools:
-    """Download a self-contained ffmpeg into VidSqueeze/bin and verify it."""
+    """Download a self-contained ffmpeg into HalveIt/bin and verify it."""
     BIN_DIR.mkdir(parents=True, exist_ok=True)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     plat = system_key()
@@ -317,7 +317,7 @@ def install_ffmpeg(progress: ProgressFn | None = None) -> Tools:
     if missing:
         raise DependencyError(
             f"The download completed but {', '.join(sorted(missing))} was not inside it. "
-            "Please report this, or install ffmpeg yourself and restart VidSqueeze."
+            "Please report this, or install ffmpeg yourself and restart HalveIt."
         )
 
     if progress:
@@ -327,7 +327,7 @@ def install_ffmpeg(progress: ProgressFn | None = None) -> Tools:
     if tools is None:
         raise DependencyError(
             "ffmpeg was downloaded but will not run on this machine. "
-            f"Try installing it yourself, then restart VidSqueeze. Files are in {BIN_DIR}."
+            f"Try installing it yourself, then restart HalveIt. Files are in {BIN_DIR}."
         )
     if progress:
         progress("Ready", 1.0)
@@ -341,7 +341,7 @@ def ensure_tools(progress: ProgressFn | None = None, allow_download: bool = True
         return tools
     if not allow_download:
         raise DependencyError(
-            "ffmpeg was not found. Run VidSqueeze without --no-download to fetch it automatically."
+            "ffmpeg was not found. Run HalveIt without --no-download to fetch it automatically."
         )
     return install_ffmpeg(progress)
 

@@ -1,4 +1,4 @@
-# What VidSqueeze can do
+# What HalveIt can do
 
 A complete inventory. This is a living document: anything added to the program
 is added here in the same change.
@@ -15,7 +15,7 @@ Last updated for version 1.13.0.
 | **Audio**  | MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF                    | MP3, M4A, and the audio inside any video file |
 
 HEIC, the format iPhones use for photos, needs a recent ffmpeg. If the one on
-your computer cannot open a file, VidSqueeze says so and offers to download a
+your computer cannot open a file, HalveIt says so and offers to download a
 newer build into its own folder.
 
 
@@ -26,11 +26,11 @@ newer build into its own folder.
 | Way                    | Command or action                    | Who it suits                    |
 | ---------------------- | ------------------------------------ | ------------------------------- |
 | Browser interface      | Double-click the launcher            | Everyone. This is the default.  |
-| Terminal, with flags   | `vidsqueeze holiday.mp4`             | Scripting and batch work        |
-| Terminal, step by step | `vidsqueeze --terminal`              | Terminal users who want prompts |
+| Terminal, with flags   | `halveit holiday.mp4`             | Scripting and batch work        |
+| Terminal, step by step | `halveit --terminal`              | Terminal users who want prompts |
 
 The interface opens in **the computer's own default browser**. To use a
-different one: `vidsqueeze --browser firefox`, which is then remembered.
+different one: `halveit --browser firefox`, which is then remembered.
 
 ---
 
@@ -102,7 +102,7 @@ the result lands close to, and under, the limit.
 
 ## What do you work with?
 
-On first run VidSqueeze asks whether you work with video, audio, photos, or
+On first run HalveIt asks whether you work with video, audio, photos, or
 anything. This only decides which settings you are shown: nothing is locked
 away. The answer is remembered, and the selector stays in the header so you can
 change it whenever you like.
@@ -117,7 +117,7 @@ no filter at all.
 
 ## Updates
 
-The **Updates** button reports two separate things: whether a newer VidSqueeze
+The **Updates** button reports two separate things: whether a newer HalveIt
 exists, and whether a newer ffmpeg exists. Both can be updated from there.
 
 **When there is a new version, it shows you what is in it.** What was fixed and
@@ -131,7 +131,7 @@ text. Headings, lists, bold, code and ordinary links are understood; links only
 when they point at a real web address. Anything else is displayed as itself rather
 than acted on.
 
-**Updating VidSqueeze** needs no terminal and no git knowledge. Press **Update
+**Updating HalveIt** needs no terminal and no git knowledge. Press **Update
 now**. A folder cloned with git is updated with git, because that is what
 someone who cloned it will expect; anything else has the newest release
 downloaded and unpacked over it. Either way:
@@ -140,15 +140,15 @@ downloaded and unpacked over it. Either way:
 - the previous version is kept in `.cache/previous-version`, so a bad update can
   be undone
 - a copy with local changes is refused rather than overwritten
-- VidSqueeze restarts itself afterwards and opens in a new tab, so there is
+- HalveIt restarts itself afterwards and opens in a new tab, so there is
   nothing to do by hand
 
-`vidsqueeze --update` does the same from a terminal.
+`halveit --update` does the same from a terminal.
 
-**Updating ffmpeg** downloads a current build into the VidSqueeze folder and
+**Updating ffmpeg** downloads a current build into the HalveIt folder and
 uses it from then on, leaving whatever the system has alone.
 
-Nothing is checked unless you press the button. VidSqueeze does not contact
+Nothing is checked unless you press the button. HalveIt does not contact
 anything on startup.
 
 ---
@@ -168,7 +168,7 @@ seconds of 1080p:
 H.265 is roughly three times slower than H.264, which is the price of its much
 smaller files.
 
-**Graphics card acceleration** is offered only after VidSqueeze has proven it
+**Graphics card acceleration** is offered only after HalveIt has proven it
 works, by running a short real encode once and caching the answer. Plenty of
 hardware advertises encoders it cannot actually use. It is presented as an
 explicit choice, with its cost stated: about twice as fast, noticeably larger
@@ -238,18 +238,18 @@ points, press "Use these trim points", and they apply to the batch.
 
 ## Watch a folder
 
-VidSqueeze can watch a folder and add anything new to Sources. It waits until a
+HalveIt can watch a folder and add anything new to Sources. It waits until a
 file has stopped growing, so a video still copying off a memory card is not
 converted half-written.
 
 **It never starts converting by itself.** New files wait in Sources until you
-press Squeeze.
+press Compress.
 
 ---
 
 ## Where files go, and safety
 
-Results are written to the **`output` folder inside VidSqueeze**, so they never
+Results are written to the **`output` folder inside HalveIt**, so they never
 mix with your originals or land somewhere unexpected. You can point elsewhere.
 
 **Originals are never touched by default.** There is an opt-in setting to delete
@@ -281,7 +281,7 @@ The summary at the end separates the two kinds of success:
 ```
 Finished. 41 came out smaller, 2.3 GB saved.
 23 came out larger, and would have been better left alone or sent to a format
-that squeezes.
+that compresses.
 ```
 
 Both numbers matter. A run where most files grew usually means the wrong output
@@ -301,15 +301,15 @@ names, sizes and dates. Clear it whenever you like.
 ## Command line
 
 ```
-vidsqueeze                          open the interface
-vidsqueeze holiday.mp4              convert one file with the default settings
-vidsqueeze ~/Videos                 convert everything in a folder
-vidsqueeze -p whatsapp clip.mov     fit WhatsApp's size limit
-vidsqueeze --terminal               step-by-step questions
-vidsqueeze --list-presets           every preset
-vidsqueeze --info video.mp4         describe a file, change nothing
-vidsqueeze --dry-run video.mp4      show the command without running it
-vidsqueeze --setup                  download ffmpeg and exit
+halveit                          open the interface
+halveit holiday.mp4              convert one file with the default settings
+halveit ~/Videos                 convert everything in a folder
+halveit -p whatsapp clip.mov     fit WhatsApp's size limit
+halveit --terminal               step-by-step questions
+halveit --list-presets           every preset
+halveit --info video.mp4         describe a file, change nothing
+halveit --dry-run video.mp4      show the command without running it
+halveit --setup                  download ffmpeg and exit
 ```
 
 

@@ -3,34 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VidSqueeze: compress video and audio on your own computer, offline</title>
+<title>HalveIt: compress video and audio on your own computer, offline</title>
 <meta name="description" content="Free, open source converter that makes video and audio files smaller. Works offline with no internet needed after setup, no uploads, no file size limits. Windows, macOS and Linux, nothing to install.">
-<link rel="canonical" href="https://pxspaces.github.io/vidsqueeze/">
+<link rel="canonical" href="https://pxspaces.github.io/halveit/">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-512.png">
 <meta name="theme-color" content="#2436C8">
 <meta property="og:type" content="website">
-<meta property="og:title" content="VidSqueeze: make video and audio files smaller">
+<meta property="og:title" content="HalveIt: make video and audio files smaller">
 <meta property="og:description" content="Compress and convert video and audio on your own computer. Nothing is uploaded. Windows, macOS and Linux.">
-<meta property="og:url" content="https://pxspaces.github.io/vidsqueeze/">
-<meta property="og:image" content="https://pxspaces.github.io/vidsqueeze/social.png">
+<meta property="og:url" content="https://pxspaces.github.io/halveit/">
+<meta property="og:image" content="https://pxspaces.github.io/halveit/social.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:site_name" content="VidSqueeze">
+<meta property="og:site_name" content="HalveIt">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://pxspaces.github.io/vidsqueeze/social.png">
+<meta name="twitter:image" content="https://pxspaces.github.io/halveit/social.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "VidSqueeze",
+  "name": "HalveIt",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Windows, macOS, Linux",
-  "softwareVersion": "1.14.0",
+  "softwareVersion": "2.0.0",
   "description": "Open source converter that makes video and audio files smaller. Runs entirely on your own computer with nothing uploaded.",
-  "url": "https://pxspaces.github.io/vidsqueeze/",
-  "codeRepository": "https://github.com/pxspaces/vidsqueeze",
+  "url": "https://pxspaces.github.io/halveit/",
+  "codeRepository": "https://github.com/pxspaces/halveit",
   "license": "https://opensource.org/licenses/MIT",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
 }
@@ -62,26 +62,35 @@ footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); 
 <body>
 <main>
 <div class="brand">
-  <img src="icon.svg" width="60" height="60" alt="VidSqueeze logo">
-  <h1>VidSqueeze</h1>
+  <img src="icon.svg" width="60" height="60" alt="HalveIt logo">
+  <h1>HalveIt</h1>
 </div>
 <p class="lede">Make video and audio files smaller, on your own computer.
 Nothing is uploaded anywhere.</p>
 
-<p><a class="cta" href="https://github.com/pxspaces/vidsqueeze">Get it on GitHub</a>
-<a class="cta" href="https://github.com/pxspaces/vidsqueeze/releases/latest">Download the latest release</a></p>
+<p><a class="cta" href="https://github.com/pxspaces/halveit">Get it on GitHub</a>
+<a class="cta" href="https://github.com/pxspaces/halveit/releases/latest">Download the latest release</a></p>
 
 <h2>What it does</h2>
-<p>VidSqueeze compresses and converts media files. It opens in the browser you
-already use, and it also works entirely from a terminal. Version 1.14.0.</p>
+<p>HalveIt compresses and converts media files. It opens in the browser you
+already use, and it also works entirely from a terminal. Version 2.0.0.</p>
 <table>
 <tr><th>Kind</th><th>Reads</th><th>Writes</th></tr>
 <tr><td>Video</td><td>MP4, MOV, MKV, AVI, WebM, MPEG, WMV, FLV, and more</td><td>MP4, MKV, WebM, MOV with H.265, H.264, AV1 or VP9</td></tr>
 <tr><td>Audio</td><td>MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF</td><td>Opus, AAC, MP3, FLAC</td></tr>
 </table>
 
+<!-- SOON:START -->
+<h2>Pictures are coming later</h2>
+<p>Stills and camera RAW are being worked on and are not in this version. They were
+close, but not close enough to hand somebody a wedding shoot and tell them it was
+fine, so they wait. When they arrive it will be as a release of its own, with
+measurements published alongside it rather than a promise. Video and audio are
+finished work and are what this version does.</p>
+<!-- SOON:END -->
+
 <h2>It needs the internet once, and then never again</h2>
-<p>On first run VidSqueeze fetches ffmpeg into its own folder. After that you can
+<p>On first run HalveIt fetches ffmpeg into its own folder. After that you can
 turn the network off and it keeps working: on a plane, on a train, on a machine
 that has never been online, or on one you would rather did not talk to anything.</p>
 <p>That is the real difference from a converter on the web. Those want the file
@@ -104,28 +113,28 @@ rather than hiding behind one number.</p>
 
 <h2>Getting started</h2>
 <p>There is nothing to install. No administrator rights are needed, nothing is
-put anywhere else on your computer, and deleting the folder removes VidSqueeze
+put anywhere else on your computer, and deleting the folder removes HalveIt
 completely.</p>
 
 <h3>1. Download it</h3>
-<p>Take <a href="https://github.com/pxspaces/vidsqueeze/releases/latest">the latest
+<p>Take <a href="https://github.com/pxspaces/halveit/releases/latest">the latest
 release</a> and download the <strong>Source code (zip)</strong> file at the bottom
 of it. If you would rather have the very newest work, use the green
 <strong>Code</strong> button on
-<a href="https://github.com/pxspaces/vidsqueeze">the repository page</a> and choose
+<a href="https://github.com/pxspaces/halveit">the repository page</a> and choose
 <strong>Download ZIP</strong>.</p>
 
 <h3>2. Unpack it somewhere permanent</h3>
 <p>The zip unpacks into a folder with a long name such as
-<code>vidsqueeze-1.14.0</code>. Rename it to <code>VidSqueeze</code>, which is
+<code>halveit-2.0.0</code>. Rename it to <code>HalveIt</code>, which is
 tidier, and move it to:</p>
 <table>
 <tr><th>System</th><th>Where to put it</th></tr>
-<tr><td>Windows</td><td><code>C:\Users\&lt;you&gt;\Documents\VidSqueeze</code></td></tr>
-<tr><td>macOS</td><td><code>~/Documents/VidSqueeze</code></td></tr>
-<tr><td>Linux</td><td><code>~/Documents/VidSqueeze</code></td></tr>
+<tr><td>Windows</td><td><code>C:\Users\&lt;you&gt;\Documents\HalveIt</code></td></tr>
+<tr><td>macOS</td><td><code>~/Documents/HalveIt</code></td></tr>
+<tr><td>Linux</td><td><code>~/Documents/HalveIt</code></td></tr>
 </table>
-<p><strong>Not your Downloads folder</strong>, and not a temporary one. VidSqueeze
+<p><strong>Not your Downloads folder</strong>, and not a temporary one. HalveIt
 keeps the tools it fetches, and by default your converted files, inside its own
 folder, so it needs to stay put. Keep the folder together as well: the launcher
 only works from inside it, so move the whole folder rather than dragging the
@@ -134,45 +143,45 @@ launcher out of it. Make a shortcut if you want one on your desktop.</p>
 <h3>3. Start it</h3>
 <table>
 <tr><th>System</th><th>What to click</th></tr>
-<tr><td>Windows</td><td>Double click <code>Start VidSqueeze.bat</code></td></tr>
-<tr><td>macOS</td><td><strong>Right click</strong> <code>Start VidSqueeze.command</code>, choose <strong>Open</strong>, then confirm</td></tr>
-<tr><td>Linux</td><td>Double click <code>start-vidsqueeze.sh</code>, or run <code>./start-vidsqueeze.sh</code></td></tr>
+<tr><td>Windows</td><td>Double click <code>Start HalveIt.bat</code></td></tr>
+<tr><td>macOS</td><td><strong>Right click</strong> <code>Start HalveIt.command</code>, choose <strong>Open</strong>, then confirm</td></tr>
+<tr><td>Linux</td><td>Double click <code>start-halveit.sh</code>, or run <code>./start-halveit.sh</code></td></tr>
 </table>
 <p>macOS needs the right click the first time only, because the file came from the
 internet. After that, double clicking works normally.</p>
 
-<p>VidSqueeze then opens in your browser. On first run it fetches ffmpeg, which it
+<p>HalveIt then opens in your browser. On first run it fetches ffmpeg, which it
 uses to do the encoding, into its own folder. If Python is missing, Windows
 downloads a private copy of about 11 MB into that folder too, and macOS and Linux
 tell you the one command that installs it.</p>
 
 <h3>If you use git</h3>
 <pre>cd ~/Documents
-git clone https://github.com/pxspaces/vidsqueeze.git VidSqueeze
-cd VidSqueeze
-python3 -m vidsqueeze</pre>
+git clone https://github.com/pxspaces/halveit.git HalveIt
+cd HalveIt
+python3 -m halveit</pre>
 <p>Cloning has one advantage worth knowing: when a new version comes out, the
 Updates button inside the program can pull it for you.</p>
 
 <h2>From a terminal</h2>
-<pre>vidsqueeze holiday.mp4                      compress one video
-vidsqueeze ~/Videos                         compress a whole folder
-vidsqueeze -p whatsapp clip.mov             fit a sharing limit
-vidsqueeze -p shrink_to_1080 *.MP4          scale a batch down
-vidsqueeze --terminal                       step by step questions</pre>
+<pre>halveit holiday.mp4                      compress one video
+halveit ~/Videos                         compress a whole folder
+halveit -p whatsapp clip.mov             fit a sharing limit
+halveit -p shrink_to_1080 *.MP4          scale a batch down
+halveit --terminal                       step by step questions</pre>
 
 <h2>Reading further</h2>
 <ul>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/README.md">README</a></li>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/USER-GUIDE.md">User guide</a></li>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/FEATURES.md">Every feature in detail</a></li>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-VIDEO.md">Working with video</a></li>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-AUDIO.md">Working with audio</a></li>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/CHANGELOG.md">What changed in each version</a></li>
+<li><a href="https://github.com/pxspaces/halveit/blob/main/README.md">README</a></li>
+<li><a href="https://github.com/pxspaces/halveit/blob/main/USER-GUIDE.md">User guide</a></li>
+<li><a href="https://github.com/pxspaces/halveit/blob/main/FEATURES.md">Every feature in detail</a></li>
+<li><a href="https://github.com/pxspaces/halveit/blob/main/docs/GUIDE-VIDEO.md">Working with video</a></li>
+<li><a href="https://github.com/pxspaces/halveit/blob/main/docs/GUIDE-AUDIO.md">Working with audio</a></li>
+<li><a href="https://github.com/pxspaces/halveit/blob/main/CHANGELOG.md">What changed in each version</a></li>
 </ul>
 
 <footer>
-<p>VidSqueeze is free and open source under the MIT licence. It uses
+<p>HalveIt is free and open source under the MIT licence. It uses
 <a href="https://ffmpeg.org/">ffmpeg</a> to do the encoding.</p>
 </footer>
 </main>

@@ -11,7 +11,7 @@ import contextlib
 import io
 import unittest
 
-from vidsqueeze.cli import build_parser, spec_from_args
+from halveit.cli import build_parser, spec_from_args
 
 
 def parse(*argv):
@@ -27,7 +27,7 @@ def quiet():
 
 
 def _images_on() -> bool:
-    from vidsqueeze import features
+    from halveit import features
     return features.images_enabled()
 
 

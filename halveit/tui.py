@@ -49,8 +49,8 @@ def _choose(title: str, options: list[tuple[str, str]], default_index: int = 0) 
 
 def wizard(tools: Tools) -> int:
     """Walk the user through a batch, then run it."""
-    print("\n  VidSqueeze")
-    print("  ----------")
+    print("\n  HalveIt")
+    print("  -------")
     print("  Answer a few questions, or press Ctrl+C to leave.\n")
 
     # 1. What to compress

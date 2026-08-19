@@ -14,10 +14,10 @@ import time
 import unittest
 from pathlib import Path
 
-from vidsqueeze import metadata
-from vidsqueeze.metadata import (ASCII, DATETIME_ORIGINAL, EXPOSURE_TIME, ISO, LENS_MODEL,
+from halveit import metadata
+from halveit.metadata import (ASCII, DATETIME_ORIGINAL, EXPOSURE_TIME, ISO, LENS_MODEL,
                                  MAKE, MODEL, ORIENTATION, RATIONAL, SHORT)
-from vidsqueeze.probe import _exif_orientation
+from halveit.probe import _exif_orientation
 
 from .support import make_test_image, needs_ffmpeg, tools
 
@@ -41,7 +41,7 @@ def jpeg_with(fields: dict, target: Path) -> Path:
 
 def setUpModule():
     """Skip the whole module in a build that does not offer pictures."""
-    from vidsqueeze import features
+    from halveit import features
     if not features.images_enabled():
         raise unittest.SkipTest("this build does not offer pictures")
 
@@ -155,7 +155,7 @@ class TheWholePipelineCarriesThem(unittest.TestCase):
 
     @needs_ffmpeg
     def test_converting_a_photograph_keeps_its_details(self):
-        from vidsqueeze.encode import JobSpec, encode_one
+        from halveit.encode import JobSpec, encode_one
 
         with tempfile.TemporaryDirectory() as work:
             work = Path(work)
@@ -177,7 +177,7 @@ class TheWholePipelineCarriesThem(unittest.TestCase):
 
     @needs_ffmpeg
     def test_asking_to_strip_them_actually_strips_them(self):
-        from vidsqueeze.encode import JobSpec, encode_one
+        from halveit.encode import JobSpec, encode_one
 
         with tempfile.TemporaryDirectory() as work:
             work = Path(work)

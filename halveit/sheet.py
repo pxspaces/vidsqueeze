@@ -145,14 +145,14 @@ def build(
 
     pictures = [Path(p) for p in sources if _is_picture(tools, Path(p))]
     if not pictures:
-        raise SheetError("None of those files is a picture VidSqueeze can read.")
+        raise SheetError("None of those files is a picture HalveIt can read.")
 
     columns = max(1, min(int(spec.columns), 20))
     font = find_font() if spec.labels else None
     if spec.labels and font is None:
         notes.append("No font was found to write the names with, so the sheet has none.")
 
-    with tempfile.TemporaryDirectory(prefix="vidsqueeze-sheet-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="halveit-sheet-") as tmp:
         work = Path(tmp)
         made = 0
         for index, source in enumerate(pictures):

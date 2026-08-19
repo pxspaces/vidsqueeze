@@ -1,4 +1,4 @@
-"""Updating VidSqueeze itself, without a terminal.
+"""Updating HalveIt itself, without a terminal.
 
 Someone who downloaded a ZIP should not have to learn git, or hunt for the
 download page again, to get a fix. This replaces the program's own files with
@@ -28,13 +28,13 @@ from typing import Callable
 from . import deps
 from .paths import APP_DIR, CACHE_DIR
 
-TARBALL_API = "https://api.github.com/repos/pxspaces/vidsqueeze/releases/latest"
+TARBALL_API = "https://api.github.com/repos/pxspaces/halveit/releases/latest"
 BACKUP_DIR = APP_DIR / ".cache" / "previous-version"
 
 #: Everything the program is made of. Anything not listed here belongs to the
 #: user, or is a tool we downloaded, and is never touched.
 DISTRIBUTED = [
-    "vidsqueeze",
+    "halveit",
     "docs",
     "README.md",
     "FEATURES.md",
@@ -42,9 +42,9 @@ DISTRIBUTED = [
     "USER-GUIDE.md",
     "LICENSE",
     "presets.example.json",
-    "Start VidSqueeze.bat",
-    "Start VidSqueeze.command",
-    "start-vidsqueeze.sh",
+    "Start HalveIt.bat",
+    "Start HalveIt.command",
+    "start-halveit.sh",
     "create-desktop-shortcut.sh",
 ]
 
@@ -83,7 +83,7 @@ def method() -> str:
         return "git"
     # Updating means rewriting the program's own folder, so it has to be
     # writable. A copy in a system location is not ours to change.
-    probe = APP_DIR / ".vidsqueeze-write-test"
+    probe = APP_DIR / ".halveit-write-test"
     try:
         probe.write_text("ok", encoding="utf-8")
         probe.unlink()
@@ -102,7 +102,7 @@ def describe() -> dict:
             "git": "This copy was cloned with git, so updating pulls the newest version.",
             "download": "The newest version will be downloaded and unpacked over this folder. "
                         "Your converted files, settings and history are untouched.",
-            "none": "This folder cannot be written to, so VidSqueeze cannot update itself. "
+            "none": "This folder cannot be written to, so HalveIt cannot update itself. "
                     "Download the newest version and replace the folder by hand.",
         }[how],
         "backup": str(BACKUP_DIR),
@@ -172,7 +172,7 @@ def _update_with_download(progress: ProgressFn | None) -> str:
 
     if progress:
         progress("Unpacking", -1)
-    with tempfile.TemporaryDirectory(prefix="vidsqueeze-update-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="halveit-update-") as tmp:
         staging = Path(tmp)
         try:
             with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
@@ -186,7 +186,7 @@ def _update_with_download(progress: ProgressFn | None) -> str:
             raise UpdateError("The download did not contain what was expected.")
         source = roots[0]
 
-        if not (source / "vidsqueeze").is_dir():
+        if not (source / "halveit").is_dir():
             raise UpdateError("The download did not contain the program.")
 
         if progress:
@@ -251,7 +251,7 @@ def perform(progress: ProgressFn | None = None) -> str:
     if how == "download":
         return _update_with_download(progress)
     raise UpdateError(
-        "This folder cannot be written to, so VidSqueeze cannot update itself. "
+        "This folder cannot be written to, so HalveIt cannot update itself. "
         "Download the newest version and replace the folder by hand."
     )
 
@@ -270,4 +270,4 @@ def restore() -> str:
             shutil.copytree(kept, target)
         else:
             shutil.copy2(kept, target)
-    return "The previous version has been put back. Restart VidSqueeze."
+    return "The previous version has been put back. Restart HalveIt."

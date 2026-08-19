@@ -1,6 +1,6 @@
 """The command line.
 
-Running VidSqueeze with no arguments opens the browser interface, because that
+Running HalveIt with no arguments opens the browser interface, because that
 is what most people want. Everything the interface can do is also available as
 a flag here, so it can be scripted or run over SSH.
 """
@@ -28,22 +28,22 @@ VERSION = __version__
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="vidsqueeze",
+        prog="halveit",
         description="Make video files smaller. Run with no arguments to open the interface.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"
-            "  vidsqueeze                          open the interface in your browser\n"
-            "  vidsqueeze holiday.mp4              compress one file with the default settings\n"
-            "  vidsqueeze ~/Videos                 compress every video in a folder\n"
-            "  vidsqueeze -p whatsapp clip.mov     make it fit WhatsApp's size limit\n"
-            "  vidsqueeze -p shrink_to_1080 *.MP4  scale a batch down to 1080p\n"
-            "  vidsqueeze --terminal               step-by-step questions instead of flags\n"
+            "  halveit                          open the interface in your browser\n"
+            "  halveit holiday.mp4              compress one file with the default settings\n"
+            "  halveit ~/Videos                 compress every video in a folder\n"
+            "  halveit -p whatsapp clip.mov     make it fit WhatsApp's size limit\n"
+            "  halveit -p shrink_to_1080 *.MP4  scale a batch down to 1080p\n"
+            "  halveit --terminal               step-by-step questions instead of flags\n"
         ),
     )
 
     parser.add_argument("inputs", nargs="*", help="Files or folders to compress.")
-    parser.add_argument("--version", action="version", version=f"VidSqueeze {VERSION}")
+    parser.add_argument("--version", action="version", version=f"HalveIt {VERSION}")
 
     modes = parser.add_argument_group("how to run")
     modes.add_argument("--web", action="store_true", help="Open the browser interface (the default).")
@@ -54,7 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Which browser to open, for example chromium or firefox. Remembered for next time.")
     modes.add_argument("--setup", action="store_true", help="Download ffmpeg and exit.")
     modes.add_argument("--update", action="store_true",
-                       help="Update VidSqueeze itself to the newest published version.")
+                       help="Update HalveIt itself to the newest published version.")
     modes.add_argument("--list-presets", action="store_true", help="Show the available presets and exit.")
     modes.add_argument("--info", action="store_true", help="Describe the input files and exit.")
     modes.add_argument("--dry-run", action="store_true", help="Show the ffmpeg command without running it.")
@@ -407,7 +407,7 @@ def run_batch(tools: deps.Tools, files: list[Path], spec: JobSpec, output_dir: P
     if grew:
         print(f"{converted} file{'s' if converted != 1 else ''} came out smaller. "
               f"{grew} came out larger and would have been better left alone, "
-              f"or converted to a format that squeezes.")
+              f"or converted to a format that compresses.")
     if failures:
         print(f"{failures} file{'s' if failures != 1 else ''} failed.")
     print(f"Results are in {output_dir}\n")
@@ -456,7 +456,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         if selfupdate.changed(message):
             # Nothing to restart here: this invocation is about to exit anyway.
-            print("\n  Updated. Start VidSqueeze to use the new version.\n")
+            print("\n  Updated. Start HalveIt to use the new version.\n")
         else:
             print(f"\n  {message}\n")
         return 0
@@ -558,7 +558,7 @@ def main(argv: list[str] | None = None) -> int:
             for pass_number in range(1, passes + 1):
                 command, more = build_command(
                     normalised, info, tools, destination, pass_number, passes,
-                    Path("/tmp/vidsqueeze-passlog") if passes > 1 else None,
+                    Path("/tmp/halveit-passlog") if passes > 1 else None,
                 )
                 if passes > 1:
                     print(f"  # pass {pass_number} of {passes}")

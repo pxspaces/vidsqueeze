@@ -18,9 +18,9 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from vidsqueeze import images, raw
-from vidsqueeze.encode import JobSpec, image_spec_of
-from vidsqueeze.images import ImageSpec
+from halveit import images, raw
+from halveit.encode import JobSpec, image_spec_of
+from halveit.images import ImageSpec
 
 from .support import arg_after, fake_image_info
 
@@ -28,7 +28,7 @@ from .support import arg_after, fake_image_info
 
 def setUpModule():
     """Skip the whole module in a build that does not offer pictures."""
-    from vidsqueeze import features
+    from halveit import features
     if not features.images_enabled():
         raise unittest.SkipTest("this build does not offer pictures")
 
@@ -112,20 +112,20 @@ class TheInterfaceCannotSetInternals(unittest.TestCase):
     directly could wreck the colour of a whole batch."""
 
     def test_saturation_from_a_request_is_ignored(self):
-        from vidsqueeze.server import _spec_from_request
+        from halveit.server import _spec_from_request
         self.assertEqual(_spec_from_request({"image_saturation": 9.0}).image_saturation, 1.0)
 
     def test_a_bad_look_from_a_request_falls_back(self):
-        from vidsqueeze.server import _spec_from_request
+        from halveit.server import _spec_from_request
         self.assertEqual(_spec_from_request({"raw_look": "nonsense"}).raw_look, raw.NATURAL)
 
     def test_a_good_look_from_a_request_is_honoured(self):
-        from vidsqueeze.server import _spec_from_request
+        from halveit.server import _spec_from_request
         self.assertEqual(_spec_from_request({"raw_look": "neutral"}).raw_look, raw.NEUTRAL)
 
 
 def _stub():
-    from vidsqueeze.deps import Tools
+    from halveit.deps import Tools
 
     return Tools(ffmpeg=Path("ffmpeg"), ffprobe=Path("ffprobe"), version="9.0",
                  encoders=frozenset({"mjpeg", "png", "libwebp", "libsvtav1", "tiff", "bmp"}),

@@ -11,8 +11,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from vidsqueeze import images
-from vidsqueeze.images import ImageSpec
+from halveit import images
+from halveit.images import ImageSpec
 
 from .support import (arg_after, fake_image_info, make_test_image, needs_ffmpeg,
                       probe_pix_fmt, psnr, run_command, tools)
@@ -21,7 +21,7 @@ from .support import (arg_after, fake_image_info, make_test_image, needs_ffmpeg,
 
 def setUpModule():
     """Skip the whole module in a build that does not offer pictures."""
-    from vidsqueeze import features
+    from halveit import features
     if not features.images_enabled():
         raise unittest.SkipTest("this build does not offer pictures")
 
@@ -202,7 +202,7 @@ class Flattening(unittest.TestCase):
 
 
 def _stub():
-    from vidsqueeze.deps import Tools
+    from halveit.deps import Tools
 
     return Tools(ffmpeg=Path("ffmpeg"), ffprobe=Path("ffprobe"), version="9.0",
                  encoders=frozenset({"mjpeg", "png", "libwebp", "libsvtav1", "tiff", "bmp"}),

@@ -7,6 +7,49 @@ Dates are the day the change was made.
 
 ---
 
+## 2.0.0 - 2026-08-19
+
+### Changed
+
+- **VidSqueeze is now called HalveIt.** The old name sat next to VideoSqueeze on
+  the App Store and SqueezeVid on the web, both of them video compressors, which
+  is the kind of near-miss that makes a program hard to find and easy to mistake
+  for something else. HalveIt is its own name: nothing else in the package
+  registries, on GitHub or in this corner of the software world is using it.
+
+  What changed for you:
+
+  | Before | Now |
+  | ------ | --- |
+  | `Start VidSqueeze.bat` | `Start HalveIt.bat` |
+  | `Start VidSqueeze.command` | `Start HalveIt.command` |
+  | `start-vidsqueeze.sh` | `start-halveit.sh` |
+  | `python3 -m vidsqueeze` | `python3 -m halveit` |
+  | the **Squeeze** button | the **Compress** button |
+
+  The button is the one that is not simply the new name. "Halve it" would promise
+  a result nothing can guarantee, and this program does not claim what it has not
+  measured, so the button says what it does instead.
+
+  Everything else is where it was. Your settings, your presets, your history and
+  the copy of ffmpeg it downloaded all live inside the program's own folder and
+  are found the same way, so nothing is lost and nothing needs moving.
+
+- **This version cannot be installed by the update button in an older copy.**
+  The updater in every version up to 1.14.0 looks for a folder called
+  `vidsqueeze` inside the download, and this release does not have one. It will
+  tell you the download did not contain the program.
+
+  Download the new folder yourself this once, from the releases page, and copy
+  your `settings.json`, `presets.json` and `history.json` across if you want to
+  keep them. Updating in place works normally again from this version onwards.
+
+  This was a deliberate choice rather than an oversight: the alternative was
+  holding the rename back for a release, and there is no sense doing that this
+  early.
+
+---
+
 ## 1.14.0 - 2026-08-19
 
 ### Changed
@@ -32,14 +75,14 @@ Dates are the day the change was made.
 
 ### Changed
 
-- **Updating now restarts VidSqueeze for you.** It used to finish by saying
-  "Restart VidSqueeze to use the new version. Close this window, stop VidSqueeze
+- **Updating now restarts HalveIt for you.** It used to finish by saying
+  "Restart HalveIt to use the new version. Close this window, stop HalveIt
   in the window it opened from, and start it again", which is four steps and
   assumes you know what a terminal is.
 
   It now starts the new version itself and opens it in a new tab. The tab you
   pressed the button in stops working at that moment, so you can close it: every
-  run of VidSqueeze uses its own private key for the interface, and the new run
+  run of HalveIt uses its own private key for the interface, and the new run
   has a new one. The message says so rather than leaving you looking at a page
   that has quietly died.
 
@@ -47,7 +90,7 @@ Dates are the day the change was made.
   instructions are still there to fall back on. And if starting the new copy fails
   outright, it says that too rather than closing and leaving you with nothing.
 
-  `vidsqueeze --update` from a terminal still just says to start the program
+  `halveit --update` from a terminal still just says to start the program
   again, because that command has no running copy to restart.
 
 ---
@@ -70,14 +113,14 @@ Dates are the day the change was made.
 
   The colour was also 20 per cent too strong, because the previous settings were
   measured against the operating system's own RAW rendering. That was the wrong
-  yardstick twice over: it exists on only one of the three systems VidSqueeze runs
+  yardstick twice over: it exists on only one of the three systems HalveIt runs
   on, and it is that vendor's opinion rather than the photograph. The reference is
   now **the camera's own full size JPEG**, which every RAW file carries inside it,
   so the target is the manufacturer's reading of its own sensor and is the same on
   every machine.
 
 - **Camera photographs came out sideways when no RAW decoder was installed.** In
-  that case VidSqueeze uses the preview the camera stored inside the file, and
+  that case HalveIt uses the preview the camera stored inside the file, and
   which way up it goes is recorded in the RAW's own directory rather than inside
   that preview. So every portrait photograph was rotated, on exactly the machines
   that depend on this path. The rotation is now carried across.
@@ -158,7 +201,7 @@ Dates are the day the change was made.
 
 - **It now says beforehand when a file will come out bigger.** Converting a
   photograph to PNG or TIFF almost always makes it larger, because those formats
-  throw nothing away. VidSqueeze used to mention this afterwards, as "the result
+  throw nothing away. HalveIt used to mention this afterwards, as "the result
   is not smaller", which is true, unavoidable, and reads like a fault rather than
   a property of the format you picked. The warning now appears in the settings as
   soon as you choose such a format, while you can still choose another, and it
@@ -173,7 +216,7 @@ Dates are the day the change was made.
 
 - **Converted photographs looked flat and grey next to the original.** A RAW file
   is what the sensor recorded, not a finished photograph, and something has to
-  decide how bright it is and how strong its colour should be. VidSqueeze was
+  decide how bright it is and how strong its colour should be. HalveIt was
   leaving that to the decoder, which chooses "barely at all", because it is being
   faithful to the sensor rather than to the scene. Measured against the same two
   photographs rendered by the computer's own RAW handling, conversions were about
@@ -212,7 +255,7 @@ Dates are the day the change was made.
   place it is written, and the program refuses to build if a second appears.
 - **Photographs taken with the camera turned sideways were made bigger, not
   smaller.** Almost every phone and camera stores a portrait photograph as a
-  landscape picture plus a note saying which way up it goes. VidSqueeze was
+  landscape picture plus a note saying which way up it goes. HalveIt was
   reading the stored shape and not the note, so it shrank the wrong side.
   Asking for a longest side of 500 pixels gave back a picture 1000 pixels tall,
   four times the size of the original, and broke the promise that images are
@@ -285,13 +328,13 @@ Dates are the day the change was made.
 
 ### Added
 
-- **Update VidSqueeze from inside VidSqueeze.** The Updates window now has an
+- **Update HalveIt from inside HalveIt.** The Updates window now has an
   Update now button, so nobody needs git or a terminal or to hunt down the
   download page again. A folder cloned with git is updated with git; anything
   else has the newest release downloaded and unpacked over it. Converted files,
   settings, history and the downloaded ffmpeg are untouched, and the previous
   version is kept so a bad update can be undone.
-- `vidsqueeze --update` does the same from a terminal.
+- `halveit --update` does the same from a terminal.
 
 ---
 
@@ -342,19 +385,19 @@ Dates are the day the change was made.
 
 - **Camera RAW.** Converts CR2, CR3, NEF, ARW, RAF, ORF, RW2, DNG and twenty
   more, covering eighteen camera makers. ffmpeg cannot read RAW at all, so
-  VidSqueeze looks for a decoder, in descending order of quality: darktable,
+  HalveIt looks for a decoder, in descending order of quality: darktable,
   RawTherapee, LibRaw, dcraw, then ImageMagick. The developed image then goes
   through the ordinary picture pipeline, so every setting behaves as it does for
   a JPEG.
 - **A fallback when no decoder is installed.** The preview image the camera
   stored inside the RAW is used instead. It always works and needs nothing
   installed, and is reported honestly as the camera's own rendering rather than
-  passed off as a full conversion. Where a decoder would be better, VidSqueeze
+  passed off as a full conversion. Where a decoder would be better, HalveIt
   names the one command to install it, chosen for the machine it is running on.
-- **Update checking.** A button that reports whether a newer VidSqueeze or a
+- **Update checking.** A button that reports whether a newer HalveIt or a
   newer ffmpeg exists, and updates ffmpeg in place. Nothing is checked unless
   you ask.
-- **A media type question, asked once.** On first run VidSqueeze asks whether
+- **A media type question, asked once.** On first run HalveIt asks whether
   you work with video, audio, photos or anything. The answer decides which
   settings are shown, is remembered, and can be changed at any time from the
   selector in the header.
@@ -370,14 +413,14 @@ Dates are the day the change was made.
 
 ### Added
 
-- **Still images.** VidSqueeze now converts photographs and graphics as well as
+- **Still images.** HalveIt now converts photographs and graphics as well as
   video and audio. Reads JPEG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, JPEG XL
   and more; writes JPEG, PNG, WebP, AVIF, JPEG XL, TIFF and BMP. Seven image
   presets, a quality dial translated onto each format's own scale, and a longest
   side limit that never enlarges anything.
 - **Transparency handling.** Preserved where the target format supports it.
   Where it does not, the image is composited onto a background colour you choose
-  rather than turning black, and VidSqueeze says it did so.
+  rather than turning black, and HalveIt says it did so.
 - **Three-pane interface.** Sources on the left, workspace in the middle,
   Results on the right. Both side panes collapse, and the whole thing stacks on
   narrow screens.
@@ -391,7 +434,7 @@ Dates are the day the change was made.
 - **Watch a folder.** Adds new files to Sources as they appear, waiting until
   each has finished copying. It never starts converting on its own.
 - **ffmpeg capability upgrade.** When a file cannot be opened by the installed
-  ffmpeg, typically an iPhone HEIC photograph, VidSqueeze offers a one-click
+  ffmpeg, typically an iPhone HEIC photograph, HalveIt offers a one-click
   download of a newer build into its own folder.
 - **Logo and browser tab icon.**
 - **Living documents.** `FEATURES.md`, `CHANGELOG.md`, `USER-GUIDE.md` and

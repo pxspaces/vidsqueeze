@@ -196,7 +196,7 @@ class Queue:
         self.finished_at = None
         self.started_at = time.time()
         self._workers = [
-            threading.Thread(target=self._work, daemon=True, name=f"vidsqueeze-{n}")
+            threading.Thread(target=self._work, daemon=True, name=f"halveit-{n}")
             for n in range(self.concurrency)
         ]
         for worker in self._workers:

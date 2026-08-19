@@ -1,4 +1,4 @@
-"""The VidSqueeze test suite.
+"""The HalveIt test suite.
 
 Standard library only, so it runs on whatever Python is already installed.
 

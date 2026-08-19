@@ -130,7 +130,7 @@ def detect(tools: Tools, force: bool = False) -> list[HardwareEncoder]:
     """Return the graphics-card encoders that actually work here.
 
     The first call may take a few seconds. After that the answer is cached in
-    VidSqueeze/.cache and reused.
+    HalveIt/.cache and reused.
     """
     fingerprint = f"{system_key()}|{tools.version}|{tools.source}"
     if not force:

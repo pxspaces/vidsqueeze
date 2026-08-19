@@ -178,7 +178,7 @@ def build_command(
     notes: list[str] = []
     fmt = spec.image_format
     if fmt not in IMAGE_FORMATS:
-        raise ImageError(f"{fmt} is not a format VidSqueeze can write.")
+        raise ImageError(f"{fmt} is not a format HalveIt can write.")
 
     details = IMAGE_FORMATS[fmt]
     command = [str(tools.ffmpeg), "-hide_banner", "-nostdin", "-y", "-loglevel", "error"]
@@ -248,7 +248,7 @@ def build_command(
     return command, notes
 
 
-#: Sources that are already squeezed hard. Turning one of these into a lossless
+#: Sources that are already compressed hard. Turning one of these into a lossless
 #: format makes it bigger, always, and there is nothing wrong with the program
 #: when it happens.
 ALREADY_COMPRESSED = {"jpeg", "jpg", "jpe", "heic", "heif", "webp", "avif", "jxl", "mp4"}
@@ -257,7 +257,7 @@ ALREADY_COMPRESSED = {"jpeg", "jpg", "jpe", "heic", "heif", "webp", "avif", "jxl
 def size_expectation(spec: ImageSpec, source_format: str, is_raw: bool = False) -> str:
     """A plain warning that the result will be bigger, or "" when it will not.
 
-    Said before the job rather than after. VidSqueeze reported "the result is not
+    Said before the job rather than after. HalveIt reported "the result is not
     smaller" on every RAW to PNG conversion, which is true, unavoidable and reads
     like a fault. Anybody choosing PNG deserves to know that beforehand, when they
     can still choose something else.

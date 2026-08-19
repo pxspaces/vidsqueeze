@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableDelayedExpansion
-title VidSqueeze
+title HalveIt
 cd /d "%~dp0"
 
 echo.
-echo   VidSqueeze
-echo   ----------
+echo   HalveIt
+echo   -------
 echo.
 
 rem ---------------------------------------------------------------------
@@ -41,13 +41,13 @@ rem  Nothing found. Fetch a private copy into the runtime folder. This
 rem  needs no administrator rights and changes nothing outside this folder.
 rem ---------------------------------------------------------------------
 
-echo   VidSqueeze needs Python, which is not installed on this computer.
+echo   HalveIt needs Python, which is not installed on this computer.
 echo.
 echo   It can download a private copy ^(about 11 MB^) into:
 echo     %~dp0runtime
 echo.
 echo   Nothing else on your computer is changed, and deleting the
-echo   VidSqueeze folder removes it completely.
+echo   HalveIt folder removes it completely.
 echo.
 set /p "AGREE=  Download it now? (Y/N): "
 if /i not "!AGREE!"=="Y" (
@@ -99,7 +99,7 @@ if not exist "runtime\python.exe" (
     exit /b 1
 )
 
-rem This build of Python ignores PYTHONPATH, so the VidSqueeze folder has to
+rem This build of Python ignores PYTHONPATH, so the HalveIt folder has to
 rem be written into its own path file for our modules to be importable.
 for %%F in ("runtime\python*._pth") do (
     findstr /c:"%~dp0" "%%F" >nul 2>&1 || echo %~dp0>>"%%F"
@@ -111,17 +111,17 @@ echo   Python is ready.
 echo.
 
 rem ---------------------------------------------------------------------
-rem  Start VidSqueeze. It opens in your browser; this window stays open
+rem  Start HalveIt. It opens in your browser; this window stays open
 rem  and does the work.
 rem ---------------------------------------------------------------------
 
 :run
-%PYTHON% -m vidsqueeze %*
+%PYTHON% -m halveit %*
 set "EXITCODE=%ERRORLEVEL%"
 
 if not "%EXITCODE%"=="0" (
     echo.
-    echo   VidSqueeze stopped unexpectedly ^(code %EXITCODE%^).
+    echo   HalveIt stopped unexpectedly ^(code %EXITCODE%^).
     echo   The logs folder may explain why.
     echo.
     pause

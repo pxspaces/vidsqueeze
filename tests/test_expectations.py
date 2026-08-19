@@ -14,9 +14,9 @@ from __future__ import annotations
 
 import unittest
 
-from vidsqueeze import images
-from vidsqueeze.encode import JobSpec, image_spec_of
-from vidsqueeze.images import ImageSpec
+from halveit import images
+from halveit.encode import JobSpec, image_spec_of
+from halveit.images import ImageSpec
 
 
 def note(fmt="png", quality=82, lossless=False, source="jpeg", is_raw=False) -> str:
@@ -27,7 +27,7 @@ def note(fmt="png", quality=82, lossless=False, source="jpeg", is_raw=False) -> 
 
 def setUpModule():
     """Skip the whole module in a build that does not offer pictures."""
-    from vidsqueeze import features
+    from halveit import features
     if not features.images_enabled():
         raise unittest.SkipTest("this build does not offer pictures")
 

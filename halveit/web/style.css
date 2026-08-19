@@ -1,4 +1,4 @@
-/* VidSqueeze
+/* HalveIt
    One typeface, a narrow palette, and a lot of space. The interface should
    feel calm while a long encode runs, so nothing moves or shouts unless it is
    reporting real progress. */
@@ -125,6 +125,10 @@ pre { background: var(--surface-sunk); padding: 9px 11px; border-radius: var(--r
 .brand { display: flex; align-items: center; gap: 9px; }
 .mark { width: 20px; height: 20px; display: block; border-radius: 5px; }
 .wordmark { font-weight: 620; letter-spacing: -.02em; font-size: 15px; }
+/* Inter draws capital I and lowercase l as the same stroke, so "HalveIt" reads as
+   "Halvelt" at this size. Setting the second word in the accent colour shows where
+   the join is, without spelling the name differently to everywhere else. */
+.wordmark-tail { color: var(--accent); }
 .topbar-meta { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 
 .lifetime {

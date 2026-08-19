@@ -1,7 +1,7 @@
 """Ready-made settings for the things people actually want to do.
 
 Presets are ordinary JobSpec values with a name attached. Anything here can be
-overridden, and users can add their own by editing VidSqueeze/presets.json,
+overridden, and users can add their own by editing HalveIt/presets.json,
 which is merged over the built-in list at startup.
 """
 

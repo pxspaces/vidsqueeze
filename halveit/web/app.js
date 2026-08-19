@@ -1,7 +1,7 @@
-/* VidSqueeze interface.
+/* HalveIt interface.
    Sources on the left, workspace in the middle, results on the right. The
    settings form is the single source of truth: presets fill it in, and whatever
-   it holds when Squeeze is pressed is what runs. */
+   it holds when Compress is pressed is what runs. */
 
 const TOKEN = document.documentElement.dataset.token;
 /* Look up a control, and survive one that is not in this build.
@@ -35,7 +35,7 @@ const $ = (id) => {
     // Expected to be missing in a build without pictures, so silent. Anything
     // else is a mistyped id, and saying nothing about that would waste an hour.
     if (!OPTIONAL.has(id)) {
-      console.warn(`VidSqueeze: no element '${id}' on this page.`);
+      console.warn(`HalveIt: no element '${id}' on this page.`);
     }
     absent.set(id, document.createElement('input'));
   }
@@ -73,7 +73,7 @@ async function api(path, options = {}) {
   const response = await fetch(path, {
     ...options,
     headers: {
-      'X-VidSqueeze-Token': TOKEN,
+      'X-HalveIt-Token': TOKEN,
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     },
   });
@@ -114,7 +114,7 @@ async function boot() {
     info = await api('/api/state');
   } catch (error) {
     document.body.innerHTML =
-      `<div class="centre-screen"><div class="panel"><h1 class="display">VidSqueeze could not start</h1><p class="muted">${error.message}</p></div></div>`;
+      `<div class="centre-screen"><div class="panel"><h1 class="display">HalveIt could not start</h1><p class="muted">${error.message}</p></div></div>`;
     return;
   }
 
@@ -365,7 +365,7 @@ function syncImageForm() {
   if (!losslessCapable) $('imageLossless').checked = false;
 
   // PNG and TIFF are always lossless, so quality is not about how hard they are
-  // squeezed. It decides how much colour depth is carried in: 90 and above keeps
+  // compressed. It decides how much colour depth is carried in: 90 and above keeps
   // all 16 bits of a developed RAW, below it keeps 8. Hiding the dial for these
   // meant the interface could never ask for a full depth PNG at all.
   const depthOnly = key === 'png' || key === 'tiff';
@@ -745,7 +745,7 @@ async function refreshSelection() {
   if (data.upgrade_offer) {
     setText($('upgradeText'),
       `${data.unreadable.length} file${data.unreadable.length === 1 ? '' : 's'} could not be opened by the installed ffmpeg. ` +
-      'A newer build, downloaded into the VidSqueeze folder, will very likely read them.');
+      'A newer build, downloaded into the HalveIt folder, will very likely read them.');
     show('upgradeOffer', true);
   } else {
     show('upgradeOffer', false);
@@ -890,7 +890,7 @@ async function loadFolder(path) {
       empty.className = 'muted tiny-text';
       empty.textContent = data.hidden
         ? `This folder has ${data.hidden} file${data.hidden === 1 ? '' : 's'}, but none of the kind you are working with.`
-        : 'This folder has nothing VidSqueeze can open.';
+        : 'This folder has nothing HalveIt can open.';
       files.append(empty);
     }
   }
@@ -1144,7 +1144,7 @@ async function pollQueue() {
     setText($('actionHint'), grew
       ? `Finished. ${totals.smaller || 0} came out smaller, ${totals.saved_size} saved. `
         + `${grew} came out larger, and would have been better left alone or sent to a `
-        + `format that squeezes.`
+        + `format that compresses.`
       : `Finished. ${totals.saved_size} saved.`);
     api('/api/history').then(renderHistory).catch(() => {});
     if (!state.selectedResult) {
@@ -1827,7 +1827,7 @@ function renderUpdates(report) {
 
   const self_ = report.self || {};
   host.append(updateRow({
-    title: 'VidSqueeze',
+    title: 'HalveIt',
     detail: (app.checked
       ? (app.update_available
         ? `You have ${app.current}. Version ${app.latest} is available.`
@@ -1859,7 +1859,7 @@ function renderUpdates(report) {
       ? (ff.update_available
         ? `You have ${ff.current}. Version ${ff.latest} is available.` +
           (ff.replaces_system
-            ? ' Yours came with the system, so a newer copy would be downloaded into the VidSqueeze folder and used instead.'
+            ? ' Yours came with the system, so a newer copy would be downloaded into the HalveIt folder and used instead.'
             : '')
         : `You have ${ff.current}, which is current.`)
       : `You have ${ff.current || 'none'}. Could not reach the download servers.`,
@@ -1911,7 +1911,7 @@ function updateRow({ title, detail, stale, action }) {
 
 async function runSelfUpdate(button) {
   if (!window.confirm(
-    'Update VidSqueeze to the newest version?\n\n' +
+    'Update HalveIt to the newest version?\n\n' +
     'Your converted files, settings and history are untouched, and the current ' +
     'version is kept so it can be put back.'
   )) return;
@@ -1954,7 +1954,7 @@ async function runSelfUpdate(button) {
       const detail = document.createElement('div');
       detail.className = 'detail';
       detail.textContent = status.result +
-        ' Close this window, stop VidSqueeze in the window it opened from, and start it again.';
+        ' Close this window, stop HalveIt in the window it opened from, and start it again.';
       info.append(strong, detail);
       done.append(info);
       $('updatesBody').append(done);
@@ -1996,7 +1996,7 @@ async function runFfmpegUpdate(button) {
 /* ---------- odds and ends ---------- */
 
 $('quitBtn').addEventListener('click', async () => {
-  if (!window.confirm('Quit VidSqueeze? Anything still running will be stopped.')) return;
+  if (!window.confirm('Quit HalveIt? Anything still running will be stopped.')) return;
   await post('/api/quit').catch(() => {});
   document.body.innerHTML =
     '<div class="centre-screen"><div class="panel"><h1 class="display">Closed</h1><p class="muted">You can close this tab.</p></div></div>';

@@ -15,8 +15,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from vidsqueeze import sheet
-from vidsqueeze.sheet import SheetError, SheetSpec
+from halveit import sheet
+from halveit.sheet import SheetError, SheetSpec
 
 from .support import make_test_image, needs_ffmpeg, probe_pix_fmt, tools
 
@@ -28,7 +28,7 @@ def pictures(work: Path, count: int) -> list:
 
 def setUpModule():
     """Skip the whole module in a build that does not offer pictures."""
-    from vidsqueeze import features
+    from halveit import features
     if not features.images_enabled():
         raise unittest.SkipTest("this build does not offer pictures")
 
@@ -177,13 +177,13 @@ class TheInterfaceCanReachIt(unittest.TestCase):
     will eventually produce different sheets from the same settings."""
 
     def test_the_server_exposes_a_start_and_a_status_route(self):
-        source = (Path(__file__).resolve().parent.parent / "vidsqueeze" / "server.py").read_text()
+        source = (Path(__file__).resolve().parent.parent / "halveit" / "server.py").read_text()
         for route in ('"/api/sheet/start"', '"/api/sheet"', '"/api/sheet/cancel"'):
             with self.subTest(route=route):
                 self.assertIn(route, source)
 
     def test_the_server_state_has_what_the_page_reads(self):
-        from vidsqueeze.server import Session
+        from halveit.server import Session
         state = Session().sheet_state
         for key in ("running", "done", "error", "output", "notes", "done_count", "total"):
             self.assertIn(key, state)
@@ -205,7 +205,7 @@ class TheInterfaceCanReachIt(unittest.TestCase):
 
 
 def build_parser_args(argv):
-    from vidsqueeze.cli import build_parser
+    from halveit.cli import build_parser
     return build_parser().parse_args(argv)
 
 

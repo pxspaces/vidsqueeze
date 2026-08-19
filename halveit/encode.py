@@ -759,7 +759,7 @@ def plan_output(info: MediaInfo, spec: JobSpec, output_dir: Path, keep_tree_from
 
     candidate = destination / f"{info.path.stem}.{spec.container}"
     if candidate.resolve() == info.path.resolve():
-        candidate = destination / f"{info.path.stem} - squeezed.{spec.container}"
+        candidate = destination / f"{info.path.stem} - converted.{spec.container}"
     return unique_path(candidate)
 
 
@@ -842,7 +842,7 @@ def encode_image(
     candidate = destination / images.output_name(named_after, image)
     if candidate.resolve() == named_after.resolve():
         extension = images.IMAGE_FORMATS[image.image_format]["ext"]
-        candidate = destination / f"{named_after.stem} - squeezed.{extension}"
+        candidate = destination / f"{named_after.stem} - converted.{extension}"
     output = unique_path(candidate)
 
     try:
@@ -951,7 +951,7 @@ def _encode_raw(
 
     look = spec.raw_look if spec.raw_look in raw.LOOKS else raw.NATURAL
 
-    with tempfile.TemporaryDirectory(prefix="vidsqueeze-raw-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="halveit-raw-") as tmp:
         try:
             developed, note = raw.develop(source, Path(tmp), look=look)
         except raw.RawError as exc:
@@ -1045,7 +1045,7 @@ def encode_one(
         pass_count = 2 if two_pass else 1
         used_command: list[str] = []
 
-        with tempfile.TemporaryDirectory(prefix="vidsqueeze-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="halveit-") as tmp:
             passlog = Path(tmp) / "passlog" if two_pass else None
 
             for pass_number in range(1, pass_count + 1):

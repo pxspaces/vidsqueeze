@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-token="__VIDSQUEEZE_TOKEN__">
+<html lang="en" data-token="__HALVEIT_TOKEN__">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VidSqueeze</title>
+  <title>HalveIt</title>
   <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -12,7 +12,7 @@
 <header class="topbar">
   <div class="brand">
     <img class="mark" src="/static/icon.svg" alt="" width="20" height="20">
-    <span class="wordmark">VidSqueeze</span>
+    <span class="wordmark">Halve<span class="wordmark-tail">It</span></span>
   </div>
   <div id="modeSelector" class="segmented small-seg" hidden></div>
   <div class="topbar-meta">
@@ -30,12 +30,12 @@
     <img class="setup-mark" src="/static/icon.svg" alt="" width="44" height="44">
     <h1 class="display">Nearly ready</h1>
     <p class="lede">
-      VidSqueeze uses <strong>ffmpeg</strong> to do the actual conversion, and it is
+      HalveIt uses <strong>ffmpeg</strong> to do the actual conversion, and it is
       not on this computer yet.
     </p>
     <p class="muted">
       The download is <span id="setupSize">small</span>, needs no administrator
-      permission, and lands inside the VidSqueeze folder. Nothing else on your
+      permission, and lands inside the HalveIt folder. Nothing else on your
       computer is touched, and deleting the folder removes it completely.
     </p>
     <div id="setupProgress" class="progress" hidden>
@@ -46,7 +46,7 @@
     <button id="setupBtn" class="btn primary wide" type="button">Download and continue</button>
     <details class="disclosure">
       <summary>I would rather install it myself</summary>
-      <p class="muted tiny-text">Run this, then restart VidSqueeze:</p>
+      <p class="muted tiny-text">Run this, then restart HalveIt:</p>
       <pre id="installHint"></pre>
     </details>
   </div>
@@ -213,7 +213,7 @@
       </section>
 
       <div class="actions">
-        <button id="startBtn" class="btn primary wide" type="button" disabled>Squeeze</button>
+        <button id="startBtn" class="btn primary wide" type="button" disabled>Compress</button>
         <div class="row two-up">
           <button id="sampleBtn" class="btn secondary" type="button" disabled>Test a short sample</button>
           <button id="bakeoffBtn" class="btn secondary" type="button" disabled>Try several settings</button>
@@ -317,9 +317,9 @@
       <section class="block">
         <h3 class="block-title">Watch a folder</h3>
         <p class="muted tiny-text">
-          VidSqueeze can keep an eye on a folder and add anything new to the Sources
+          HalveIt can keep an eye on a folder and add anything new to the Sources
           list. It waits until a file has finished copying, and it never starts
-          converting on its own: you always press Squeeze yourself.
+          converting on its own: you always press Compress yourself.
         </p>
         <div class="path-row">
           <code id="watchPath" class="path">No folder chosen</code>

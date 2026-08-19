@@ -1,6 +1,6 @@
 """Checking whether newer versions exist.
 
-Two separate questions: is there a newer VidSqueeze, and is there a newer
+Two separate questions: is there a newer HalveIt, and is there a newer
 ffmpeg. Neither is checked unless the user asks, because a program that phones
 home on startup is a program that phones home.
 """
@@ -18,9 +18,9 @@ from pathlib import Path
 from . import deps
 from .paths import CACHE_DIR, arch_key, system_key
 
-RELEASES_API = "https://api.github.com/repos/pxspaces/vidsqueeze/releases/latest"
-TAGS_API = "https://api.github.com/repos/pxspaces/vidsqueeze/tags"
-PROJECT_URL = "https://github.com/pxspaces/vidsqueeze"
+RELEASES_API = "https://api.github.com/repos/pxspaces/halveit/releases/latest"
+TAGS_API = "https://api.github.com/repos/pxspaces/halveit/tags"
+PROJECT_URL = "https://github.com/pxspaces/halveit"
 
 CACHE_FILE = CACHE_DIR / "updates.json"
 CACHE_MAX_AGE = 6 * 3600  # a check is good for a few hours
@@ -47,7 +47,7 @@ def _newer(latest: str, current: str) -> bool:
 
 
 # --------------------------------------------------------------------------
-# VidSqueeze itself
+# HalveIt itself
 # --------------------------------------------------------------------------
 
 
@@ -149,7 +149,7 @@ def _save_cache(payload: dict) -> None:
 
 
 def check(app_version: str, tools: deps.Tools | None, force: bool = False) -> dict:
-    """Report on both VidSqueeze and ffmpeg."""
+    """Report on both HalveIt and ffmpeg."""
     if not force:
         cached = _load_cache()
         if cached is not None:
@@ -192,7 +192,7 @@ def summarise(report: dict) -> str:
     app, ffmpeg = report.get("app", {}), report.get("ffmpeg", {})
     parts = []
     if app.get("update_available"):
-        parts.append(f"VidSqueeze {app['latest']} is available (you have {app['current']})")
+        parts.append(f"HalveIt {app['latest']} is available (you have {app['current']})")
     if ffmpeg.get("update_available"):
         parts.append(f"ffmpeg {ffmpeg['latest']} is available (you have {ffmpeg['current']})")
     if not parts:

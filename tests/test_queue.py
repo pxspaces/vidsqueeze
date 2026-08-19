@@ -10,8 +10,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from vidsqueeze.encode import JobResult, JobSpec
-from vidsqueeze.jobs import STATUS_DONE, QueueItem, Queue
+from halveit.encode import JobResult, JobSpec
+from halveit.jobs import STATUS_DONE, QueueItem, Queue
 
 
 def queue_of(*sizes) -> Queue:
@@ -106,13 +106,13 @@ class Pausing(unittest.TestCase):
 
 class TheServerExposesIt(unittest.TestCase):
     def test_pause_and_resume_have_routes(self):
-        source = (Path(__file__).resolve().parent.parent / "vidsqueeze" / "server.py").read_text()
+        source = (Path(__file__).resolve().parent.parent / "halveit" / "server.py").read_text()
         self.assertIn('"/api/queue/pause"', source)
         self.assertIn('"/api/queue/resume"', source)
 
     def test_the_page_reads_the_paused_flag_and_the_two_counts(self):
         script = (Path(__file__).resolve().parent.parent
-                  / "vidsqueeze" / "web" / "app.js").read_text()
+                  / "halveit" / "web" / "app.js").read_text()
         for name in ("totals.paused", "totals.grew", "totals.smaller"):
             with self.subTest(name=name):
                 self.assertIn(name, script)

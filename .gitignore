@@ -1,9 +1,9 @@
-# Tools VidSqueeze downloads for itself
+# Tools HalveIt downloads for itself
 /bin/
 /runtime/
 /.cache/
 
-# What VidSqueeze produces
+# What HalveIt produces
 /output/
 /logs/
 /settings.json

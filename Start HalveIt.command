@@ -1,5 +1,5 @@
 #!/bin/bash
-# VidSqueeze launcher for macOS. Double-click this file.
+# HalveIt launcher for macOS. Double-click this file.
 #
 # If macOS refuses to open it, right-click the file and choose Open, then
 # confirm. That only has to be done once.
@@ -7,8 +7,8 @@
 cd "$(dirname "$0")" || exit 1
 
 echo
-echo "  VidSqueeze"
-echo "  ----------"
+echo "  HalveIt"
+echo "  -------"
 echo
 
 find_python() {
@@ -33,7 +33,7 @@ find_python() {
 PYTHON=$(find_python)
 
 if [ -z "$PYTHON" ]; then
-    echo "  VidSqueeze needs Python 3.9 or newer, which this Mac does not have yet."
+    echo "  HalveIt needs Python 3.9 or newer, which this Mac does not have yet."
     echo
     echo "  The easiest way to get it:"
     echo
@@ -47,7 +47,7 @@ if [ -z "$PYTHON" ]; then
         [Yy]*)
             xcode-select --install
             echo
-            echo "  Follow the installer, then double-click VidSqueeze again."
+            echo "  Follow the installer, then double-click HalveIt again."
             ;;
         *)
             echo "  No changes made."
@@ -58,12 +58,12 @@ if [ -z "$PYTHON" ]; then
     exit 1
 fi
 
-"$PYTHON" -m vidsqueeze "$@"
+"$PYTHON" -m halveit "$@"
 STATUS=$?
 
 if [ "$STATUS" -ne 0 ]; then
     echo
-    echo "  VidSqueeze stopped unexpectedly (code $STATUS)."
+    echo "  HalveIt stopped unexpectedly (code $STATUS)."
     echo "  The logs folder may explain why."
     echo
     read -r -p "  Press Enter to close. " _

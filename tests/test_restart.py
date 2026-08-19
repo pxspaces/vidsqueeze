@@ -1,6 +1,6 @@
 """Restarting itself after an update.
 
-The old message told the user to close the window, find the terminal VidSqueeze
+The old message told the user to close the window, find the terminal HalveIt
 was started from, stop it, and start it again. That is four steps and a concept,
 the terminal, that the people this program is for should never have to meet.
 
@@ -16,7 +16,7 @@ from __future__ import annotations
 import inspect
 import unittest
 
-from vidsqueeze import selfupdate, server
+from halveit import selfupdate, server
 
 
 class TheUpdateResultSaysWhetherAnythingChanged(unittest.TestCase):
@@ -67,7 +67,7 @@ class TheRestartIsSafeToAttempt(unittest.TestCase):
         no window and no way to reach it."""
         import re
         argv = re.search(r"Popen\(\[(.*?)\]", self.source, re.S).group(1)
-        self.assertIn("vidsqueeze", argv)
+        self.assertIn("halveit", argv)
         self.assertNotIn("no-browser", argv)
         self.assertNotIn("argv", argv)
 
@@ -114,15 +114,15 @@ class TheMessageSetsTheRightExpectation(unittest.TestCase):
 
 
 class TheCommandLineDoesNotPretendToRestart(unittest.TestCase):
-    """`vidsqueeze --update` has no server running and is about to exit, so
+    """`halveit --update` has no server running and is about to exit, so
     telling the user it is restarting would be a lie."""
 
     def test_it_says_to_start_the_program(self):
-        from vidsqueeze import cli
+        from halveit import cli
         source = inspect.getsource(cli)
-        self.assertIn("Start VidSqueeze to use the new version", source)
+        self.assertIn("Start HalveIt to use the new version", source)
 
     def test_it_does_not_claim_to_be_restarting(self):
-        from vidsqueeze import cli
+        from halveit import cli
         source = inspect.getsource(cli.main) if hasattr(cli, "main") else inspect.getsource(cli)
         self.assertNotIn("is restarting", source)
