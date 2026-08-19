@@ -26,6 +26,12 @@ def quiet():
         yield
 
 
+def _images_on() -> bool:
+    from vidsqueeze import features
+    return features.images_enabled()
+
+
+@unittest.skipUnless(_images_on(), "this build does not offer pictures")
 class ImageOptionsReachTheSpec(unittest.TestCase):
     def test_format(self):
         self.assertEqual(parse("--image-format", "png", "x.cr2").image_format, "png")
@@ -49,6 +55,7 @@ class ImageOptionsReachTheSpec(unittest.TestCase):
         self.assertIsNone(spec.image_max_dimension)
 
 
+@unittest.skipUnless(_images_on(), "this build does not offer pictures")
 class BadInputIsRefusedClearly(unittest.TestCase):
     """A wrong number should be a sentence, not a traceback."""
 

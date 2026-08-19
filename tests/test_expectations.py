@@ -24,6 +24,13 @@ def note(fmt="png", quality=82, lossless=False, source="jpeg", is_raw=False) -> 
     return images.size_expectation(spec, source, is_raw=is_raw)
 
 
+
+def setUpModule():
+    """Skip the whole module in a build that does not offer pictures."""
+    from vidsqueeze import features
+    if not features.images_enabled():
+        raise unittest.SkipTest("this build does not offer pictures")
+
 class WarnsWhereItWillGrow(unittest.TestCase):
     def test_raw_to_png(self):
         self.assertIn("larger", note(fmt="png", is_raw=True))

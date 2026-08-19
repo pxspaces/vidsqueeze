@@ -2,7 +2,7 @@
 
 # VidSqueeze
 
-**Compress and convert video, audio, photos and camera RAW on your own computer.**
+**Compress and convert video and audio on your own computer.**
 Free and open source, for Windows, macOS and Linux. Nothing is uploaded anywhere,
 there are no file size limits, and you need to know nothing about codecs.
 
@@ -11,7 +11,7 @@ ffmpeg into its own folder. After that you can turn the network off and VidSquee
 keeps working, on a plane, on a train, or on a machine that has never been online.
 
 That is the real difference from a converter on the web. Those want the file
-uploaded first, which puts your holiday videos, your client photographs or your
+uploaded first, which puts your holiday videos or your
 recordings on somebody else's server, under their size limits, their queue, their
 privacy policy and their decision about how long to keep a copy. Nothing you
 convert here leaves the computer, because there is nowhere for it to go.
@@ -26,17 +26,10 @@ People who prefer a terminal get every feature as command line flags.
 | -------------- | ------------------------------------------------------------ | -------------------------------------------- |
 | **Video**      | MP4, MOV, MKV, AVI, WebM, MPEG, WMV, FLV and more            | MP4, MKV, WebM, MOV in H.265, H.264, AV1, VP9 |
 | **Audio**      | MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF               | Opus, AAC, MP3, FLAC                          |
-| **Photos**     | JPEG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, JPEG XL         | JPEG, PNG, WebP, AVIF, JPEG XL, TIFF, BMP     |
-| **Camera RAW** | CR2, CR3, NEF, ARW, RAF, ORF, RW2, PEF, DNG and twenty more  | any photo format above                        |
 
-Camera RAW is handled properly rather than as an afterthought: developed at 16 bits
-per colour with the camera's own white balance, keeping the camera, lens, exposure
-and the date the photograph was taken. There are contact sheets too, for picking
-which of sixty frames are worth keeping.
 
 **Documentation:** [User guide](USER-GUIDE.md) &middot;
 [Everything it can do](FEATURES.md) &middot; [What changed](CHANGELOG.md) &middot;
-[Video](docs/GUIDE-VIDEO.md) &middot; [Photos](docs/GUIDE-IMAGES.md) &middot;
 [Audio](docs/GUIDE-AUDIO.md)
 
 ---
@@ -116,16 +109,9 @@ and deinterlacing.
 
 **Audio** extracted from video or converted between formats.
 
-**Photos and graphics** into JPEG, PNG, WebP, AVIF, JPEG XL, TIFF or BMP, with a
-quality dial, a size limit and proper handling of transparency.
-
-**Camera RAW** from Canon, Nikon, Sony, Fujifilm, Olympus, Panasonic, Pentax,
-Leica and others. ffmpeg cannot read RAW, so VidSqueeze uses the best decoder
-installed and falls back to the camera's embedded preview when there is none,
-telling you which it used.
 
 Presets cover the things people actually want: WhatsApp and email size limits,
-short-form video, YouTube, websites, web-ready photographs and thumbnails. The
+short-form video, YouTube and websites. The
 presets on offer change to suit whatever you selected.
 
 [The full inventory is in FEATURES.md](FEATURES.md).
@@ -157,16 +143,11 @@ vidsqueeze                          open the interface
 vidsqueeze holiday.mp4              convert one file with the default settings
 vidsqueeze ~/Videos                 convert everything in a folder
 vidsqueeze -p whatsapp clip.mov     fit WhatsApp's size limit
-vidsqueeze -p photo_web *.png       convert photographs for the web
 vidsqueeze --terminal               step-by-step questions instead of flags
 vidsqueeze --list-presets           show every preset
 vidsqueeze --info video.mp4         describe a file without changing it
 vidsqueeze --dry-run video.mp4      show the command without running it
 
-vidsqueeze --image-format png photo.cr2               develop a camera RAW
-vidsqueeze --image-format webp --lossless picture.png an exact, smaller copy
-vidsqueeze --image-format jpeg --image-quality 95 *.tif
-```
 
 Run it as `python3 -m vidsqueeze` from inside the folder, or use the launcher.
 `--help` lists every option.

@@ -11,6 +11,7 @@ import json
 from dataclasses import asdict, fields
 from typing import Any
 
+from . import features
 from .encode import JobSpec
 from .paths import PRESETS_FILE
 
@@ -321,6 +322,11 @@ def all_presets() -> tuple[list[Preset], list[str]]:
     by_key = {preset.key: preset for preset in BUILT_IN}
     for preset in user:
         by_key[preset.key] = preset  # user definitions win
+
+    # A build without pictures must not offer presets that only apply to them.
+    # Filtered here, once, rather than at each of the places that list presets.
+    if not features.images_enabled():
+        by_key = {k: p for k, p in by_key.items() if tuple(p.kinds) != ("image",)}
 
     ordered: list[Preset] = []
     for group in GROUP_ORDER:

@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VidSqueeze: compress video, audio, photos and camera RAW on your own computer</title>
-<meta name="description" content="Free, open source converter that makes video, audio, photo and camera RAW files smaller. Works offline with no internet needed after setup, no uploads, no file size limits. Windows, macOS and Linux, nothing to install.">
+<title>VidSqueeze: compress video and audio on your own computer, offline</title>
+<meta name="description" content="Free, open source converter that makes video and audio files smaller. Works offline with no internet needed after setup, no uploads, no file size limits. Windows, macOS and Linux, nothing to install.">
 <link rel="canonical" href="https://pxspaces.github.io/vidsqueeze/">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-512.png">
 <meta name="theme-color" content="#2436C8">
 <meta property="og:type" content="website">
-<meta property="og:title" content="VidSqueeze: make video, audio and photo files smaller">
-<meta property="og:description" content="Compress and convert video, audio, photos and camera RAW on your own computer. Nothing is uploaded. Windows, macOS and Linux.">
+<meta property="og:title" content="VidSqueeze: make video and audio files smaller">
+<meta property="og:description" content="Compress and convert video and audio on your own computer. Nothing is uploaded. Windows, macOS and Linux.">
 <meta property="og:url" content="https://pxspaces.github.io/vidsqueeze/">
 <meta property="og:image" content="https://pxspaces.github.io/vidsqueeze/social.png">
 <meta property="og:image:width" content="1200">
@@ -27,8 +27,8 @@
   "name": "VidSqueeze",
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Windows, macOS, Linux",
-  "softwareVersion": "1.13.0",
-  "description": "Open source converter that makes video, audio, photo and camera RAW files smaller. Runs entirely on your own computer with nothing uploaded.",
+  "softwareVersion": "1.14.0",
+  "description": "Open source converter that makes video and audio files smaller. Runs entirely on your own computer with nothing uploaded.",
   "url": "https://pxspaces.github.io/vidsqueeze/",
   "codeRepository": "https://github.com/pxspaces/vidsqueeze",
   "license": "https://opensource.org/licenses/MIT",
@@ -65,21 +65,19 @@ footer { margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); 
   <img src="icon.svg" width="60" height="60" alt="VidSqueeze logo">
   <h1>VidSqueeze</h1>
 </div>
-<p class="lede">Make video, audio, photo and camera RAW files smaller, on your own
-computer. Nothing is uploaded anywhere.</p>
+<p class="lede">Make video and audio files smaller, on your own computer.
+Nothing is uploaded anywhere.</p>
 
 <p><a class="cta" href="https://github.com/pxspaces/vidsqueeze">Get it on GitHub</a>
 <a class="cta" href="https://github.com/pxspaces/vidsqueeze/releases/latest">Download the latest release</a></p>
 
 <h2>What it does</h2>
 <p>VidSqueeze compresses and converts media files. It opens in the browser you
-already use, and it also works entirely from a terminal. Version 1.13.0.</p>
+already use, and it also works entirely from a terminal. Version 1.14.0.</p>
 <table>
 <tr><th>Kind</th><th>Reads</th><th>Writes</th></tr>
 <tr><td>Video</td><td>MP4, MOV, MKV, AVI, WebM, MPEG, WMV, FLV, and more</td><td>MP4, MKV, WebM, MOV with H.265, H.264, AV1 or VP9</td></tr>
 <tr><td>Audio</td><td>MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF</td><td>Opus, AAC, MP3, FLAC</td></tr>
-<tr><td>Photos</td><td>JPEG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, JPEG XL</td><td>JPEG, PNG, WebP, AVIF, JPEG XL, TIFF, BMP</td></tr>
-<tr><td>Camera RAW</td><td>CR2, CR3, NEF, ARW, RAF, ORF, RW2, DNG and twenty more</td><td>Any photo format above</td></tr>
 </table>
 
 <h2>It needs the internet once, and then never again</h2>
@@ -87,23 +85,22 @@ already use, and it also works entirely from a terminal. Version 1.13.0.</p>
 turn the network off and it keeps working: on a plane, on a train, on a machine
 that has never been online, or on one you would rather did not talk to anything.</p>
 <p>That is the real difference from a converter on the web. Those want the file
-uploaded first, which puts your holiday videos, your client photographs or your
-recordings on somebody else's server, subject to their size limits, their queue,
-their privacy policy, and their decision about how long to keep a copy.</p>
+uploaded first, which puts your holiday videos, your work and your recordings on
+somebody else's server, subject to their size limits, their queue, their privacy
+policy, and their decision about how long to keep a copy.</p>
 <p>Nothing you convert here leaves the computer, because there is nowhere for it to
 go. The interface is a small server on your own machine that only your own browser
 can reach.</p>
 
-<h2>Made for photographers as much as for video</h2>
-<p>Camera RAW is handled properly rather than as an afterthought. RAW files are
-developed at 16 bits per colour with the camera's own white balance and a correct
-sRGB curve, so a converted photograph looks like the photograph rather than a
-flat, grey approximation of it. The camera, the lens, the exposure and the date
-the picture was taken are all kept, and the date taken becomes the date on the
-file so a shoot stays in order.</p>
-<p>There are contact sheets too: one image showing small versions of every
-photograph in a folder with the file names underneath, which is still the fastest
-way to pick which of sixty frames are worth keeping.</p>
+<h2>Built for long jobs, not just single files</h2>
+<p>Point it at a folder of sixty videos and it works through them, showing what
+each one saved. A batch can be paused when you need the machine back and picked up
+afterwards, and the file being worked on finishes rather than being cut off, so
+nothing is left half written.</p>
+<p>The summary at the end separates the two kinds of result: how many came out
+smaller, and how many came out larger and would have been better left alone. A run
+where most files grew usually means the wrong output format, which is worth knowing
+rather than hiding behind one number.</p>
 
 <h2>Getting started</h2>
 <p>There is nothing to install. No administrator rights are needed, nothing is
@@ -120,7 +117,7 @@ of it. If you would rather have the very newest work, use the green
 
 <h3>2. Unpack it somewhere permanent</h3>
 <p>The zip unpacks into a folder with a long name such as
-<code>vidsqueeze-1.13.0</code>. Rename it to <code>VidSqueeze</code>, which is
+<code>vidsqueeze-1.14.0</code>. Rename it to <code>VidSqueeze</code>, which is
 tidier, and move it to:</p>
 <table>
 <tr><th>System</th><th>Where to put it</th></tr>
@@ -161,8 +158,8 @@ Updates button inside the program can pull it for you.</p>
 <pre>vidsqueeze holiday.mp4                      compress one video
 vidsqueeze ~/Videos                         compress a whole folder
 vidsqueeze -p whatsapp clip.mov             fit a sharing limit
-vidsqueeze --image-format jpeg photo.cr2    develop a camera RAW
-vidsqueeze --contact-sheet ~/Photos         one sheet from a shoot</pre>
+vidsqueeze -p shrink_to_1080 *.MP4          scale a batch down
+vidsqueeze --terminal                       step by step questions</pre>
 
 <h2>Reading further</h2>
 <ul>
@@ -170,7 +167,6 @@ vidsqueeze --contact-sheet ~/Photos         one sheet from a shoot</pre>
 <li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/USER-GUIDE.md">User guide</a></li>
 <li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/FEATURES.md">Every feature in detail</a></li>
 <li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-VIDEO.md">Working with video</a></li>
-<li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-IMAGES.md">Working with photos and images</a></li>
 <li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/docs/GUIDE-AUDIO.md">Working with audio</a></li>
 <li><a href="https://github.com/pxspaces/vidsqueeze/blob/main/CHANGELOG.md">What changed in each version</a></li>
 </ul>

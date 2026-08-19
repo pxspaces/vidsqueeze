@@ -25,6 +25,13 @@ from vidsqueeze.images import ImageSpec
 from .support import arg_after, fake_image_info
 
 
+
+def setUpModule():
+    """Skip the whole module in a build that does not offer pictures."""
+    from vidsqueeze import features
+    if not features.images_enabled():
+        raise unittest.SkipTest("this build does not offer pictures")
+
 class TheNaturalLookIsTheDefault(unittest.TestCase):
     """Somebody converting a holiday photograph wants a photograph, not a
     faithful sensor reading."""

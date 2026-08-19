@@ -7,6 +7,27 @@ Dates are the day the change was made.
 
 ---
 
+## 1.14.0 - 2026-08-19
+
+### Changed
+
+- **Pictures and camera RAW are not in this build.** Still images were doing too
+  much guessing about colour to be trusted with somebody's photographs, so they
+  have been taken out of the released version while that is finished properly.
+  Everything below in this file that describes them still happened, and the work
+  is still going on. It is simply not in the copy you are running.
+
+  Nothing about video or audio has changed. What this means in practice: the
+  program accepts video and audio files only, the file chooser no longer offers
+  Photos, the picture presets and the picture settings are gone, the contact
+  sheet is gone, and the picture options are not in `--help`. There is no hidden
+  switch: the code is not built in, so there is nothing to turn on by accident.
+
+  When stills come back they will come back as a version of their own, with
+  measurements published alongside them rather than a promise.
+
+---
+
 ## 1.13.0 - 2026-08-18
 
 ### Changed
@@ -118,8 +139,6 @@ Dates are the day the change was made.
   From a terminal:
 
   ```
-  vidsqueeze --contact-sheet ~/Photos
-  vidsqueeze --contact-sheet --sheet-out ~/shoot.png --sheet-columns 6 *.CR2
   ```
 
   Camera RAW works exactly as it does elsewhere, developed with the same look, so

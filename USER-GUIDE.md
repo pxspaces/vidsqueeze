@@ -8,7 +8,6 @@ Living document, last updated for version 1.13.0.
 **Jump to:** [Windows](#getting-started-on-windows) &middot;
 [macOS](#getting-started-on-macos) &middot; [Linux](#getting-started-on-linux) &middot;
 [Your first conversion](#your-first-conversion) &middot;
-[Video](docs/GUIDE-VIDEO.md) &middot; [Photos](docs/GUIDE-IMAGES.md) &middot;
 [Audio](docs/GUIDE-AUDIO.md) &middot; [Problems](#when-something-goes-wrong)
 
 ---
@@ -160,8 +159,6 @@ shown, so nothing is hidden permanently. Pick **Anything** if you are not sure.
 It remembers your answer and never asks again. The same choice sits in the
 header as a row of buttons, so you can change it whenever you like.
 
-Adding files always overrides it. Drop a photograph in while set to Video and
-the picture settings appear regardless.
 
 ---
 
@@ -181,11 +178,9 @@ the picture settings appear regardless.
    **Anything** in the header to see everything.
 
 2. **Pick what you want.** In the middle, under Settings, choose a preset. If
-   you are unsure, **Balanced** for video and **Photo for the web** for
-   photographs are the right answers.
+   you are unsure, **Balanced** is the right answer.
 
-   The choices change depending on what you added. Photographs do not offer
-   video codecs.
+   The choices change depending on what you added.
 
 3. **Try it first, optionally.** Press **Test a short sample** to convert about
    eight seconds and see what the whole file would come to. Or **Try several
@@ -251,34 +246,6 @@ This cannot be undone. There is no recycle bin.
 **A file failed.** Open the `logs` folder inside VidSqueeze. Every failure
 records the exact command and what went wrong.
 
-**A photo will not open.** iPhone photos are HEIC, which needs a recent ffmpeg.
-VidSqueeze offers to download a newer one into its own folder. Press the button.
-
-**My camera RAW files convert but look low resolution.** No RAW decoder is
-installed, so VidSqueeze used the preview picture your camera stored inside the
-file. It tells you when this happens, and names the command to fix it. Install
-that and convert again for full quality.
-
-**My photographs look flatter and greyer than the original.** Fixed in 1.7.0. A
-RAW file is what the sensor recorded, not a finished photograph, and VidSqueeze
-was leaving the decision about brightness and colour to the decoder, which errs
-heavily towards faithful rather than attractive. Update, and they will come out
-close to how your camera renders them.
-
-If you preferred the old flat rendering, because you edit your photographs
-afterwards, set **Camera RAW should look** to **Flat, for editing** under Advanced
-image settings.
-
-**My PNG is not as good as I expected.** Two settings to check, both fixed in
-1.7.0 but worth knowing. The quality dial decides colour depth for PNG, so set it
-to 90 or more for all 16 bits; it used to be hidden for PNG entirely. And the
-longest side used to stay at 2560, so a big photograph came out at under half its
-size; choosing PNG now clears that for you.
-
-**My converted picture looks dark or muddy.** It should not. This was a genuine
-fault in versions before 1.5.0, where photographs were developed with the wrong
-tone curve and came out darker than they should have been. Update, and convert
-again.
 
 **I need my computer back part way through a big batch.** Press **Pause**, next to
 Stop. The file being worked on finishes, then it waits. Press **Carry on** when you
@@ -286,18 +253,8 @@ are ready. Nothing is lost and the time estimate does not punish you for the bre
 
 **It says some files came out larger.** That is the honest report rather than a
 fault. It happens when the output format does not compress, which usually means
-PNG or TIFF was chosen for photographs. Convert those to JPEG, WebP or AVIF
-instead. From 1.8.0 VidSqueeze warns about this before the batch starts.
+the chosen output format does not compress.
 
-**My portrait photographs came out the wrong size, or bigger.** Fixed in 1.6.0.
-Phones and cameras store a portrait photograph as a landscape picture plus a note
-saying which way up it goes, and VidSqueeze was reading the shape and not the
-note, so it shrank the wrong side. Update and convert again.
-
-**The date on my converted photographs is today, not when I took them.** Fixed in
-1.6.0. The date the photograph was taken is now kept, and becomes the date on the
-file, so a shoot stays in order. Camera and lens details are kept too, in JPEG.
-If you would rather they were not, tick **Strip dates and camera information**.
 
 **Updates says I am up to date but I know there is a newer version.** Press
 **Check again** in the Updates window, which ignores the saved answer from the
@@ -306,13 +263,6 @@ for themselves, so if you are on 1.5.0 or earlier and the button will not offer
 anything, update by pulling with git, or download the newest copy from the
 project page.
 
-**The PNG came out bigger than the original.** From 1.8.0 VidSqueeze warns about
-this in the settings before you start, rather than mentioning it afterwards.
-PNG never throws anything away,
-so it is often larger than a camera file, which does. If you want a smaller
-file, choose WebP or AVIF. If you want PNG but not an enormous one, keep the
-quality below 90: above that VidSqueeze keeps 16 bits of colour per channel,
-which roughly triples the size.
 
 **What is in the new version?** Press **Updates** in the header. When there is one
 to take, the window lists what was fixed and what was added, so you can decide

@@ -29,8 +29,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from . import (deps, history, hwaccel, images, media, presets, raw, selfupdate, sheet,
-               updates, watch)
+from . import (deps, features, history, hwaccel, images, media, presets, raw, selfupdate,
+               sheet, updates, watch)
 from .encode import (
     CODEC_LABELS,
     CONTAINER_RULES,
@@ -54,6 +54,8 @@ from .paths import (
 )
 from .probe import (
     MEDIA_EXTENSIONS,
+    kind_for_extension,
+    offered_kinds,
     ProbeError,
     kind_for_extension,
     matches_kinds,
@@ -253,6 +255,11 @@ def expand_selection(
             collected += found
         elif path.is_file():
             if not matches_kinds(path, wanted):
+                # Filtered out by the mode is silent and expected: that is what a
+                # mode is for. Filtered out because this build does not do that
+                # kind at all is worth a sentence, or the file simply vanishes.
+                if kind_for_extension(path) not in offered_kinds():
+                    problems.append(f"{path.name} is not a kind this version converts.")
                 continue
             collected.append(path)
         else:
@@ -504,7 +511,10 @@ class Handler(BaseHTTPRequestHandler):
         elif route == "/api/sample/start":
             self._start_sample(body)
         elif route == "/api/sheet/start":
-            self._start_sheet(body)
+            if not features.images_enabled():
+                self._error("Contact sheets are not part of this version.")
+            else:
+                self._start_sheet(body)
         elif route == "/api/sheet/cancel":
             SESSION.sheet_state["running"] = False
             self._json({"cancelled": True})
@@ -792,12 +802,15 @@ class Handler(BaseHTTPRequestHandler):
             "default_preset": presets.DEFAULT_PRESET,
             "warnings": warnings,
             "settings": load_settings(),
-            "raw": raw.describe_support(),
+            "raw": raw.describe_support() if features.images_enabled() else {"available": False, "extensions": [], "brands": []},
             "app_version": VERSION,
+            # Empty when this build does not offer pictures, which is what makes
+            # the page hide the whole picture side without knowing why.
+            "images_enabled": features.images_enabled(),
             "image_formats": {
                 name: {**spec, "available": name in images.available_formats(tools)}
                 for name, spec in images.IMAGE_FORMATS.items()
-            } if tools else {},
+            } if tools and features.images_enabled() else {},
             "max_concurrency": sensible_concurrency(99),
             "history": history.summary(limit=12),
             "options": {
@@ -808,7 +821,7 @@ class Handler(BaseHTTPRequestHandler):
                 "speeds": SPEEDS,
                 "scales": SCALE_PRESETS,
             },
-            "defaults": asdict(JobSpec()),
+            "defaults": _offered_defaults(),
         }
 
     #: How many files get a full inspection. Reading a file's dimensions and
@@ -952,7 +965,7 @@ class Handler(BaseHTTPRequestHandler):
                 "problems": problems[:12],
                 "kinds": sorted({d["kind"] for d in details}),
                 "needs_raw_decoder": any(d.get("is_raw") and not d.get("raw_ready") for d in details),
-                "raw_install_hint": raw.install_hint(),
+                "raw_install_hint": raw.install_hint() if features.images_enabled() else "",
                 "unreadable": unreadable,
                 "upgrade_offer": bool(unreadable),
             }
@@ -1220,6 +1233,20 @@ _LIMITS = {
 #: Fields the program works out for itself. The interface has no business
 #: setting them, and letting it would mean a stray value in a request could
 #: quietly wreck the colour of every picture in a batch.
+def _offered_defaults() -> dict:
+    """The starting values the page reads.
+
+    A build without pictures sends no picture defaults. Nothing on the page reads
+    them, so this changes no behaviour; it is here so that what the program tells
+    the page matches what the program will do, which is one less thing to be
+    puzzled by when reading it back in a browser's network view.
+    """
+    values = asdict(JobSpec())
+    if not features.images_enabled():
+        values = {k: v for k, v in values.items() if not k.startswith("image_")}
+    return values
+
+
 _INTERNAL_FIELDS = frozenset({"image_saturation"})
 
 

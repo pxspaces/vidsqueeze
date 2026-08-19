@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from fractions import Fraction
 from pathlib import Path
 
+from . import features
 from .deps import Tools, _no_window
 from .paths import human_duration, human_size
 
@@ -38,7 +39,16 @@ RAW_EXTENSIONS = {
 
 IMAGE_EXTENSIONS |= RAW_EXTENSIONS
 
-MEDIA_EXTENSIONS = VIDEO_EXTENSIONS | AUDIO_EXTENSIONS | IMAGE_EXTENSIONS
+#: What the program will pick up. Pictures are left out of builds that do not
+#: offer them, which is the single change that makes the file browser, the folder
+#: scans and the selection helper all skip them without knowing why.
+def _media_extensions() -> set:
+    if features.images_enabled():
+        return VIDEO_EXTENSIONS | AUDIO_EXTENSIONS | IMAGE_EXTENSIONS
+    return VIDEO_EXTENSIONS | AUDIO_EXTENSIONS
+
+
+MEDIA_EXTENSIONS = _media_extensions()
 
 #: Container names ffprobe reports for single images.
 IMAGE_CONTAINERS = {
@@ -473,11 +483,29 @@ def kind_for_extension(path: Path | str) -> str | None:
     return None
 
 
+def offered_kinds() -> set:
+    """The kinds of file this build will convert at all.
+
+    Separate from MEDIA_EXTENSIONS because the two answer different questions:
+    that one is about names, this one is about kinds, and a kind filter arriving
+    from the interface has to be checked against it.
+    """
+    kinds = {KIND_VIDEO, KIND_AUDIO}
+    if features.images_enabled():
+        kinds.add(KIND_IMAGE)
+    return kinds
+
+
 def matches_kinds(path: Path | str, kinds: set[str] | None) -> bool:
-    """Whether a file is one of the kinds asked for. No filter means everything."""
-    if not kinds:
-        return True
-    return kind_for_extension(path) in kinds
+    """Whether a file is one of the kinds asked for.
+
+    No filter means everything this build offers, which is not the same as
+    everything. Reading it as "everything" let a photograph named directly on
+    the command line straight through to the picture pipeline in a build that
+    does not have the picture settings to control it.
+    """
+    wanted = set(kinds) & offered_kinds() if kinds else offered_kinds()
+    return kind_for_extension(path) in wanted
 
 
 def scan_folder(folder: Path, recursive: bool = True, kinds: set[str] | None = None) -> list[Path]:

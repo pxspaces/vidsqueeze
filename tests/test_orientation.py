@@ -28,6 +28,13 @@ SWAPPING = (5, 6, 7, 8)
 UPRIGHT = (1, 2, 3, 4)
 
 
+
+def setUpModule():
+    """Skip the whole module in a build that does not offer pictures."""
+    from vidsqueeze import features
+    if not features.images_enabled():
+        raise unittest.SkipTest("this build does not offer pictures")
+
 class ProbeAgreesWithTheDecoder(unittest.TestCase):
     @needs_ffmpeg
     def test_sideways_photographs_report_their_displayed_shape(self):

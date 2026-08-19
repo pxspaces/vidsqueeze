@@ -25,6 +25,13 @@ def pictures(work: Path, count: int) -> list:
     return [make_test_image(work / f"p{n}.png", size="200x150") for n in range(count)]
 
 
+
+def setUpModule():
+    """Skip the whole module in a build that does not offer pictures."""
+    from vidsqueeze import features
+    if not features.images_enabled():
+        raise unittest.SkipTest("this build does not offer pictures")
+
 class TheGridFitsEverything(unittest.TestCase):
     """A grid too small drops the last pictures and says nothing."""
 

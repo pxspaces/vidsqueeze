@@ -38,6 +38,13 @@ def jpeg_with(fields: dict, target: Path) -> Path:
     return target
 
 
+
+def setUpModule():
+    """Skip the whole module in a build that does not offer pictures."""
+    from vidsqueeze import features
+    if not features.images_enabled():
+        raise unittest.SkipTest("this build does not offer pictures")
+
 class BlockSurvivesARoundTrip(unittest.TestCase):
     @needs_ffmpeg
     def test_every_field_comes_back(self):

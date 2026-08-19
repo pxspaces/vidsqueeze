@@ -4,7 +4,43 @@
    it holds when Squeeze is pressed is what runs. */
 
 const TOKEN = document.documentElement.dataset.token;
-const $ = (id) => document.getElementById(id);
+/* Look up a control, and survive one that is not in this build.
+
+   The published copy has the picture markup taken out of the page rather than
+   hidden, because a hidden control is still a control somebody can find. That
+   leaves this script asking for elements that are not there, and a single
+   addEventListener on a missing element throws and stops the rest of the file
+   running: everything below it would silently never be wired up.
+
+   So a missing element becomes a detached one. Reads give empty values, writes
+   go nowhere, and listeners never fire, which is exactly what a control that
+   does not exist should do. The warning is there because in development a
+   missing element means a mistyped id, and that should not be silent. */
+const OPTIONAL = new Set([
+  'imageAdvanced', 'imageFormat', 'imageFormatNote', 'imageQuality',
+  'imageQualityField', 'imageQualityHint', 'imageQualityValue',
+  'imageMaxDimension', 'imageBackground', 'imageBackgroundField',
+  'imageLossless', 'imageLosslessRow', 'sizeExpectation',
+  'rawLook', 'rawLookField',
+  'rawNotice', 'rawText', 'rawHint',
+  'sheetRow', 'sheetBtn', 'sheetCancelBtn', 'sheetStatus',
+  'sheetColumns', 'sheetThumbnail',
+]);
+
+const absent = new Map();
+const $ = (id) => {
+  const found = document.getElementById(id);
+  if (found) return found;
+  if (!absent.has(id)) {
+    // Expected to be missing in a build without pictures, so silent. Anything
+    // else is a mistyped id, and saying nothing about that would waste an hour.
+    if (!OPTIONAL.has(id)) {
+      console.warn(`VidSqueeze: no element '${id}' on this page.`);
+    }
+    absent.set(id, document.createElement('input'));
+  }
+  return absent.get(id);
+};
 
 const state = {
   paths: [],        // what the user picked, folders included
@@ -85,6 +121,7 @@ async function boot() {
   state.presets = info.presets;
   state.settings = info.settings || {};
   state.imageFormats = info.image_formats || {};
+  state.imagesEnabled = info.images_enabled !== false;
   state.rawSupport = info.raw || null;
   state.appVersion = info.app_version || '';
   state.mode = state.settings.media_mode || 'any';
@@ -137,10 +174,24 @@ const MODES = [
   ['image', '\u25A3', 'Photos', 'Pictures and graphics, including camera RAW.'],
 ];
 
+/* What this build actually offers. The server says so, and a build without
+   pictures must not show a Photos button that leads to an empty room: the file
+   browser will not list a photograph, so choosing it would look broken. */
+function offeredModes() {
+  if (state.imagesEnabled === false) {
+    return MODES
+      .filter(([value]) => value !== 'image')
+      .map((mode) => mode[0] === 'any'
+        ? ['any', mode[1], 'Anything', 'Video and audio. Every setting available.']
+        : mode);
+  }
+  return MODES;
+}
+
 function buildModeScreen() {
   const host = $('modeChoices');
   host.innerHTML = '';
-  for (const [value, glyph, name, description] of MODES) {
+  for (const [value, glyph, name, description] of offeredModes()) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'mode-choice';
@@ -167,7 +218,7 @@ function buildModeScreen() {
 function buildModeSelector() {
   const host = $('modeSelector');
   host.innerHTML = '';
-  for (const [value, , name] of MODES) {
+  for (const [value, , name] of offeredModes()) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'seg';
@@ -481,14 +532,16 @@ function renderPresets() {
 
   // What is actually selected wins. With nothing selected, the chosen mode
   // decides, so the settings are never a wall of irrelevant options.
-  const fromMode = state.mode === 'any' ? ['video', 'audio', 'image'] : [state.mode];
+  const fromMode = state.mode === 'any'
+    ? (state.imagesEnabled === false ? ['video', 'audio'] : ['video', 'audio', 'image'])
+    : [state.mode];
   const kinds = new Set(state.kinds.length ? state.kinds : fromMode);
   const relevant = state.presets.filter((p) => p.kinds.some((k) => kinds.has(k)));
 
   // Show only the settings that apply to what is actually selected.
   const onlyImages = kinds.size === 1 && kinds.has('image');
   show('advanced', !onlyImages);
-  show('imageAdvanced', kinds.has('image'));
+  show('imageAdvanced', state.imagesEnabled !== false && kinds.has('image'));
   show('speedBlock', !onlyImages);
 
   if (state.kinds.length > 1) {

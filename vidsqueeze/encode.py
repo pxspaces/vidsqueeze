@@ -12,10 +12,10 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Callable, Iterator
 
-from . import hwaccel, images, metadata, raw
+from . import features, hwaccel, images, metadata, raw
 from .deps import Tools, _no_window
 from .images import ImageError, ImageSpec
-from .probe import MediaInfo, ProbeError, probe
+from .probe import IMAGE_EXTENSIONS, MediaInfo, ProbeError, probe
 from .paths import LOG_DIR, human_size, system_key
 
 # --------------------------------------------------------------------------
@@ -994,6 +994,14 @@ def encode_one(
     """Compress a single file from start to finish."""
     started = time.monotonic()
     source = Path(source)
+
+    # A build without pictures must not have a route into the picture pipeline,
+    # not even an internal one. The selection code refuses these earlier and more
+    # politely; this is here so that a caller which skips it cannot get through.
+    if not features.images_enabled() and (
+            raw.is_raw(source) or source.suffix.lower() in IMAGE_EXTENSIONS):
+        return JobResult(source=source, output=None, ok=False,
+                         message="This version converts video and audio only.")
 
     # Camera RAW cannot be read by ffmpeg at all, so it is developed into an
     # ordinary image first and then treated as one.

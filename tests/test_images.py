@@ -18,6 +18,13 @@ from .support import (arg_after, fake_image_info, make_test_image, needs_ffmpeg,
                       probe_pix_fmt, psnr, run_command, tools)
 
 
+
+def setUpModule():
+    """Skip the whole module in a build that does not offer pictures."""
+    from vidsqueeze import features
+    if not features.images_enabled():
+        raise unittest.SkipTest("this build does not offer pictures")
+
 class PixelFormatChoice(unittest.TestCase):
     """Forcing a pixel format is occasionally necessary and frequently
     harmful, so the default answer has to be "leave it alone"."""

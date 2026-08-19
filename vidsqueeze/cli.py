@@ -13,7 +13,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import __version__, deps, history, hwaccel, images, presets
+from . import __version__, deps, features, history, hwaccel, images, presets
 from .encode import CODEC_LABELS, QUALITY_LABELS, SPEEDS, JobSpec, encode_one
 from .jobs import Queue
 from .paths import OUTPUT_DIR, ensure_dirs, human_duration, human_size
@@ -88,6 +88,15 @@ def build_parser() -> argparse.ArgumentParser:
     audio = parser.add_argument_group("audio")
     audio.add_argument("--audio", choices=["opus", "aac", "mp3", "flac", "copy", "none"], help="Audio codec.")
     audio.add_argument("--audio-bitrate", type=int, metavar="KBPS", help="Audio bitrate.")
+
+    # Registered only when this build offers pictures, so --help does not list
+    # flags that would be refused, and a script using them fails loudly rather
+    # than being quietly ignored.
+    if not features.images_enabled():
+        extras = parser.add_argument_group("extras")
+        extras.add_argument("--keep-subtitles", action="store_true", help="Carry subtitles across.")
+        extras.add_argument("--no-metadata", action="store_true", help="Strip dates and camera information.")
+        return parser
 
     stills = parser.add_argument_group("images")
     stills.add_argument("--image-format", choices=sorted(images.IMAGE_FORMATS),
@@ -258,6 +267,11 @@ def spec_from_args(args: argparse.Namespace) -> JobSpec:
         spec.keep_subtitles = True
     if args.no_metadata:
         spec.keep_metadata = False
+
+    # Not registered at all in a build without pictures, so reading any of them
+    # would be an AttributeError rather than a graceful "not supported".
+    if not features.images_enabled():
+        return spec
 
     if args.image_format:
         spec.image_format = args.image_format
@@ -480,7 +494,10 @@ def main(argv: list[str] | None = None) -> int:
     for problem in problems:
         print(f"  {problem}")
     if not files:
-        print("Nothing to do: no video or audio files were found.")
+        kinds = ("no video, audio or picture files were found"
+                 if features.images_enabled() else
+                 "no video or audio files were found")
+        print(f"Nothing to do: {kinds}.")
         return 1
 
     if args.info:
@@ -494,7 +511,7 @@ def main(argv: list[str] | None = None) -> int:
     spec = spec_from_args(args)
     output_dir = Path(args.output).expanduser() if args.output else OUTPUT_DIR
 
-    if args.contact_sheet:
+    if features.images_enabled() and args.contact_sheet:
         return _make_contact_sheet(tools, files, args, spec, output_dir)
 
     if args.dry_run:

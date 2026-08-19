@@ -13,15 +13,11 @@ Last updated for version 1.13.0.
 | ---------- | ---------------------------------------------------------------- | --------------------------------------------- |
 | **Video**  | MP4, MOV, MKV, AVI, WebM, M4V, MPG, WMV, FLV, TS, M2TS, MTS, 3GP, OGV, VOB, MXF and more | MP4, MKV, WebM, MOV        |
 | **Audio**  | MP3, M4A, AAC, WAV, FLAC, OGG, Opus, WMA, AIFF                    | MP3, M4A, and the audio inside any video file |
-| **Images** | JPEG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, JPEG XL, QOI, PPM, TGA | JPEG, PNG, WebP, AVIF, JPEG XL, TIFF, BMP   |
-| **Camera RAW** | CR2, CR3, CRW, NEF, NRW, ARW, SRF, SR2, RAF, ORF, RW2, PEF, SRW, DNG, 3FR, DCR, KDC, MRW, MOS, IIQ, X3F, ERF, RWL, GPR | converted to any image format above |
 
 HEIC, the format iPhones use for photos, needs a recent ffmpeg. If the one on
 your computer cannot open a file, VidSqueeze says so and offers to download a
 newer build into its own folder.
 
-Camera RAW needs a decoder that ffmpeg does not include. See
-[Camera RAW](#camera-raw) below.
 
 ---
 
@@ -54,8 +50,7 @@ On narrow screens the three panes stack vertically.
 
 ## Presets
 
-Presets are filtered to whatever you have selected, so choosing photographs does
-not offer you video codecs.
+Presets are filtered to whatever you have selected.
 
 **Everyday (video)** Balanced, High quality, Archive, Small, Shrink to 1080p,
 Shrink to 720p.
@@ -68,7 +63,6 @@ Website.
 
 **Audio** Extract as MP3, Extract as M4A.
 
-**Images** Photo for the web, WebP, AVIF, PNG, Photo for messaging, Thumbnail,
 Archive quality (lossless WebP).
 
 You can add your own: rename `presets.example.json` to `presets.json` and edit
@@ -105,139 +99,6 @@ the result lands close to, and under, the limit.
 
 ---
 
-## Image settings
-
-| Setting        | Choices                                                       |
-| -------------- | ------------------------------------------------------------- |
-| Convert to     | JPEG, PNG, WebP, AVIF, JPEG XL, TIFF, BMP                      |
-| Quality        | 1 to 100, mapped correctly onto each format's own scale        |
-| Lossless       | WebP and JPEG XL                                               |
-| Longest side   | 4096, 2560, 1920, 1600, 1080, 512, or keep original            |
-| Background     | White, black or grey, when flattening transparency             |
-
-Transparency is preserved wherever the target format supports it. Where it does
-not, such as JPEG, the image is composited onto your chosen background rather
-than turning transparent areas black, and VidSqueeze tells you it did so.
-
-Images are never enlarged. This includes photographs taken with the camera
-turned sideways, which are stored as a landscape picture plus a note saying
-which way up they go. VidSqueeze reads the note, so a portrait photograph is
-measured on the side you actually see.
-
-### The camera, the lens and the date are kept
-
-Converting a photograph keeps the details recorded with it: the camera and lens,
-the exposure, the aperture, the ISO, and the date and time it was taken. The date
-taken also becomes the date on the file, so a shoot stays in the right order in
-any folder sorted by time.
-
-| Target                         | What is kept                        |
-| ------------------------------ | ----------------------------------- |
-| JPEG                           | Everything above                    |
-| PNG, WebP, AVIF, TIFF, BMP     | The date it was taken               |
-
-This matters most for camera RAW, where previously none of it survived and every
-converted photograph was stamped with the day it was converted.
-
-**Strip dates and camera information** removes all of it, for photographs you
-intend to share.
-
-### It says when a file will get bigger
-
-Some conversions cannot make a file smaller. A photograph turned into PNG or TIFF
-is normally larger than the camera file, because those formats throw nothing away,
-and a JPEG turned into any lossless format is larger for the same reason.
-
-VidSqueeze says so in the settings as soon as you choose such a format, before the
-work starts, and names a smaller format to use instead. It stays quiet when the
-file will shrink: a warning that appears every time is a warning nobody reads.
-
-The same wording appears on the command line, before the batch begins, because it
-is worked out in one place rather than twice.
-
-### What quality actually changes
-
-Quality is not only how hard the picture is squeezed. At **90 and above**,
-VidSqueeze stops economising on colour:
-
-| Quality  | Colour detail                  | Photographs from a camera |
-| -------- | ------------------------------ | ------------------------- |
-| below 90 | colour stored at half width    | 8 bits per colour         |
-| 90 or up | colour stored in full          | 16 bits per colour        |
-
-Below 90 the saving is large and the difference is hard to see. At 90 and above
-nothing is economised, which matters for photographs you intend to edit later,
-and makes the files considerably bigger. A 26 megapixel photograph saved as PNG
-is about 36 MB below 90, and about 120 MB above it.
-
-PNG, TIFF and BMP are lossless whatever quality you choose. The setting only
-decides how much colour depth is carried into them.
-
-**Lossless WebP and lossless JPEG XL reproduce the original exactly**, pixel for
-pixel. If you compare the two files with a measuring tool, they are identical.
-
----
-
-## Camera RAW
-
-ffmpeg cannot read camera RAW. Its "raw" decoders are for Cintel, DPX and
-OpenEXR, none of which is what comes off a Canon or a Nikon. VidSqueeze
-therefore looks for a proper decoder and uses the best one installed:
-
-| Decoder      | Result                                              |
-| ------------ | --------------------------------------------------- |
-| darktable    | Full resolution, the camera's own colour handling    |
-| RawTherapee  | Full resolution, high quality development            |
-| LibRaw       | Full resolution                                      |
-| dcraw        | Full resolution                                      |
-| ImageMagick  | Good quality, often at half resolution               |
-
-Once developed, the image goes through the ordinary picture pipeline, so every
-setting works exactly as it does for a JPEG.
-
-Whichever decoder is used, VidSqueeze asks it for the camera's own white
-balance, for 16 bits of colour per channel, and for the standard tone curve that
-every image viewer expects. Left to their own defaults these tools use a
-different curve, which nothing records in the file, so every viewer reads the
-result as too dark. That is why a converted photograph used to look flatter and
-greyer than the same shot straight out of the camera.
-
-### How a RAW should look
-
-A RAW file is not a photograph. It is what the sensor measured, and something has
-to decide how bright the picture is and how strong its colour should be. A decoder
-left to itself decides "barely at all", because its job is faithfulness to the
-sensor, not to the scene. The result is correct and looks flat and grey beside the
-same shot out of the camera.
-
-| Choice                  | What you get                                             |
-| ----------------------- | -------------------------------------------------------- |
-| **Like the photograph** | The default. Close to how the camera would render it.    |
-| **Flat, for editing**   | Faithful to the sensor. Duller alone, better to edit.    |
-
-The natural setting was measured rather than chosen: two photographs in very
-different light were rendered by the operating system's own RAW handling and used
-as the target, and the values are the ones that come closest without clipping any
-highlight, within about 8 per cent on both brightness and colour. Values that
-matched one photograph exactly overshot the other by 15 per cent.
-
-Either way, VidSqueeze does not imitate a particular camera's picture style, which
-would be guessing.
-
-**If none of them is installed**, VidSqueeze uses the preview image the camera
-stored inside the RAW file. That needs nothing installed and always produces
-something, but it is the camera's own rendering and is often well below full
-resolution, so it is labelled as such rather than presented as a real
-conversion. VidSqueeze also names the single command that would fix it, chosen
-for the system you are on:
-
-```
-winget install ImageMagick.ImageMagick    # Windows
-brew install libraw                       # macOS
-sudo apt install libraw-bin               # Linux, or the dnf/pacman/zypper equivalent
-```
-
----
 
 ## What do you work with?
 
@@ -247,13 +108,10 @@ away. The answer is remembered, and the selector stays in the header so you can
 change it whenever you like.
 
 It also filters what you are shown. In Photos, the file browser lists only
-pictures and camera RAW, and choosing a whole folder brings in only those. The
+only those, and choosing a whole folder brings in only those. The
 browser tells you how many files of other kinds it has hidden. Anything applies
 no filter at all.
 
-Selecting files always wins over the setting for the purposes of which settings
-appear: add a photograph while in Video mode and the picture settings show up
-anyway.
 
 ---
 
@@ -447,7 +305,6 @@ vidsqueeze                          open the interface
 vidsqueeze holiday.mp4              convert one file with the default settings
 vidsqueeze ~/Videos                 convert everything in a folder
 vidsqueeze -p whatsapp clip.mov     fit WhatsApp's size limit
-vidsqueeze -p photo_web *.png       convert photographs for the web
 vidsqueeze --terminal               step-by-step questions
 vidsqueeze --list-presets           every preset
 vidsqueeze --info video.mp4         describe a file, change nothing
@@ -455,36 +312,10 @@ vidsqueeze --dry-run video.mp4      show the command without running it
 vidsqueeze --setup                  download ffmpeg and exit
 ```
 
-Contact sheets, one image of everything in a folder with the names underneath.
-**Make a contact sheet** appears under the buttons whenever pictures have been
-added, counts its way through, can be stopped, and shows the result. From a
-terminal:
-
-```
-vidsqueeze --contact-sheet ~/Photos                        named after the folder
-vidsqueeze --contact-sheet --sheet-out ~/shoot.png *.CR2   choose the name
-vidsqueeze --contact-sheet --sheet-columns 6 *.CR2         six across
-vidsqueeze --contact-sheet --no-sheet-labels *.jpg         no names
-```
-
-Camera RAW is developed the same way it is everywhere else, so a sheet of RAW
-files needs nothing extra. Anything unreadable is left off and named rather than
-quietly shrinking the sheet. Names are drawn with whatever font the computer has;
-if there is none, the sheet is made without them and says so.
-
-Photographs and camera RAW, from a script as well as the interface:
-
-```
-vidsqueeze --image-format png photo.cr2           develop a RAW to PNG
-vidsqueeze --image-format webp --lossless *.png   lossless WebP, exact copies
-vidsqueeze --image-format jpeg --image-quality 95 *.tif
-vidsqueeze --image-format avif --max-dimension 2048 ~/Pictures
-```
 
 Flags: `--codec --container --quality --crf --size --bitrate --speed --scale
 --fps --trim-start --trim-end --audio --audio-bitrate --hardware --replace
 --10bit --denoise --deinterlace --no-tonemap --keep-subtitles --no-metadata
---image-format --image-quality --lossless --max-dimension --background
 --browser --port --no-browser --no-download -o -p`
 
 ---
@@ -498,7 +329,7 @@ The only other time it reaches out is when you press the update button.
 
 Nothing is uploaded anywhere, because there is nowhere for it to go. That is the
 real difference from a converter on the web, which wants the file uploaded first
-and puts your holiday videos, your client photographs or your recordings on
+and puts your holiday videos or your recordings on
 somebody else's server, under their size limits, their queue, their privacy policy
 and their decision about how long to keep a copy.
 

@@ -81,16 +81,12 @@
 
     <div id="sourcesEmpty" class="empty-state">
       <p class="empty-title">Nothing added yet</p>
-      <p class="muted tiny-text">Videos, music or photos. Add single files, or a whole folder.</p>
+      <p class="muted tiny-text">Videos or music. Add single files, or a whole folder.</p>
       <button id="addBtnEmpty" class="btn primary" type="button">Choose files or a folder</button>
     </div>
 
     <ul id="sourceList" class="file-list"></ul>
 
-    <div id="rawNotice" class="notice warn inset" hidden>
-      <p id="rawText"></p>
-      <pre id="rawHint"></pre>
-    </div>
 
     <div id="upgradeOffer" class="notice warn inset" hidden>
       <p id="upgradeText"></p>
@@ -189,69 +185,6 @@
         </div>
       </details>
 
-      <!-- Image controls -->
-      <details id="imageAdvanced" class="disclosure block" hidden>
-        <summary>Advanced image settings</summary>
-        <div class="fields">
-          <label class="field"><span>Convert to</span><select id="imageFormat"></select>
-            <small id="imageFormatNote" class="muted"></small></label>
-          <label class="field" id="imageQualityField"><span>Quality</span>
-            <input id="imageQuality" type="range" min="1" max="100" value="82">
-            <small class="muted"><span id="imageQualityValue" class="tabular">82</span> of 100</small>
-            <small id="imageQualityHint" class="muted"></small></label>
-          <label class="field"><span>Longest side (pixels)</span>
-            <select id="imageMaxDimension">
-              <option value="">Keep original size</option>
-              <option value="4096">4096</option>
-              <option value="2560">2560</option>
-              <option value="1920">1920</option>
-              <option value="1600">1600</option>
-              <option value="1080">1080</option>
-              <option value="512">512</option>
-            </select>
-          </label>
-          <label class="field" id="imageBackgroundField"><span>Background when flattening</span>
-            <select id="imageBackground">
-              <option value="white">White</option>
-              <option value="black">Black</option>
-              <option value="gray">Grey</option>
-            </select>
-            <small class="muted">Used only when the target format cannot store transparency.</small>
-          </label>
-          <p id="sizeExpectation" class="muted tiny-text" hidden></p>
-          <label class="field"><span>Contact sheet, thumbnails across</span>
-            <select id="sheetColumns">
-              <option value="3">3</option>
-              <option value="4" selected>4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="8">8</option>
-            </select>
-            <small class="muted">Used by Make a contact sheet, which lays every
-              picture out on one page with its name underneath.</small>
-          </label>
-          <label class="field"><span>Contact sheet, thumbnail size</span>
-            <select id="sheetThumbnail">
-              <option value="180">Small</option>
-              <option value="320" selected>Medium</option>
-              <option value="480">Large</option>
-            </select>
-          </label>
-          <label class="field" id="rawLookField"><span>Camera RAW should look</span>
-            <select id="rawLook">
-              <option value="natural">Like the photograph</option>
-              <option value="neutral">Flat, for editing</option>
-            </select>
-            <small class="muted">A RAW file is what the sensor recorded, not a finished
-              picture. "Like the photograph" renders it the way your camera would.
-              "Flat" keeps everything for editing and looks duller on its own.</small>
-          </label>
-        </div>
-        <div class="checks">
-          <label id="imageLosslessRow"><input id="imageLossless" type="checkbox">
-            <span>Lossless <em>WebP and JPEG XL only. Larger, but pixel perfect.</em></span></label>
-        </div>
-      </details>
 
       <section class="block" id="speedBlock">
         <h3 class="block-title">Speed</h3>
@@ -285,11 +218,6 @@
           <button id="sampleBtn" class="btn secondary" type="button" disabled>Test a short sample</button>
           <button id="bakeoffBtn" class="btn secondary" type="button" disabled>Try several settings</button>
         </div>
-        <div id="sheetRow" class="row two-up" hidden>
-          <button id="sheetBtn" class="btn secondary" type="button" disabled>Make a contact sheet</button>
-          <button id="sheetCancelBtn" class="btn secondary" type="button" hidden>Stop the sheet</button>
-        </div>
-        <p id="sheetStatus" class="muted tiny-text" hidden></p>
         <p id="actionHint" class="muted tiny-text"></p>
       </div>
     </div>
